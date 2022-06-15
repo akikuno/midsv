@@ -28,7 +28,14 @@
 </summary>
 <pre><code class="python">from __future__ import annotations
 
-import re</code></pre>
+import re
+
+def append_reference_sequence_length(headers: list[dict], alignments: list[dict]):
+    alingment_with_reference_sequence_length = []
+    for alignment in alignments:
+        alignment[&#34;RLEN&#34;] = headers[alignment[&#34;RNAME&#34;]]
+        alingment_with_reference_sequence_length.append(alignment)
+    return alingment_with_reference_sequence_length</code></pre>
 </details>
 </section>
 <section>
@@ -36,6 +43,26 @@ import re</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="mids.format.append_reference_sequence_length"><code class="name flex">
+<span>def <span class="ident">append_reference_sequence_length</span></span>(<span>headers: list[dict], alignments: list[dict])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append_reference_sequence_length(headers: list[dict], alignments: list[dict]):
+    alingment_with_reference_sequence_length = []
+    for alignment in alignments:
+        alignment[&#34;RLEN&#34;] = headers[alignment[&#34;RNAME&#34;]]
+        alingment_with_reference_sequence_length.append(alignment)
+    return alingment_with_reference_sequence_length</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -49,6 +76,11 @@ import re</code></pre>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="mids" href="index.html">mids</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="mids.format.append_reference_sequence_length" href="#mids.format.append_reference_sequence_length">append_reference_sequence_length</a></code></li>
 </ul>
 </li>
 </ul>
