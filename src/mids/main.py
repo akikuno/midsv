@@ -9,66 +9,6 @@
 # ###############################################################################
 
 
-# def extract_name_length(sam: list[list]) -> dict:
-#     """Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
-
-#     Args:
-#         sam (list[list]): a list of lists of SAM format
-
-#     Returns:
-#         dict: a dictionary containing (multiple) SN and LN
-#     """
-#     sqheaders = [s for s in sam if "@SQ" in s]
-#     SNLN = {}
-#     for sqheader in sqheaders:
-#         sn_ln = [sq for sq in sqheader if re.search(("SN:|LN:"), sq)]
-#         sn = sn_ln[0].replace("SN:", "")
-#         ln = sn_ln[1].replace("LN:", "")
-#         SNLN.update({sn: ln})
-#     return SNLN
-
-
-# def slide_insertion(CSTAGS: list) -> list:
-#     """
-#     Input:  ['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']
-#     Output: ['MMMM', 'S', 'M', 'Dg', 'M', 'ItM', 'MMM']
-#     """
-#     for i, cs in enumerate(CSTAGS):
-#         if "I" in cs:
-#             CSTAGS[i] = cs + CSTAGS[i + 1][0]
-#             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
-#     return CSTAGS
-
-
-# def to_fixed_length(CSTAG: str) -> str:
-#     if "D" in CSTAG:
-#         CSTAG = re.sub("[acgt]", "D,", CSTAG[1:])
-#     elif "I" in CSTAG:
-#         CSTAG = f"{len(CSTAG)-2}{CSTAG[-1]},"
-#     elif "S" in CSTAG:
-#         CSTAG = "S,"
-#     elif "M" in CSTAG:
-#         CSTAG = CSTAG.replace("M", "M,")
-#     return CSTAG
-
-
-# def cstag_to_mids(CSTAG: str) -> str:
-#     """
-#     Input:  "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-#     Output: "M,M,M,M,S,M,D,M,1M,M,M,M"
-#     """
-#     # CSTAG = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-#     CSTAG = CSTAG.replace("cs:Z:", "")
-#     CSTAG = CSTAG.replace("-", "=D")
-#     CSTAG = CSTAG.replace("+", "=I")
-#     CSTAG = re.sub("[ACGT]", "M", CSTAG)
-#     CSTAG = re.sub("\\*[acgt][acgt]", "=S", CSTAG)
-#     CSTAGS = CSTAG.split("=")[1:]
-#     CSTAGS = slide_insertion(CSTAGS)
-#     CSTAGS_fixlen = [to_fixed_length(cs) for cs in CSTAGS]
-#     return "".join(CSTAGS_fixlen).rstrip(",")
-
-
 # def padding(mids: str, pos: int, reflen: int) -> str:
 #     midslen = mids.count(",") + 1
 #     left_pad = "=," * (int(pos) - 1)

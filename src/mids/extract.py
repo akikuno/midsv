@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 
+
 def headers(sam: list[list]) -> dict[str, int]:
     """Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
 
@@ -21,7 +22,7 @@ def headers(sam: list[list]) -> dict[str, int]:
     return SNLN
 
 def alignments(sam: list[list]) -> list[dict]:
-    """Extract alignments from SAM
+    """Extract mapped alignments from SAM
 
     Args:
         sam (list[list]): a list of lists of SAM format including CS tag
@@ -30,13 +31,17 @@ def alignments(sam: list[list]) -> list[dict]:
         dict: a dictionary containing QNAME, RNAME, POS, QUAL, and CSTAG
     """
     aligns = []
+    idx_cstag = -1
     for alignment in sam:
         if "@" in alignment[0]:
             continue
-        try:
-            _ = idx_cstag
-        except NameError:
-            idx_cstag = [i for i, a in enumerate(alignment) if a.startswith("cs:Z")][0]
+        if alignment[2] == "*":
+            continue
+        if idx_cstag == -1:
+            try:
+                idx_cstag = [i for i, a in enumerate(alignment) if a.startswith("cs:Z=")][0]
+            except IndexError:
+                print(f"IndexError: CS tag is not found")
         samdict = dict(
             QNAME=alignment[0].replace(",", "_"),
             RNAME=alignment[2],

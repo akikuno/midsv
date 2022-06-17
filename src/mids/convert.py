@@ -1,16 +1,41 @@
+from __future__ import annotations
+
 import re
 
-def slide_insertion(CSTAGS: [str]) -> list[str]:
-    """To append one base from the next index at an inserted base.
+def split(cstag: str) -> list[str]:
+    """Split cstag along with annotating MIDS
 
     Args:
-        alignments (list[str]): _description_
+        CSTAGS (list[str]): a list of CS tags
 
     Returns:
-        list[str]: _description_
+        list[str]: a list of slided CS tags
+
     Example:
-        >>> _input = ['Iacgt', 'MMMM']
-        >>> slide_insertion(_input)
+        >>> cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
+        >>> split(cstag)
+        "['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']"
+    """
+    _cstag = cstag.replace("cs:Z:", "")
+    _cstag = _cstag.lstrip("=")
+    _cstag = _cstag.replace("-", "=D")
+    _cstag = _cstag.replace("+", "=I")
+    _cstag = re.sub("[ACGT]", "M", _cstag)
+    _cstag = re.sub(r"\*[acgt][acgt]", "=S", _cstag)
+    return _cstag.split("=")
+
+def slide_insertion(CSTAGS: list[str]) -> list[str]:
+    """Append one base from the next index at an inserted base.
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        list[str]: a list of slided CS tags
+
+    Example:
+        >>> mids = ['Iacgt', 'MMMM']
+        >>> slide_insertion(mids)
         "['IacgtM', 'MMM']"
     """
     for i, cs in enumerate(CSTAGS):
@@ -19,33 +44,45 @@ def slide_insertion(CSTAGS: [str]) -> list[str]:
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS
 
-def to_csv_with_fixed_length(CSTAG: str) -> str:
-    if "I" == CSTAG[0]:
-        # "IacgtacgtA" -> "8M"
-        return f"{len(CSTAG)-2}{CSTAG[-1]}"
-    elif "D" == CSTAG[0]:
-        # "Dacgtacgt" -> "D,D,D,D,D,D,D,D"
-        return re.sub("[acgt]", "D,", CSTAG[1:]).rstrip(",")
-    elif "M" == CSTAG[0]:
-        # "MMM" -> "M,M,M"
-        return CSTAG.replace("M", "M,").rstrip(",")
-    else:
-        return CSTAG
+def to_mids(CSTAGS: list[str]) -> str:
+    """Convert to MIDS format
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        str: a MIDS sequence
+
+    Example:
+        >>> to_mids(["IacgtacgtM"])
+        "8M"
+        >>> to_mids(["Dacgtacgt"])
+        "D,D,D,D,D,D,D,D"
+        >>> to_mids(["MMMM"])
+        "M,M,M,M"
+    """
+    cstags = []
+    for cs in CSTAGS:
+        if "I" == cs[0]:
+            # "IacgtacgtA" -> "8M"
+            cstags.append(f"{len(cs)-2}{cs[-1]}")
+        elif "D" == cs[0]:
+            # "Dacgtacgt" -> "D,D,D,D,D,D,D,D"
+            cstags.append(re.sub("[acgt]", "D,", cs[1:]).rstrip(","))
+        elif "M" == cs[0]:
+            # "MMM" -> "M,M,M"
+            cstags.append(cs.replace("M", "M,").rstrip(","))
+        else:
+            cstags.append(cs)
+    return ",".join(cstags)
 
 
-def cstag_to_mids(CSTAG: str) -> str:
+def cstag_to_mids(cstag: str) -> str:
     """
     Input:  "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
     Output: "M,M,M,M,S,M,D,M,1M,M,M,M"
     """
-    # CSTAG = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    _cstag = CSTAG.replace("cs:Z:", "")
-    _cstag = _cstag.lstrip("=")
-    _cstag = _cstag.replace("-", "=D")
-    _cstag = _cstag.replace("+", "=I")
-    _cstag = re.sub("[ACGT]", "M", _cstag)
-    _cstag = re.sub(r"\*[acgt][acgt]", "=S", _cstag)
-    _cstag_split = _cstag.split("=")
+    # cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
+    _cstag_split = split(cstag)
     _cstags_slide = slide_insertion(_cstag_split)
-    _mids = [to_csv_with_fixed_length(cs) for cs in _cstags_slide]
-    return ",".join(_mids)
+    return to_mids(_cstags_slide)
