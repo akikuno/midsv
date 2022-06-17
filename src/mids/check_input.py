@@ -19,6 +19,7 @@ def check_headers(sam: list[list]) -> None:
     if not sqheaders:
         raise AttributeError("Input does not have @SQ header")
 
+
 def check_alignments(sam: list[list]) -> None:
     """Check alignments are mapped and have long-formatted cs tag
 
