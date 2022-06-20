@@ -1,5 +1,14 @@
 # Test lists
 
+## functions
++ preprocess
+  + [ ] read_sam
+  + [ ] check_sam_format
+  + [ ] remove_unmapped_reads
+  + [ ] remove_overlapped_reads
++ convert
+  + 
+
 ## convert_from_sam
 + [ ] control
 + [ ] point mutation
