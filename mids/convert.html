@@ -26,19 +26,44 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import re
+<pre><code class="python">from __future__ import annotations
 
-def slide_insertion(CSTAGS: [str]) -&gt; list[str]:
-    &#34;&#34;&#34;To append one base from the next index at an inserted base.
+import re
+
+def split(cstag: str) -&gt; list[str]:
+    &#34;&#34;&#34;Split cstag along with annotating MIDS
 
     Args:
-        alignments (list[str]): _description_
+        CSTAGS (list[str]): a list of CS tags
 
     Returns:
-        list[str]: _description_
+        list[str]: a list of slided CS tags
+
     Example:
-        &gt;&gt;&gt; _input = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
-        &gt;&gt;&gt; slide_insertion(_input)
+        &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
+        &gt;&gt;&gt; split(cstag)
+        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
+    &#34;&#34;&#34;
+    _cstag = cstag.replace(&#34;cs:Z:&#34;, &#34;&#34;)
+    _cstag = _cstag.lstrip(&#34;=&#34;)
+    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
+    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
+    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
+    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
+    return _cstag.split(&#34;=&#34;)
+
+def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Append one base from the next index at an inserted base.
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        list[str]: a list of slided CS tags
+
+    Example:
+        &gt;&gt;&gt; mids = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
+        &gt;&gt;&gt; slide_insertion(mids)
         &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
     &#34;&#34;&#34;
     for i, cs in enumerate(CSTAGS):
@@ -47,36 +72,48 @@ def slide_insertion(CSTAGS: [str]) -&gt; list[str]:
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS
 
-def to_csv_with_fixed_length(CSTAG: str) -&gt; str:
-    if &#34;I&#34; == CSTAG[0]:
-        # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
-        return f&#34;{len(CSTAG)-2}{CSTAG[-1]}&#34;
-    elif &#34;D&#34; == CSTAG[0]:
-        # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
-        return re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, CSTAG[1:]).rstrip(&#34;,&#34;)
-    elif &#34;M&#34; == CSTAG[0]:
-        # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
-        return CSTAG.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;)
-    else:
-        return CSTAG
+def to_mids(CSTAGS: list[str]) -&gt; str:
+    &#34;&#34;&#34;Convert to MIDS format
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        str: a MIDS sequence
+
+    Example:
+        &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
+        &#34;8M&#34;
+        &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
+        &#34;D,D,D,D,D,D,D,D&#34;
+        &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
+        &#34;M,M,M,M&#34;
+    &#34;&#34;&#34;
+    cstags = []
+    for cs in CSTAGS:
+        if &#34;I&#34; == cs[0]:
+            # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
+            cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
+        elif &#34;D&#34; == cs[0]:
+            # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
+            cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
+        elif &#34;M&#34; == cs[0]:
+            # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
+            cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
+        else:
+            cstags.append(cs)
+    return &#34;,&#34;.join(cstags)
 
 
-def cstag_to_mids(CSTAG: str) -&gt; str:
+def cstag_to_mids(cstag: str) -&gt; str:
     &#34;&#34;&#34;
     Input:  &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
     Output: &#34;M,M,M,M,S,M,D,M,1M,M,M,M&#34;
     &#34;&#34;&#34;
-    # CSTAG = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    _cstag = CSTAG.replace(&#34;cs:Z:&#34;, &#34;&#34;)
-    _cstag = _cstag.lstrip(&#34;=&#34;)
-    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
-    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
-    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
-    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
-    _cstag_split = _cstag.split(&#34;=&#34;)
+    # cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
+    _cstag_split = split(cstag)
     _cstags_slide = slide_insertion(_cstag_split)
-    _mids = [to_csv_with_fixed_length(cs) for cs in _cstags_slide]
-    return &#34;,&#34;.join(_mids)</code></pre>
+    return to_mids(_cstags_slide)</code></pre>
 </details>
 </section>
 <section>
@@ -87,7 +124,7 @@ def cstag_to_mids(CSTAG: str) -&gt; str:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="mids.convert.cstag_to_mids"><code class="name flex">
-<span>def <span class="ident">cstag_to_mids</span></span>(<span>CSTAG: str) ‑> str</span>
+<span>def <span class="ident">cstag_to_mids</span></span>(<span>cstag: str) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Input:
@@ -97,59 +134,53 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def cstag_to_mids(CSTAG: str) -&gt; str:
+<pre><code class="python">def cstag_to_mids(cstag: str) -&gt; str:
     &#34;&#34;&#34;
     Input:  &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
     Output: &#34;M,M,M,M,S,M,D,M,1M,M,M,M&#34;
     &#34;&#34;&#34;
-    # CSTAG = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    _cstag = CSTAG.replace(&#34;cs:Z:&#34;, &#34;&#34;)
-    _cstag = _cstag.lstrip(&#34;=&#34;)
-    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
-    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
-    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
-    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
-    _cstag_split = _cstag.split(&#34;=&#34;)
+    # cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
+    _cstag_split = split(cstag)
     _cstags_slide = slide_insertion(_cstag_split)
-    _mids = [to_csv_with_fixed_length(cs) for cs in _cstags_slide]
-    return &#34;,&#34;.join(_mids)</code></pre>
+    return to_mids(_cstags_slide)</code></pre>
 </details>
 </dd>
 <dt id="mids.convert.slide_insertion"><code class="name flex">
-<span>def <span class="ident">slide_insertion</span></span>(<span>CSTAGS: [<class 'str'>]) ‑> list[str]</span>
+<span>def <span class="ident">slide_insertion</span></span>(<span>CSTAGS: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>To append one base from the next index at an inserted base.</p>
+<div class="desc"><p>Append one base from the next index at an inserted base.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>alignments</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd><em>description</em></dd>
+<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>a list of CS tags</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd><em>description</em></dd>
+<dd>a list of slided CS tags</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; _input = ['Iacgt', 'MMMM']
-&gt;&gt;&gt; slide_insertion(_input)
+<pre><code class="language-python-repl">&gt;&gt;&gt; mids = ['Iacgt', 'MMMM']
+&gt;&gt;&gt; slide_insertion(mids)
 &quot;['IacgtM', 'MMM']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def slide_insertion(CSTAGS: [str]) -&gt; list[str]:
-    &#34;&#34;&#34;To append one base from the next index at an inserted base.
+<pre><code class="python">def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
     Args:
-        alignments (list[str]): _description_
+        CSTAGS (list[str]): a list of CS tags
 
     Returns:
-        list[str]: _description_
+        list[str]: a list of slided CS tags
+
     Example:
-        &gt;&gt;&gt; _input = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
-        &gt;&gt;&gt; slide_insertion(_input)
+        &gt;&gt;&gt; mids = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
+        &gt;&gt;&gt; slide_insertion(mids)
         &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
     &#34;&#34;&#34;
     for i, cs in enumerate(CSTAGS):
@@ -159,27 +190,111 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
     return CSTAGS</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.to_csv_with_fixed_length"><code class="name flex">
-<span>def <span class="ident">to_csv_with_fixed_length</span></span>(<span>CSTAG: str) ‑> str</span>
+<dt id="mids.convert.split"><code class="name flex">
+<span>def <span class="ident">split</span></span>(<span>cstag: str) ‑> list[str]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Split cstag along with annotating MIDS</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>a list of CS tags</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>a list of slided CS tags</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; cstag = &quot;cs:Z:=ACGT*ag=C-g=T+t=ACGT&quot;
+&gt;&gt;&gt; split(cstag)
+&quot;['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']&quot;
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_csv_with_fixed_length(CSTAG: str) -&gt; str:
-    if &#34;I&#34; == CSTAG[0]:
-        # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
-        return f&#34;{len(CSTAG)-2}{CSTAG[-1]}&#34;
-    elif &#34;D&#34; == CSTAG[0]:
-        # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
-        return re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, CSTAG[1:]).rstrip(&#34;,&#34;)
-    elif &#34;M&#34; == CSTAG[0]:
-        # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
-        return CSTAG.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;)
-    else:
-        return CSTAG</code></pre>
+<pre><code class="python">def split(cstag: str) -&gt; list[str]:
+    &#34;&#34;&#34;Split cstag along with annotating MIDS
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        list[str]: a list of slided CS tags
+
+    Example:
+        &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
+        &gt;&gt;&gt; split(cstag)
+        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
+    &#34;&#34;&#34;
+    _cstag = cstag.replace(&#34;cs:Z:&#34;, &#34;&#34;)
+    _cstag = _cstag.lstrip(&#34;=&#34;)
+    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
+    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
+    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
+    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
+    return _cstag.split(&#34;=&#34;)</code></pre>
+</details>
+</dd>
+<dt id="mids.convert.to_mids"><code class="name flex">
+<span>def <span class="ident">to_mids</span></span>(<span>CSTAGS: list[str]) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert to MIDS format</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>a list of CS tags</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>a MIDS sequence</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; to_mids([&quot;IacgtacgtM&quot;])
+&quot;8M&quot;
+&gt;&gt;&gt; to_mids([&quot;Dacgtacgt&quot;])
+&quot;D,D,D,D,D,D,D,D&quot;
+&gt;&gt;&gt; to_mids([&quot;MMMM&quot;])
+&quot;M,M,M,M&quot;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_mids(CSTAGS: list[str]) -&gt; str:
+    &#34;&#34;&#34;Convert to MIDS format
+
+    Args:
+        CSTAGS (list[str]): a list of CS tags
+
+    Returns:
+        str: a MIDS sequence
+
+    Example:
+        &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
+        &#34;8M&#34;
+        &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
+        &#34;D,D,D,D,D,D,D,D&#34;
+        &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
+        &#34;M,M,M,M&#34;
+    &#34;&#34;&#34;
+    cstags = []
+    for cs in CSTAGS:
+        if &#34;I&#34; == cs[0]:
+            # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
+            cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
+        elif &#34;D&#34; == cs[0]:
+            # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
+            cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
+        elif &#34;M&#34; == cs[0]:
+            # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
+            cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
+        else:
+            cstags.append(cs)
+    return &#34;,&#34;.join(cstags)</code></pre>
 </details>
 </dd>
 </dl>
@@ -202,7 +317,8 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 <ul class="">
 <li><code><a title="mids.convert.cstag_to_mids" href="#mids.convert.cstag_to_mids">cstag_to_mids</a></code></li>
 <li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
-<li><code><a title="mids.convert.to_csv_with_fixed_length" href="#mids.convert.to_csv_with_fixed_length">to_csv_with_fixed_length</a></code></li>
+<li><code><a title="mids.convert.split" href="#mids.convert.split">split</a></code></li>
+<li><code><a title="mids.convert.to_mids" href="#mids.convert.to_mids">to_mids</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids.convert_from_sam API documentation</title>
-<meta name="description" content="" />
+<title>mids.preprocess API documentation</title>
+<meta name="description" content="- 入力がSAMか
+- mappingされているか
+- 入力にCS tagのlong formatが使われているか" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,36 +21,80 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mids.convert_from_sam</code></h1>
+<h1 class="title">Module <code>mids.preprocess</code></h1>
 </header>
 <section id="section-intro">
+<ul>
+<li>入力がSAMか</li>
+<li>mappingされているか</li>
+<li>入力にCS tagのlong formatが使われているか</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import re
-from itertools import groupby
+<pre><code class="python">&#34;&#34;&#34;
+- 入力がSAMか
+- mappingされているか
+- 入力にCS tagのlong formatが使われているか
+&#34;&#34;&#34;
 
-def extract_name_and_length(sam: list) -&gt; dict:
-    &#34;&#34;&#34;Extract SN (Reference sequence name) and LN (Reference sequence length) information at SQ header from SAM file
+from __future__ import annotations
+from pathlib import Path
+
+###########################################################
+# Read sam
+###########################################################
+
+
+def read_sam(path_of_sam: str) -&gt; list[list]:
+    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
+    return [s.split(&#34;\t&#34;) for s in sam]
+
+
+###########################################################
+# Check sam format
+###########################################################
+
+
+def check_headers(sam: list[list]):
+    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
 
     Args:
-        sam (list): alignment information in SAM format
+        sam (list[list]): a list of lists of SAM format
 
-    Returns:
-        dict: a dictionary containing SN and LN
     &#34;&#34;&#34;
-    sqheaders = (s for s in sam if s.startswith(&#34;@SQ&#34;))
-    SNLN = {}
-    for sqheader in sqheaders:
-        sn_ln = [sq for sq in sqheader.split(&#34;\t&#34;) if re.search((&#34;SN:|LN:&#34;), sq)]
-        sn = sn_ln[0].replace(&#34;SN:&#34;, &#34;&#34;)
-        ln = sn_ln[1].replace(&#34;LN:&#34;, &#34;&#34;)
-        SNLN.update({sn: ln})
-    return SNLN
+    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
+    if not sqheaders:
+        raise AttributeError(&#34;Input does not have @SQ header&#34;)
 
-def convert_from_sam():
-    pass</code></pre>
+
+def check_alignments(sam: list[list]):
+    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
+
+    Args:
+        sam (list[list]): a list of lists of SAM format including CS tag
+    &#34;&#34;&#34;
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            continue
+        if len(alignment) &lt; 10:
+            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
+        if alignment[2] == &#34;*&#34;:
+            continue
+        idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)]
+        if not idx_cstag:
+            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
+
+
+def check_sam_format(sam: list[list]):
+    check_headers(sam)
+    check_alignments(sam)
+
+
+###########################################################
+# Remove undesired reads
+###########################################################</code></pre>
 </details>
 </section>
 <section>
@@ -58,8 +104,66 @@ def convert_from_sam():
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.convert_from_sam.convert_from_sam"><code class="name flex">
-<span>def <span class="ident">convert_from_sam</span></span>(<span>)</span>
+<dt id="mids.preprocess.check_alignments"><code class="name flex">
+<span>def <span class="ident">check_alignments</span></span>(<span>sam: list[list])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check alignments are mapped and have long-formatted cs tag</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>a list of lists of SAM format including CS tag</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_alignments(sam: list[list]):
+    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
+
+    Args:
+        sam (list[list]): a list of lists of SAM format including CS tag
+    &#34;&#34;&#34;
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            continue
+        if len(alignment) &lt; 10:
+            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
+        if alignment[2] == &#34;*&#34;:
+            continue
+        idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)]
+        if not idx_cstag:
+            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)</code></pre>
+</details>
+</dd>
+<dt id="mids.preprocess.check_headers"><code class="name flex">
+<span>def <span class="ident">check_headers</span></span>(<span>sam: list[list])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check headers containing SN (Reference sequence name) and LN (Reference sequence length)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>a list of lists of SAM format</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_headers(sam: list[list]):
+    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
+
+    Args:
+        sam (list[list]): a list of lists of SAM format
+
+    &#34;&#34;&#34;
+    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
+    if not sqheaders:
+        raise AttributeError(&#34;Input does not have @SQ header&#34;)</code></pre>
+</details>
+</dd>
+<dt id="mids.preprocess.check_sam_format"><code class="name flex">
+<span>def <span class="ident">check_sam_format</span></span>(<span>sam: list[list])</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -67,46 +171,23 @@ def convert_from_sam():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def convert_from_sam():
-    pass</code></pre>
+<pre><code class="python">def check_sam_format(sam: list[list]):
+    check_headers(sam)
+    check_alignments(sam)</code></pre>
 </details>
 </dd>
-<dt id="mids.convert_from_sam.extract_name_and_length"><code class="name flex">
-<span>def <span class="ident">extract_name_and_length</span></span>(<span>sam: list) ‑> dict</span>
+<dt id="mids.preprocess.read_sam"><code class="name flex">
+<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str) ‑> list[list]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract SN (Reference sequence name) and LN (Reference sequence length) information at SQ header from SAM file</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list</code></dt>
-<dd>alignment information in SAM format</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>a dictionary containing SN and LN</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_name_and_length(sam: list) -&gt; dict:
-    &#34;&#34;&#34;Extract SN (Reference sequence name) and LN (Reference sequence length) information at SQ header from SAM file
-
-    Args:
-        sam (list): alignment information in SAM format
-
-    Returns:
-        dict: a dictionary containing SN and LN
-    &#34;&#34;&#34;
-    sqheaders = (s for s in sam if s.startswith(&#34;@SQ&#34;))
-    SNLN = {}
-    for sqheader in sqheaders:
-        sn_ln = [sq for sq in sqheader.split(&#34;\t&#34;) if re.search((&#34;SN:|LN:&#34;), sq)]
-        sn = sn_ln[0].replace(&#34;SN:&#34;, &#34;&#34;)
-        ln = sn_ln[1].replace(&#34;LN:&#34;, &#34;&#34;)
-        SNLN.update({sn: ln})
-    return SNLN</code></pre>
+<pre><code class="python">def read_sam(path_of_sam: str) -&gt; list[list]:
+    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
+    return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
 </details>
 </dd>
 </dl>
@@ -127,8 +208,10 @@ def convert_from_sam():
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="mids.convert_from_sam.convert_from_sam" href="#mids.convert_from_sam.convert_from_sam">convert_from_sam</a></code></li>
-<li><code><a title="mids.convert_from_sam.extract_name_and_length" href="#mids.convert_from_sam.extract_name_and_length">extract_name_and_length</a></code></li>
+<li><code><a title="mids.preprocess.check_alignments" href="#mids.preprocess.check_alignments">check_alignments</a></code></li>
+<li><code><a title="mids.preprocess.check_headers" href="#mids.preprocess.check_headers">check_headers</a></code></li>
+<li><code><a title="mids.preprocess.check_sam_format" href="#mids.preprocess.check_sam_format">check_sam_format</a></code></li>
+<li><code><a title="mids.preprocess.read_sam" href="#mids.preprocess.read_sam">read_sam</a></code></li>
 </ul>
 </li>
 </ul>

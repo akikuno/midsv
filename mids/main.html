@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids.extract_full_length API documentation</title>
+<title>mids.main API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mids.extract_full_length</code></h1>
+<h1 class="title">Module <code>mids.main</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -35,66 +35,6 @@
 # ###############################################################################
 # # MIDS Conversion
 # ###############################################################################
-
-
-# def extract_name_length(sam: list[list]) -&gt; dict:
-#     &#34;&#34;&#34;Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
-
-#     Args:
-#         sam (list[list]): a list of lists of SAM format
-
-#     Returns:
-#         dict: a dictionary containing (multiple) SN and LN
-#     &#34;&#34;&#34;
-#     sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
-#     SNLN = {}
-#     for sqheader in sqheaders:
-#         sn_ln = [sq for sq in sqheader if re.search((&#34;SN:|LN:&#34;), sq)]
-#         sn = sn_ln[0].replace(&#34;SN:&#34;, &#34;&#34;)
-#         ln = sn_ln[1].replace(&#34;LN:&#34;, &#34;&#34;)
-#         SNLN.update({sn: ln})
-#     return SNLN
-
-
-# def slide_insertion(CSTAGS: list) -&gt; list:
-#     &#34;&#34;&#34;
-#     Input:  [&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]
-#     Output: [&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;ItM&#39;, &#39;MMM&#39;]
-#     &#34;&#34;&#34;
-#     for i, cs in enumerate(CSTAGS):
-#         if &#34;I&#34; in cs:
-#             CSTAGS[i] = cs + CSTAGS[i + 1][0]
-#             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
-#     return CSTAGS
-
-
-# def to_fixed_length(CSTAG: str) -&gt; str:
-#     if &#34;D&#34; in CSTAG:
-#         CSTAG = re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, CSTAG[1:])
-#     elif &#34;I&#34; in CSTAG:
-#         CSTAG = f&#34;{len(CSTAG)-2}{CSTAG[-1]},&#34;
-#     elif &#34;S&#34; in CSTAG:
-#         CSTAG = &#34;S,&#34;
-#     elif &#34;M&#34; in CSTAG:
-#         CSTAG = CSTAG.replace(&#34;M&#34;, &#34;M,&#34;)
-#     return CSTAG
-
-
-# def cstag_to_mids(CSTAG: str) -&gt; str:
-#     &#34;&#34;&#34;
-#     Input:  &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-#     Output: &#34;M,M,M,M,S,M,D,M,1M,M,M,M&#34;
-#     &#34;&#34;&#34;
-#     # CSTAG = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-#     CSTAG = CSTAG.replace(&#34;cs:Z:&#34;, &#34;&#34;)
-#     CSTAG = CSTAG.replace(&#34;-&#34;, &#34;=D&#34;)
-#     CSTAG = CSTAG.replace(&#34;+&#34;, &#34;=I&#34;)
-#     CSTAG = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, CSTAG)
-#     CSTAG = re.sub(&#34;\\*[acgt][acgt]&#34;, &#34;=S&#34;, CSTAG)
-#     CSTAGS = CSTAG.split(&#34;=&#34;)[1:]
-#     CSTAGS = slide_insertion(CSTAGS)
-#     CSTAGS_fixlen = [to_fixed_length(cs) for cs in CSTAGS]
-#     return &#34;&#34;.join(CSTAGS_fixlen).rstrip(&#34;,&#34;)
 
 
 # def padding(mids: str, pos: int, reflen: int) -&gt; str:
