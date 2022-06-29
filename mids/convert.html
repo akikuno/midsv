@@ -30,6 +30,7 @@
 
 import re
 
+
 def split(cstag: str) -&gt; list[str]:
     &#34;&#34;&#34;Split cstag along with annotating MIDS
 
@@ -52,6 +53,7 @@ def split(cstag: str) -&gt; list[str]:
     _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
     return _cstag.split(&#34;=&#34;)
 
+
 def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
@@ -71,6 +73,7 @@ def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
             CSTAGS[i] = cs + CSTAGS[i + 1][0]
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS
+
 
 def to_mids(CSTAGS: list[str]) -&gt; str:
     &#34;&#34;&#34;Convert to MIDS format
@@ -113,7 +116,14 @@ def cstag_to_mids(cstag: str) -&gt; str:
     # cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
     _cstag_split = split(cstag)
     _cstags_slide = slide_insertion(_cstag_split)
-    return to_mids(_cstags_slide)</code></pre>
+    return to_mids(_cstags_slide)
+
+
+def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
+    qscore = []
+    for ascii in ascii_quality:
+        qscore.append(ord(ascii) - 33)
+    return qscore</code></pre>
 </details>
 </section>
 <section>
@@ -123,6 +133,22 @@ def cstag_to_mids(cstag: str) -&gt; str:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="mids.convert.ascii_to_qscore"><code class="name flex">
+<span>def <span class="ident">ascii_to_qscore</span></span>(<span>ascii_quality: str) ‑> list[int]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
+    qscore = []
+    for ascii in ascii_quality:
+        qscore.append(ord(ascii) - 33)
+    return qscore</code></pre>
+</details>
+</dd>
 <dt id="mids.convert.cstag_to_mids"><code class="name flex">
 <span>def <span class="ident">cstag_to_mids</span></span>(<span>cstag: str) ‑> str</span>
 </code></dt>
@@ -315,6 +341,7 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="mids.convert.ascii_to_qscore" href="#mids.convert.ascii_to_qscore">ascii_to_qscore</a></code></li>
 <li><code><a title="mids.convert.cstag_to_mids" href="#mids.convert.cstag_to_mids">cstag_to_mids</a></code></li>
 <li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
 <li><code><a title="mids.convert.split" href="#mids.convert.split">split</a></code></li>
