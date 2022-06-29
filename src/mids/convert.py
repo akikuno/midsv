@@ -4,26 +4,29 @@ import re
 
 
 def split(cstag: str) -> list[str]:
-    """Split cstag along with annotating MIDS
+    """Split cstag
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        sctag (str): a string of CS tags
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: a list of splitted CS tags
 
     Example:
         >>> cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
         >>> split(cstag)
         "['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']"
+        =ACGT *ag =C -g =T +t =ACGT
     """
-    _cstag = cstag.replace("cs:Z:", "")
-    _cstag = _cstag.lstrip("=")
-    _cstag = _cstag.replace("-", "=D")
-    _cstag = _cstag.replace("+", "=I")
-    _cstag = re.sub("[ACGT]", "M", _cstag)
-    _cstag = re.sub(r"\*[acgt][acgt]", "=S", _cstag)
-    return _cstag.split("=")
+    cstag_splitted = []
+    for cs in re.split(r"(=|\*|\-|\+)", cstag):
+        if not cs or cs == "cs:Z:":
+            continue
+        if re.match(r"(=|\*|\-|\+)", cs):
+            cstag_splitted.append(cs)
+        else:
+            cstag_splitted[-1] += cs
+    return cstag_splitted
 
 
 def slide_insertion(CSTAGS: list[str]) -> list[str]:

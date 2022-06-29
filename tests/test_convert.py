@@ -19,6 +19,13 @@ from src.mids import convert
 #     alignments_with_mids.append(alignment)
 
 
+def test_split():
+    cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
+    test = convert.split(cstag)
+    answer = ["=ACGT", "*ag", "=C", "-g", "=T", "+t", "=ACGT"]
+    assert test == answer
+
+
 def test_ascii_to_qscore():
     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
     qscore = convert.ascii_to_qscore(ascii)
