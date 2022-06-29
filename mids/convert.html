@@ -32,26 +32,29 @@ import re
 
 
 def split(cstag: str) -&gt; list[str]:
-    &#34;&#34;&#34;Split cstag along with annotating MIDS
+    &#34;&#34;&#34;Split cstag
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        sctag (str): a string of CS tags
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: a list of splitted CS tags
 
     Example:
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
         &gt;&gt;&gt; split(cstag)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
+        =ACGT *ag =C -g =T +t =ACGT
     &#34;&#34;&#34;
-    _cstag = cstag.replace(&#34;cs:Z:&#34;, &#34;&#34;)
-    _cstag = _cstag.lstrip(&#34;=&#34;)
-    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
-    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
-    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
-    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
-    return _cstag.split(&#34;=&#34;)
+    cstag_splitted = []
+    for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
+        if not cs or cs == &#34;cs:Z:&#34;:
+            continue
+        if re.match(r&#34;(=|\*|\-|\+)&#34;, cs):
+            cstag_splitted.append(cs)
+        else:
+            cstag_splitted[-1] += cs
+    return cstag_splitted
 
 
 def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
@@ -220,47 +223,51 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 <span>def <span class="ident">split</span></span>(<span>cstag: str) ‑> list[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Split cstag along with annotating MIDS</p>
+<div class="desc"><p>Split cstag</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd>a list of CS tags</dd>
+<dt><strong><code>sctag</code></strong> :&ensp;<code>str</code></dt>
+<dd>a string of CS tags</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd>a list of slided CS tags</dd>
+<dd>a list of splitted CS tags</dd>
 </dl>
 <h2 id="example">Example</h2>
 <pre><code class="language-python-repl">&gt;&gt;&gt; cstag = &quot;cs:Z:=ACGT*ag=C-g=T+t=ACGT&quot;
 &gt;&gt;&gt; split(cstag)
 &quot;['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']&quot;
+=ACGT *ag =C -g =T +t =ACGT
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def split(cstag: str) -&gt; list[str]:
-    &#34;&#34;&#34;Split cstag along with annotating MIDS
+    &#34;&#34;&#34;Split cstag
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        sctag (str): a string of CS tags
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: a list of splitted CS tags
 
     Example:
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
         &gt;&gt;&gt; split(cstag)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
+        =ACGT *ag =C -g =T +t =ACGT
     &#34;&#34;&#34;
-    _cstag = cstag.replace(&#34;cs:Z:&#34;, &#34;&#34;)
-    _cstag = _cstag.lstrip(&#34;=&#34;)
-    _cstag = _cstag.replace(&#34;-&#34;, &#34;=D&#34;)
-    _cstag = _cstag.replace(&#34;+&#34;, &#34;=I&#34;)
-    _cstag = re.sub(&#34;[ACGT]&#34;, &#34;M&#34;, _cstag)
-    _cstag = re.sub(r&#34;\*[acgt][acgt]&#34;, &#34;=S&#34;, _cstag)
-    return _cstag.split(&#34;=&#34;)</code></pre>
+    cstag_splitted = []
+    for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
+        if not cs or cs == &#34;cs:Z:&#34;:
+            continue
+        if re.match(r&#34;(=|\*|\-|\+)&#34;, cs):
+            cstag_splitted.append(cs)
+        else:
+            cstag_splitted[-1] += cs
+    return cstag_splitted</code></pre>
 </details>
 </dd>
 <dt id="mids.convert.to_mids"><code class="name flex">
