@@ -1,9 +1,3 @@
-"""
-- 入力がSAMか
-- mappingされているか
-- 入力にCS tagのlong formatが使われているか
-"""
-
 from __future__ import annotations
 from pathlib import Path
 

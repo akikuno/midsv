@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 
+
 def split(cstag: str) -> list[str]:
     """Split cstag along with annotating MIDS
 
@@ -24,6 +25,7 @@ def split(cstag: str) -> list[str]:
     _cstag = re.sub(r"\*[acgt][acgt]", "=S", _cstag)
     return _cstag.split("=")
 
+
 def slide_insertion(CSTAGS: list[str]) -> list[str]:
     """Append one base from the next index at an inserted base.
 
@@ -43,6 +45,7 @@ def slide_insertion(CSTAGS: list[str]) -> list[str]:
             CSTAGS[i] = cs + CSTAGS[i + 1][0]
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS
+
 
 def to_mids(CSTAGS: list[str]) -> str:
     """Convert to MIDS format
@@ -86,3 +89,11 @@ def cstag_to_mids(cstag: str) -> str:
     _cstag_split = split(cstag)
     _cstags_slide = slide_insertion(_cstag_split)
     return to_mids(_cstags_slide)
+
+
+def ascii_to_qscore(ascii_quality: str) -> list[int]:
+    qscore = []
+    for ascii in ascii_quality:
+        qscore.append(ord(ascii) - 33)
+    return qscore
+
