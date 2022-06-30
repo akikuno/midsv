@@ -90,37 +90,29 @@ def slide_insertion(mids: list[str]) -> list[str]:
     return [m for m in mids if m]
 
 
-# def to_mids(CSTAGS: list[str]) -> str:
-#     """Convert to MIDS format
+def to_string(mids: list[str]) -> str:
+    """Convert to string in CSV format
 
-#     Args:
-#         CSTAGS (list[str]): a list of CS tags
+    Args:
+        mids (list[str]): a list of MIDS
 
-#     Returns:
-#         str: a MIDS sequence
+    Returns:
+        str: MIDS
 
-#     Example:
-#         >>> to_mids(["IacgtacgtM"])
-#         "8M"
-#         >>> to_mids(["Dacgtacgt"])
-#         "D,D,D,D,D,D,D,D"
-#         >>> to_mids(["MMMM"])
-#         "M,M,M,M"
-#     """
-#     cstags = []
-#     for cs in CSTAGS:
-#         if "I" == cs[0]:
-#             # "IacgtacgtA" -> "8M"
-#             cstags.append(f"{len(cs)-2}{cs[-1]}")
-#         elif "D" == cs[0]:
-#             # "Dacgtacgt" -> "D,D,D,D,D,D,D,D"
-#             cstags.append(re.sub("[acgt]", "D,", cs[1:]).rstrip(","))
-#         elif "M" == cs[0]:
-#             # "MMM" -> "M,M,M"
-#             cstags.append(cs.replace("M", "M,").rstrip(","))
-#         else:
-#             cstags.append(cs)
-#     return ",".join(cstags)
+    Example:
+        >>> from mids import convert
+        >>> mids = ['3M', '4S', "MM", "DDD"]
+        >>> convert.to_string(mids)
+        "3M,4S,M,M,D,D,D"
+    """
+    mids_csv = []
+    for m in mids:
+        if m[0].isdigit():
+            mids_csv.append(m)
+            continue
+        for mm in m:
+            mids_csv.append(mm)
+    return ",".join(mids_csv)
 
 
 def cstag_to_mids(cstag: str) -> str:

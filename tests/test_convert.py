@@ -47,6 +47,13 @@ def test_slide_insertion():
     assert test == answer
 
 
+def test_to_string():
+    mids = ["3M", "4S", "MM", "DDD"]
+    test = convert.to_string(mids)
+    answer = "3M,4S,M,M,D,D,D"
+    assert test == answer
+
+
 def test_ascii_to_qscore():
     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
     qscore = convert.ascii_to_qscore(ascii)
