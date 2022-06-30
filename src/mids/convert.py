@@ -1,9 +1,8 @@
 from __future__ import annotations
-
 import re
 
 ###########################################################
-# MIDS conversion
+# MIDS conversion (from CS tag to MIDS)
 ###########################################################
 
 
