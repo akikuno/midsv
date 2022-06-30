@@ -94,25 +94,28 @@ def numerize_insertion(mids: list[str]) -&gt; list[str]:
     return mids
 
 
-def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
+def slide_insertion(mids: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        mids (list[str]): numerized MIDS
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: slided MIDS
 
     Example:
-        &gt;&gt;&gt; mids = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
-        &gt;&gt;&gt; slide_insertion(mids)
-        &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
+        &gt;&gt;&gt; convert.slide_insertion(mids)
+        &#34;[&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;]&#34;
     &#34;&#34;&#34;
-    for i, cs in enumerate(CSTAGS):
-        if &#34;+&#34; in cs:
-            CSTAGS[i] = cs + CSTAGS[i + 1][0]
-            CSTAGS[i + 1] = CSTAGS[i + 1][1:]
-    return CSTAGS
+    for i, m in enumerate(mids):
+        if not m:
+            continue
+        if isinstance(m, int):
+            mids[i] = str(m) + mids[i + 1][0]
+            mids[i + 1] = mids[i + 1][1:]
+    return [m for m in mids if m]
 
 
 # def to_mids(CSTAGS: list[str]) -&gt; str:
@@ -241,48 +244,52 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 </details>
 </dd>
 <dt id="mids.convert.slide_insertion"><code class="name flex">
-<span>def <span class="ident">slide_insertion</span></span>(<span>CSTAGS: list[str]) ‑> list[str]</span>
+<span>def <span class="ident">slide_insertion</span></span>(<span>mids: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Append one base from the next index at an inserted base.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd>a list of CS tags</dd>
+<dt><strong><code>mids</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>numerized MIDS</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd>a list of slided CS tags</dd>
+<dd>slided MIDS</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; mids = ['Iacgt', 'MMMM']
-&gt;&gt;&gt; slide_insertion(mids)
-&quot;['IacgtM', 'MMM']&quot;
+<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+&gt;&gt;&gt; mids = [3, 'M', 4, &quot;S&quot;, &quot;MM&quot;]
+&gt;&gt;&gt; convert.slide_insertion(mids)
+&quot;['3M', '4S', &quot;MM&quot;]&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
+<pre><code class="python">def slide_insertion(mids: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        mids (list[str]): numerized MIDS
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: slided MIDS
 
     Example:
-        &gt;&gt;&gt; mids = [&#39;Iacgt&#39;, &#39;MMMM&#39;]
-        &gt;&gt;&gt; slide_insertion(mids)
-        &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
+        &gt;&gt;&gt; convert.slide_insertion(mids)
+        &#34;[&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;]&#34;
     &#34;&#34;&#34;
-    for i, cs in enumerate(CSTAGS):
-        if &#34;+&#34; in cs:
-            CSTAGS[i] = cs + CSTAGS[i + 1][0]
-            CSTAGS[i + 1] = CSTAGS[i + 1][1:]
-    return CSTAGS</code></pre>
+    for i, m in enumerate(mids):
+        if not m:
+            continue
+        if isinstance(m, int):
+            mids[i] = str(m) + mids[i + 1][0]
+            mids[i + 1] = mids[i + 1][1:]
+    return [m for m in mids if m]</code></pre>
 </details>
 </dd>
 <dt id="mids.convert.split"><code class="name flex">
