@@ -66,25 +66,28 @@ def numerize_insertion(mids: list[str]) -> list[str]:
     return mids
 
 
-def slide_insertion(CSTAGS: list[str]) -> list[str]:
+def slide_insertion(mids: list[str]) -> list[str]:
     """Append one base from the next index at an inserted base.
 
     Args:
-        CSTAGS (list[str]): a list of CS tags
+        mids (list[str]): numerized MIDS
 
     Returns:
-        list[str]: a list of slided CS tags
+        list[str]: slided MIDS
 
     Example:
-        >>> mids = ['Iacgt', 'MMMM']
-        >>> slide_insertion(mids)
-        "['IacgtM', 'MMM']"
+        >>> from mids import convert
+        >>> mids = [3, 'M', 4, "S", "MM"]
+        >>> convert.slide_insertion(mids)
+        "['3M', '4S', "MM"]"
     """
-    for i, cs in enumerate(CSTAGS):
-        if "+" in cs:
-            CSTAGS[i] = cs + CSTAGS[i + 1][0]
-            CSTAGS[i + 1] = CSTAGS[i + 1][1:]
-    return CSTAGS
+    for i, m in enumerate(mids):
+        if not m:
+            continue
+        if isinstance(m, int):
+            mids[i] = str(m) + mids[i + 1][0]
+            mids[i + 1] = mids[i + 1][1:]
+    return [m for m in mids if m]
 
 
 # def to_mids(CSTAGS: list[str]) -> str:

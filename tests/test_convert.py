@@ -40,6 +40,13 @@ def test_numerize_insertion():
     assert test == answer
 
 
+def test_slide_insertion():
+    mids = [3, "M", 4, "S", "MM"]
+    test = convert.slide_insertion(mids)
+    answer = ["3M", "4S", "MM"]
+    assert test == answer
+
+
 def test_ascii_to_qscore():
     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
     qscore = convert.ascii_to_qscore(ascii)
