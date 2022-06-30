@@ -47,7 +47,7 @@ def dictionarize_alignments(sam: list[list]) -> list[dict]:
             FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
-            QUOL=alignment[10],
+            QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
         aligns.append(samdict)

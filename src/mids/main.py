@@ -1,6 +1,21 @@
-# from __future__ import annotations
-# # from ctypes import alignment
-# import re
+from __future__ import annotations
+import re
+from pathlib import Path
+from src.mids import preprocess
+from src.mids import format
+from src.mids import convert
+
+sampath = Path("tests", "data", "dictionalize_alignments", "sub_cslong.sam")
+sam = preprocess.read_sam(str(sampath))
+
+preprocess.check_sam_format(sam)
+
+sam_dict = format.append_reflen(sam)
+
+for i, alignment in enumerate(sam_dict):
+    sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+    sam_dict[i]["QSCORE"] = convert.ascii_to_qscore(alignment["QUAL"])
+
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor
 
