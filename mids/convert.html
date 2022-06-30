@@ -30,6 +30,10 @@
 
 import re
 
+###########################################################
+# MIDS conversion
+###########################################################
+
 
 def split(cstag: str) -&gt; list[str]:
     &#34;&#34;&#34;Split cstag
@@ -144,14 +148,16 @@ def to_string(mids: list[str]) -&gt; str:
 
 
 def cstag_to_mids(cstag: str) -&gt; str:
-    &#34;&#34;&#34;
-    Input:  &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    Output: &#34;M,M,M,M,S,M,D,M,1M,M,M,M&#34;
-    &#34;&#34;&#34;
-    # cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    _cstag_split = split(cstag)
-    _cstags_slide = slide_insertion(_cstag_split)
-    return to_mids(_cstags_slide)
+    cstag_splited = split(cstag)
+    mids_splited = to_mids(cstag_splited)
+    mids_numerized = numerize_insertion(mids_splited)
+    mids_slided = slide_insertion(mids_numerized)
+    return to_string(mids_slided)
+
+
+###########################################################
+# Phred score
+###########################################################
 
 
 def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
@@ -188,22 +194,17 @@ def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
 <span>def <span class="ident">cstag_to_mids</span></span>(<span>cstag: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Input:
-"cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def cstag_to_mids(cstag: str) -&gt; str:
-    &#34;&#34;&#34;
-    Input:  &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    Output: &#34;M,M,M,M,S,M,D,M,1M,M,M,M&#34;
-    &#34;&#34;&#34;
-    # cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-    _cstag_split = split(cstag)
-    _cstags_slide = slide_insertion(_cstag_split)
-    return to_mids(_cstags_slide)</code></pre>
+    cstag_splited = split(cstag)
+    mids_splited = to_mids(cstag_splited)
+    mids_numerized = numerize_insertion(mids_splited)
+    mids_slided = slide_insertion(mids_numerized)
+    return to_string(mids_slided)</code></pre>
 </details>
 </dd>
 <dt id="mids.convert.numerize_insertion"><code class="name flex">
