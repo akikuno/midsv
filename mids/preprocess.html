@@ -62,16 +62,26 @@ def check_alignments(sam: list[list]):
     Args:
         sam (list[list]): a list of lists of SAM format including CS tag
     &#34;&#34;&#34;
+    is_alignment = False
     for alignment in sam:
         if &#34;@&#34; in alignment[0]:
             continue
+        is_alignment = True
         if len(alignment) &lt; 10:
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
         if alignment[2] == &#34;*&#34;:
             continue
-        idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)]
-        if not idx_cstag:
+        idx_cstag = -1
+        for i, a in enumerate(alignment):
+            if a.startswith(&#34;cs:Z:=&#34;):
+                idx_cstag = i
+                break
+        if idx_cstag == -1:
             raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
+        if &#34;~&#34; in alignment[idx_cstag]:
+            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+    if not is_alignment:
+        raise AttributeError(&#34;No alignment information&#34;)
 
 
 def check_sam_format(sam: list[list]):
@@ -111,16 +121,26 @@ def check_sam_format(sam: list[list]):
     Args:
         sam (list[list]): a list of lists of SAM format including CS tag
     &#34;&#34;&#34;
+    is_alignment = False
     for alignment in sam:
         if &#34;@&#34; in alignment[0]:
             continue
+        is_alignment = True
         if len(alignment) &lt; 10:
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
         if alignment[2] == &#34;*&#34;:
             continue
-        idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)]
-        if not idx_cstag:
-            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)</code></pre>
+        idx_cstag = -1
+        for i, a in enumerate(alignment):
+            if a.startswith(&#34;cs:Z:=&#34;):
+                idx_cstag = i
+                break
+        if idx_cstag == -1:
+            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
+        if &#34;~&#34; in alignment[idx_cstag]:
+            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+    if not is_alignment:
+        raise AttributeError(&#34;No alignment information&#34;)</code></pre>
 </details>
 </dd>
 <dt id="mids.preprocess.check_headers"><code class="name flex">
