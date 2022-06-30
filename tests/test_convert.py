@@ -1,6 +1,8 @@
 from pathlib import Path
-from src.mids import convert
+from src.mids import convert, preprocess, format
+from importlib import reload
 
+reload(convert)
 
 # substitution = Path("tests", "data", "substitution", "sub_cslong.sam").read_text().strip().split("\n")
 # substitution = [s.split("\t") for s in substitution]
@@ -70,8 +72,23 @@ def test_to_string():
 ###########################################################
 
 
-def test_ascii_to_qscore():
-    ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
-    qscore = convert.ascii_to_qscore(ascii)
-    for i in range(43):
-        assert qscore[i] == i
+# def test_ascii_to_qscore():
+#     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
+#     qscore = convert.ascii_to_qscore(ascii)
+#     qscore = qscore.split(",")
+#     for i in range(43):
+#         assert qscore[i] == str(i)
+
+
+def test_to_qscore_with_indel_adjustment():
+    sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
+    sam = preprocess.read_sam(str(sampath))
+    sam_dict = format.dictionarize_sam(sam)
+    for i, alignment in enumerate(sam_dict):
+        sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        sam_dict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
+    test = sam_dict
+    answer = Path("tests", "data", "phredscore", "answer.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+

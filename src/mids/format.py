@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 
-def extract_headers(sam: list[list]) -> dict[str, int]:
+def extract_sqheaders(sam: list[list]) -> dict[str, int]:
     """Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
 
     Args:
@@ -22,14 +22,32 @@ def extract_headers(sam: list[list]) -> dict[str, int]:
     return SNLN
 
 
-def dictionarize_alignments(sam: list[list]) -> list[dict]:
+# def append_reflen(sam: list[list]) -> list[dict]:
+#     """Append reference sequence length
+
+#     Args:
+#         sam (list[list]): a list of lists of SAM format including CS tag
+
+#     Returns:
+#         list[list]: alignments appended LN named as "RLEN"
+#     """
+#     headers = extract_headers(sam)
+#     for i, alignment in enumerate(sam):
+#         if "@" in alignment[0]:
+#             continue
+#         RNAME = alignment[2]
+#         sam[i].append(headers[RNAME])
+#     return sam
+
+
+def dictionarize_sam(sam: list[list]) -> list[dict]:
     """Extract mapped alignments from SAM
 
     Args:
         sam (list[list]): a list of lists of SAM format including CS tag
 
     Returns:
-        dict: a dictionary containing QNAME, RNAME, POS, QUAL, and CSTAG
+        dict: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
     """
     aligns = []
     idx_cstag = -1
@@ -53,22 +71,4 @@ def dictionarize_alignments(sam: list[list]) -> list[dict]:
         aligns.append(samdict)
     aligns = sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
     return aligns
-
-
-def append_reflen(sam: list[list]) -> list[dict]:
-    """Append reference sequence length
-
-    Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
-
-    Returns:
-        list[dict]: alignments appended LN named as "RLEN"
-    """
-    headers = extract_headers(sam)
-    alignments = dictionarize_alignments(sam)
-    alignments_with_reflen = []
-    for alignment in alignments:
-        alignment["RLEN"] = headers[alignment["RNAME"]]
-        alignments_with_reflen.append(alignment)
-    return alignments_with_reflen
 

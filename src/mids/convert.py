@@ -1,4 +1,5 @@
 from __future__ import annotations
+from curses.ascii import isdigit
 import re
 
 ###########################################################
@@ -131,9 +132,38 @@ def cstag_to_mids(cstag: str) -> str:
 ###########################################################
 
 
-def ascii_to_qscore(ascii_quality: str) -> list[int]:
-    qscore = []
-    for ascii in ascii_quality:
-        qscore.append(ord(ascii) - 33)
-    return qscore
+# def ascii_to_qscore(ascii_quality: str) -> str:
+#     qscore = []
+#     for ascii in ascii_quality:
+#         qscore.append(str(ord(ascii) - 33))
+#     return ",".join(qscore)
 
+
+def ascii_to_phred(ascii: str) -> str:
+    return str(ord(ascii) - 33)
+
+
+def to_qscore_with_indel_compensation(qual: str, mids: str) -> str:
+    """Convert ascii quality to phred score.
+    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+
+    Args:
+        qual (str): QUAL in SAM format
+        mids (str): MIDS
+
+    Returns:
+        str: Phred quality score with indel compensation
+    """
+    qscore = []
+    idx = 0
+    for m in mids.split(","):
+        if m == "D":
+            qscore.append(str(-1))
+            idx -= 1
+        elif m[0].isdigit():
+            idx += int(m[:-1])
+            qscore.append(ascii_to_phred(qual[idx]))
+        else:
+            qscore.append(ascii_to_phred(qual[idx]))
+        idx += 1
+    return ",".join(qscore)

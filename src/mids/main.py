@@ -5,12 +5,13 @@ from src.mids import preprocess
 from src.mids import format
 from src.mids import convert
 
-sampath = Path("tests", "data", "dictionalize_alignments", "sub_cslong.sam")
+sampath = Path("tests", "data", "subindel", "subindel_cslong.sam")
 sam = preprocess.read_sam(str(sampath))
 
 preprocess.check_sam_format(sam)
 
-sam_dict = format.append_reflen(sam)
+sqheaders = format.extract_sqheaders(sam)
+sam_dict = format.dictionarize_sam(sam)
 
 for i, alignment in enumerate(sam_dict):
     sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
