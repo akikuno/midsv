@@ -118,37 +118,29 @@ def slide_insertion(mids: list[str]) -&gt; list[str]:
     return [m for m in mids if m]
 
 
-# def to_mids(CSTAGS: list[str]) -&gt; str:
-#     &#34;&#34;&#34;Convert to MIDS format
+def to_string(mids: list[str]) -&gt; str:
+    &#34;&#34;&#34;Convert to string in CSV format
 
-#     Args:
-#         CSTAGS (list[str]): a list of CS tags
+    Args:
+        mids (list[str]): a list of MIDS
 
-#     Returns:
-#         str: a MIDS sequence
+    Returns:
+        str: MIDS
 
-#     Example:
-#         &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
-#         &#34;8M&#34;
-#         &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
-#         &#34;D,D,D,D,D,D,D,D&#34;
-#         &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
-#         &#34;M,M,M,M&#34;
-#     &#34;&#34;&#34;
-#     cstags = []
-#     for cs in CSTAGS:
-#         if &#34;I&#34; == cs[0]:
-#             # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
-#             cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
-#         elif &#34;D&#34; == cs[0]:
-#             # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
-#             cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
-#         elif &#34;M&#34; == cs[0]:
-#             # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
-#             cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
-#         else:
-#             cstags.append(cs)
-#     return &#34;,&#34;.join(cstags)
+    Example:
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
+        &gt;&gt;&gt; convert.to_string(mids)
+        &#34;3M,4S,M,M,D,D,D&#34;
+    &#34;&#34;&#34;
+    mids_csv = []
+    for m in mids:
+        if m[0].isdigit():
+            mids_csv.append(m)
+            continue
+        for mm in m:
+            mids_csv.append(mm)
+    return &#34;,&#34;.join(mids_csv)
 
 
 def cstag_to_mids(cstag: str) -&gt; str:
@@ -391,6 +383,56 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
     return mids</code></pre>
 </details>
 </dd>
+<dt id="mids.convert.to_string"><code class="name flex">
+<span>def <span class="ident">to_string</span></span>(<span>mids: list[str]) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert to string in CSV format</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mids</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>a list of MIDS</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>MIDS</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+&gt;&gt;&gt; mids = ['3M', '4S', &quot;MM&quot;, &quot;DDD&quot;]
+&gt;&gt;&gt; convert.to_string(mids)
+&quot;3M,4S,M,M,D,D,D&quot;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_string(mids: list[str]) -&gt; str:
+    &#34;&#34;&#34;Convert to string in CSV format
+
+    Args:
+        mids (list[str]): a list of MIDS
+
+    Returns:
+        str: MIDS
+
+    Example:
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
+        &gt;&gt;&gt; convert.to_string(mids)
+        &#34;3M,4S,M,M,D,D,D&#34;
+    &#34;&#34;&#34;
+    mids_csv = []
+    for m in mids:
+        if m[0].isdigit():
+            mids_csv.append(m)
+            continue
+        for mm in m:
+            mids_csv.append(mm)
+    return &#34;,&#34;.join(mids_csv)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -415,6 +457,7 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 <li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
 <li><code><a title="mids.convert.split" href="#mids.convert.split">split</a></code></li>
 <li><code><a title="mids.convert.to_mids" href="#mids.convert.to_mids">to_mids</a></code></li>
+<li><code><a title="mids.convert.to_string" href="#mids.convert.to_string">to_string</a></code></li>
 </ul>
 </li>
 </ul>
