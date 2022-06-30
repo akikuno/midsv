@@ -33,18 +33,15 @@ import re
 
 def split(cstag: str) -&gt; list[str]:
     &#34;&#34;&#34;Split cstag
-
     Args:
-        sctag (str): a string of CS tags
-
+        cstag (str): a string of CS tags
     Returns:
-        list[str]: a list of splitted CS tags
-
+        list[str]: splitted CS tags
     Example:
+        &gt;&gt;&gt; from mids import convert
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-        &gt;&gt;&gt; split(cstag)
-        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
-        =ACGT *ag =C -g =T +t =ACGT
+        &gt;&gt;&gt; convert.split(cstag)
+        &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
     &#34;&#34;&#34;
     cstag_splitted = []
     for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
@@ -55,6 +52,46 @@ def split(cstag: str) -&gt; list[str]:
         else:
             cstag_splitted[-1] += cs
     return cstag_splitted
+
+
+def to_mids(cstag_splitted: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert to MIDS
+    Args:
+        cstag_splitted (list[str]): splitted CS tags
+    Returns:
+        list[str]: splitted MIDS
+    Example:
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
+        &gt;&gt;&gt; convert.to_mids(cstag_splitted)
+        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
+    &#34;&#34;&#34;
+    mids = []
+    for cs in cstag_splitted:
+        num = len(cs) - 1
+        if cs.startswith(&#34;=&#34;):
+            mids.append(&#34;M&#34; * num)
+        elif cs.startswith(&#34;+&#34;):
+            mids.append(&#34;I&#34; * num)
+        elif cs.startswith(&#34;-&#34;):
+            mids.append(&#34;D&#34; * num)
+        else:
+            mids.append(&#34;S&#34;)
+    return mids
+
+
+def numerize_insertion(mids: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert insertion to numeric numbers
+    Example:
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
+        &gt;&gt;&gt; convert.numerize_insertion(mids)
+        &#34;[&#39;MMM&#39;, 3, &#39;D&#39;, &#39;S&#39;]&#34;
+    &#34;&#34;&#34;
+    for i, m in enumerate(mids):
+        if m.startswith(&#34;I&#34;):
+            mids[i] = len(m)
+    return mids
 
 
 def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
@@ -72,43 +109,43 @@ def slide_insertion(CSTAGS: list[str]) -&gt; list[str]:
         &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
     &#34;&#34;&#34;
     for i, cs in enumerate(CSTAGS):
-        if &#34;I&#34; in cs:
+        if &#34;+&#34; in cs:
             CSTAGS[i] = cs + CSTAGS[i + 1][0]
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS
 
 
-def to_mids(CSTAGS: list[str]) -&gt; str:
-    &#34;&#34;&#34;Convert to MIDS format
+# def to_mids(CSTAGS: list[str]) -&gt; str:
+#     &#34;&#34;&#34;Convert to MIDS format
 
-    Args:
-        CSTAGS (list[str]): a list of CS tags
+#     Args:
+#         CSTAGS (list[str]): a list of CS tags
 
-    Returns:
-        str: a MIDS sequence
+#     Returns:
+#         str: a MIDS sequence
 
-    Example:
-        &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
-        &#34;8M&#34;
-        &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
-        &#34;D,D,D,D,D,D,D,D&#34;
-        &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
-        &#34;M,M,M,M&#34;
-    &#34;&#34;&#34;
-    cstags = []
-    for cs in CSTAGS:
-        if &#34;I&#34; == cs[0]:
-            # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
-            cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
-        elif &#34;D&#34; == cs[0]:
-            # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
-            cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
-        elif &#34;M&#34; == cs[0]:
-            # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
-            cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
-        else:
-            cstags.append(cs)
-    return &#34;,&#34;.join(cstags)
+#     Example:
+#         &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
+#         &#34;8M&#34;
+#         &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
+#         &#34;D,D,D,D,D,D,D,D&#34;
+#         &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
+#         &#34;M,M,M,M&#34;
+#     &#34;&#34;&#34;
+#     cstags = []
+#     for cs in CSTAGS:
+#         if &#34;I&#34; == cs[0]:
+#             # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
+#             cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
+#         elif &#34;D&#34; == cs[0]:
+#             # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
+#             cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
+#         elif &#34;M&#34; == cs[0]:
+#             # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
+#             cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
+#         else:
+#             cstags.append(cs)
+#     return &#34;,&#34;.join(cstags)
 
 
 def cstag_to_mids(cstag: str) -&gt; str:
@@ -174,6 +211,35 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
     return to_mids(_cstags_slide)</code></pre>
 </details>
 </dd>
+<dt id="mids.convert.numerize_insertion"><code class="name flex">
+<span>def <span class="ident">numerize_insertion</span></span>(<span>mids: list[str]) ‑> list[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert insertion to numeric numbers</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+&gt;&gt;&gt; mids = ['MMM', 'III', 'D', 'S']
+&gt;&gt;&gt; convert.numerize_insertion(mids)
+&quot;['MMM', 3, 'D', 'S']&quot;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def numerize_insertion(mids: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert insertion to numeric numbers
+    Example:
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; mids = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
+        &gt;&gt;&gt; convert.numerize_insertion(mids)
+        &#34;[&#39;MMM&#39;, 3, &#39;D&#39;, &#39;S&#39;]&#34;
+    &#34;&#34;&#34;
+    for i, m in enumerate(mids):
+        if m.startswith(&#34;I&#34;):
+            mids[i] = len(m)
+    return mids</code></pre>
+</details>
+</dd>
 <dt id="mids.convert.slide_insertion"><code class="name flex">
 <span>def <span class="ident">slide_insertion</span></span>(<span>CSTAGS: list[str]) ‑> list[str]</span>
 </code></dt>
@@ -213,7 +279,7 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
         &#34;[&#39;IacgtM&#39;, &#39;MMM&#39;]&#34;
     &#34;&#34;&#34;
     for i, cs in enumerate(CSTAGS):
-        if &#34;I&#34; in cs:
+        if &#34;+&#34; in cs:
             CSTAGS[i] = cs + CSTAGS[i + 1][0]
             CSTAGS[i + 1] = CSTAGS[i + 1][1:]
     return CSTAGS</code></pre>
@@ -226,19 +292,19 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 <div class="desc"><p>Split cstag</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sctag</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>cstag</code></strong> :&ensp;<code>str</code></dt>
 <dd>a string of CS tags</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd>a list of splitted CS tags</dd>
+<dd>splitted CS tags</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; cstag = &quot;cs:Z:=ACGT*ag=C-g=T+t=ACGT&quot;
-&gt;&gt;&gt; split(cstag)
-&quot;['MMMM', 'S', 'M', 'Dg', 'M', 'It', 'MMMM']&quot;
-=ACGT *ag =C -g =T +t =ACGT
+<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+&gt;&gt;&gt; cstag = &quot;cs:Z:=ACGT*ag=C-g=T+t=ACGT&quot;
+&gt;&gt;&gt; convert.split(cstag)
+&quot;['=ACGT', '*ag', '=C', '-g', '=T', '+t', '=ACGT']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -246,18 +312,15 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 </summary>
 <pre><code class="python">def split(cstag: str) -&gt; list[str]:
     &#34;&#34;&#34;Split cstag
-
     Args:
-        sctag (str): a string of CS tags
-
+        cstag (str): a string of CS tags
     Returns:
-        list[str]: a list of splitted CS tags
-
+        list[str]: splitted CS tags
     Example:
+        &gt;&gt;&gt; from mids import convert
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
-        &gt;&gt;&gt; split(cstag)
-        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;Dg&#39;, &#39;M&#39;, &#39;It&#39;, &#39;MMMM&#39;]&#34;
-        =ACGT *ag =C -g =T +t =ACGT
+        &gt;&gt;&gt; convert.split(cstag)
+        &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
     &#34;&#34;&#34;
     cstag_splitted = []
     for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
@@ -271,63 +334,54 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 </details>
 </dd>
 <dt id="mids.convert.to_mids"><code class="name flex">
-<span>def <span class="ident">to_mids</span></span>(<span>CSTAGS: list[str]) ‑> str</span>
+<span>def <span class="ident">to_mids</span></span>(<span>cstag_splitted: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert to MIDS format</p>
+<div class="desc"><p>Convert to MIDS</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>CSTAGS</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd>a list of CS tags</dd>
+<dt><strong><code>cstag_splitted</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>splitted CS tags</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>str</code></dt>
-<dd>a MIDS sequence</dd>
+<dt><code>list[str]</code></dt>
+<dd>splitted MIDS</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; to_mids([&quot;IacgtacgtM&quot;])
-&quot;8M&quot;
-&gt;&gt;&gt; to_mids([&quot;Dacgtacgt&quot;])
-&quot;D,D,D,D,D,D,D,D&quot;
-&gt;&gt;&gt; to_mids([&quot;MMMM&quot;])
-&quot;M,M,M,M&quot;
+<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+&gt;&gt;&gt; cstag_splitted = ['=ACGT', '*ag', '=C', '-gg', '=T', '+t', '=ACGT']
+&gt;&gt;&gt; convert.to_mids(cstag_splitted)
+&quot;['MMMM', 'S', 'M', 'DD', 'M', 'I', 'MMMM']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_mids(CSTAGS: list[str]) -&gt; str:
-    &#34;&#34;&#34;Convert to MIDS format
-
+<pre><code class="python">def to_mids(cstag_splitted: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert to MIDS
     Args:
-        CSTAGS (list[str]): a list of CS tags
-
+        cstag_splitted (list[str]): splitted CS tags
     Returns:
-        str: a MIDS sequence
-
+        list[str]: splitted MIDS
     Example:
-        &gt;&gt;&gt; to_mids([&#34;IacgtacgtM&#34;])
-        &#34;8M&#34;
-        &gt;&gt;&gt; to_mids([&#34;Dacgtacgt&#34;])
-        &#34;D,D,D,D,D,D,D,D&#34;
-        &gt;&gt;&gt; to_mids([&#34;MMMM&#34;])
-        &#34;M,M,M,M&#34;
+        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
+        &gt;&gt;&gt; convert.to_mids(cstag_splitted)
+        &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
     &#34;&#34;&#34;
-    cstags = []
-    for cs in CSTAGS:
-        if &#34;I&#34; == cs[0]:
-            # &#34;IacgtacgtA&#34; -&gt; &#34;8M&#34;
-            cstags.append(f&#34;{len(cs)-2}{cs[-1]}&#34;)
-        elif &#34;D&#34; == cs[0]:
-            # &#34;Dacgtacgt&#34; -&gt; &#34;D,D,D,D,D,D,D,D&#34;
-            cstags.append(re.sub(&#34;[acgt]&#34;, &#34;D,&#34;, cs[1:]).rstrip(&#34;,&#34;))
-        elif &#34;M&#34; == cs[0]:
-            # &#34;MMM&#34; -&gt; &#34;M,M,M&#34;
-            cstags.append(cs.replace(&#34;M&#34;, &#34;M,&#34;).rstrip(&#34;,&#34;))
+    mids = []
+    for cs in cstag_splitted:
+        num = len(cs) - 1
+        if cs.startswith(&#34;=&#34;):
+            mids.append(&#34;M&#34; * num)
+        elif cs.startswith(&#34;+&#34;):
+            mids.append(&#34;I&#34; * num)
+        elif cs.startswith(&#34;-&#34;):
+            mids.append(&#34;D&#34; * num)
         else:
-            cstags.append(cs)
-    return &#34;,&#34;.join(cstags)</code></pre>
+            mids.append(&#34;S&#34;)
+    return mids</code></pre>
 </details>
 </dd>
 </dl>
@@ -347,9 +401,10 @@ Output: "M,M,M,M,S,M,D,M,1M,M,M,M"</p></div>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="mids.convert.ascii_to_qscore" href="#mids.convert.ascii_to_qscore">ascii_to_qscore</a></code></li>
 <li><code><a title="mids.convert.cstag_to_mids" href="#mids.convert.cstag_to_mids">cstag_to_mids</a></code></li>
+<li><code><a title="mids.convert.numerize_insertion" href="#mids.convert.numerize_insertion">numerize_insertion</a></code></li>
 <li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
 <li><code><a title="mids.convert.split" href="#mids.convert.split">split</a></code></li>
 <li><code><a title="mids.convert.to_mids" href="#mids.convert.to_mids">to_mids</a></code></li>
