@@ -22,7 +22,7 @@ def extract_headers(sam: list[list]) -> dict[str, int]:
     return SNLN
 
 
-def extract_alignments(sam: list[list]) -> list[dict]:
+def dictionarize_alignments(sam: list[list]) -> list[dict]:
     """Extract mapped alignments from SAM
 
     Args:
@@ -39,12 +39,12 @@ def extract_alignments(sam: list[list]) -> list[dict]:
         if alignment[2] == "*":
             continue
         if idx_cstag == -1:
-            try:
-                idx_cstag = [i for i, a in enumerate(alignment) if a.startswith("cs:Z:=")][0]
-            except IndexError:
-                print(f"IndexError: CS tag is not found")
+            for i, a in enumerate(alignment):
+                if a.startswith("cs:Z:="):
+                    idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(",", "_"),
+            FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
             QUOL=alignment[10],
@@ -55,7 +55,7 @@ def extract_alignments(sam: list[list]) -> list[dict]:
     return aligns
 
 
-def append_reference_sequence_length(sam: list[list]) -> list[dict]:
+def append_reflen(sam: list[list]) -> list[dict]:
     """Append reference sequence length
 
     Args:
@@ -65,10 +65,10 @@ def append_reference_sequence_length(sam: list[list]) -> list[dict]:
         list[dict]: alignments appended LN named as "RLEN"
     """
     headers = extract_headers(sam)
-    alignments = extract_alignments(sam)
-    alingment_with_reference_sequence_length = []
+    alignments = dictionarize_alignments(sam)
+    alignments_with_reflen = []
     for alignment in alignments:
         alignment["RLEN"] = headers[alignment["RNAME"]]
-        alingment_with_reference_sequence_length.append(alignment)
-    return alingment_with_reference_sequence_length
+        alignments_with_reflen.append(alignment)
+    return alignments_with_reflen
 

@@ -1,57 +1,31 @@
 from pathlib import Path
-from src.mids import format
+from src.mids import preprocess, format
+from importlib import reload
+
+reload(format)
 
 
 def test_extract_headers():
-    query = Path("tests", "data", "extract_headers", "query.sam").read_text().strip().split("\n")
-    query = [q.split("\t") for q in query]
-    value = format.extract_headers(query)
+    sampath = Path("tests", "data", "extract_headers", "query.sam")
+    sam = preprocess.read_sam(str(sampath))
+    test = format.extract_headers(sam)
     answer = {"chr13": 120421639, "chr6": 149736546}
-    assert value == answer
+    assert test == answer
 
 
-def test_extract_alignments():
-    query = Path("tests", "data", "extract_alignments", "sub_cslong.sam").read_text().strip().split("\n")
-    query = [q.split("\t") for q in query]
-    list_eval = [
-        {
-            "QNAME": "control",
-            "RNAME": "random_100bp",
-            "POS": 1,
-            "QUOL": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            "CSTAG": "cs:Z:=ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC",
-        },
-        {
-            "QNAME": "sub-1nt",
-            "RNAME": "random_100bp",
-            "POS": 1,
-            "QUOL": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            "CSTAG": "cs:Z:=ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCT*ag=GGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC",
-        },
-    ]
-    assert format.extract_alignments(query) == list_eval
+def test_dictionarize_alignments():
+    sampath = Path("tests", "data", "dictionalize_alignments", "sub_cslong.sam")
+    sam = preprocess.read_sam(str(sampath))
+    test = format.dictionarize_alignments(sam)
+    answer = Path("tests", "data", "dictionalize_alignments", "answer.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
 
 
-def test_append_reference_sequence_length():
-    query = Path("tests", "data", "extract_alignments", "sub_cslong.sam").read_text().strip().split("\n")
-    query = [q.split("\t") for q in query]
-    answer = format.append_reference_sequence_length(query)
-    correct_answer = [
-        {
-            "QNAME": "control",
-            "RNAME": "random_100bp",
-            "POS": 1,
-            "QUOL": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            "CSTAG": "cs:Z:=ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC",
-            "RLEN": 100,
-        },
-        {
-            "QNAME": "sub-1nt",
-            "RNAME": "random_100bp",
-            "POS": 1,
-            "QUOL": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            "CSTAG": "cs:Z:=ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCT*ag=GGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC",
-            "RLEN": 100,
-        },
-    ]
-    assert answer == correct_answer
+def test_append_reflen():
+    sampath = Path("tests", "data", "append_reflen", "query.sam")
+    sam = preprocess.read_sam(str(sampath))
+    test = format.append_reflen(sam)
+    answer = Path("tests", "data", "append_reflen", "answer.txt").read_text()
+    answer = eval(answer)
+    assert test == answer

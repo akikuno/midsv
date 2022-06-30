@@ -1,0 +1,1 @@
+[{'QNAME': 'mm10_dna', 'FLAG': 0, 'RNAME': 'chr13', 'POS': 35967800, 'QUOL': '*', 'CSTAG': 'rl:i:15', 'RLEN': 120421639}, {'QNAME': 'mm10_dna', 'FLAG': 0, 'RNAME': 'chr6', 'POS': 122711500, 'QUOL': '*', 'CSTAG': 'rl:i:0', 'RLEN': 149736546}]
