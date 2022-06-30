@@ -26,6 +26,20 @@ def test_split():
     assert test == answer
 
 
+def test_to_mids():
+    cstag_splitted = ["=ACGT", "*ag", "=C", "-gg", "=T", "+t", "=ACGT"]
+    test = convert.to_mids(cstag_splitted)
+    answer = ["MMMM", "S", "M", "DD", "M", "I", "MMMM"]
+    assert test == answer
+
+
+def test_numerize_insertion():
+    mids = ["MMM", "III", "D", "S"]
+    test = convert.numerize_insertion(mids)
+    answer = ["MMM", 3, "D", "S"]
+    assert test == answer
+
+
 def test_ascii_to_qscore():
     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
     qscore = convert.ascii_to_qscore(ascii)
