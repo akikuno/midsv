@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import re
 
+###########################################################
+# MIDS conversion
+###########################################################
+
 
 def split(cstag: str) -> list[str]:
     """Split cstag
@@ -116,14 +120,16 @@ def to_string(mids: list[str]) -> str:
 
 
 def cstag_to_mids(cstag: str) -> str:
-    """
-    Input:  "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    Output: "M,M,M,M,S,M,D,M,1M,M,M,M"
-    """
-    # cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    _cstag_split = split(cstag)
-    _cstags_slide = slide_insertion(_cstag_split)
-    return to_mids(_cstags_slide)
+    cstag_splited = split(cstag)
+    mids_splited = to_mids(cstag_splited)
+    mids_numerized = numerize_insertion(mids_splited)
+    mids_slided = slide_insertion(mids_numerized)
+    return to_string(mids_slided)
+
+
+###########################################################
+# Phred score
+###########################################################
 
 
 def ascii_to_qscore(ascii_quality: str) -> list[int]:

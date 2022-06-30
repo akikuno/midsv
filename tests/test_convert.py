@@ -18,6 +18,10 @@ from src.mids import convert
 #     alignment["MIDS"] = mids
 #     alignments_with_mids.append(alignment)
 
+###########################################################
+# MIDS conversion
+###########################################################
+
 
 def test_split():
     cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
@@ -47,11 +51,23 @@ def test_slide_insertion():
     assert test == answer
 
 
+def test_cstag_to_mids():
+    cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
+    test = convert.cstag_to_mids(cstag)
+    answer = "M,M,M,M,S,M,D,M,1M,M,M,M"
+    assert test == answer
+
+
 def test_to_string():
     mids = ["3M", "4S", "MM", "DDD"]
     test = convert.to_string(mids)
     answer = "3M,4S,M,M,D,D,D"
     assert test == answer
+
+
+###########################################################
+# Phred score
+###########################################################
 
 
 def test_ascii_to_qscore():
