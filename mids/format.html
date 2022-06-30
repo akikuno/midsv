@@ -50,7 +50,7 @@ def extract_headers(sam: list[list]) -&gt; dict[str, int]:
     return SNLN
 
 
-def extract_alignments(sam: list[list]) -&gt; list[dict]:
+def dictionarize_alignments(sam: list[list]) -&gt; list[dict]:
     &#34;&#34;&#34;Extract mapped alignments from SAM
 
     Args:
@@ -67,12 +67,12 @@ def extract_alignments(sam: list[list]) -&gt; list[dict]:
         if alignment[2] == &#34;*&#34;:
             continue
         if idx_cstag == -1:
-            try:
-                idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)][0]
-            except IndexError:
-                print(f&#34;IndexError: CS tag is not found&#34;)
+            for i, a in enumerate(alignment):
+                if a.startswith(&#34;cs:Z:=&#34;):
+                    idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(&#34;,&#34;, &#34;_&#34;),
+            FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
             QUOL=alignment[10],
@@ -83,7 +83,7 @@ def extract_alignments(sam: list[list]) -&gt; list[dict]:
     return aligns
 
 
-def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
+def append_reflen(sam: list[list]) -&gt; list[dict]:
     &#34;&#34;&#34;Append reference sequence length
 
     Args:
@@ -93,12 +93,12 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
         list[dict]: alignments appended LN named as &#34;RLEN&#34;
     &#34;&#34;&#34;
     headers = extract_headers(sam)
-    alignments = extract_alignments(sam)
-    alingment_with_reference_sequence_length = []
+    alignments = dictionarize_alignments(sam)
+    alignments_with_reflen = []
     for alignment in alignments:
         alignment[&#34;RLEN&#34;] = headers[alignment[&#34;RNAME&#34;]]
-        alingment_with_reference_sequence_length.append(alignment)
-    return alingment_with_reference_sequence_length</code></pre>
+        alignments_with_reflen.append(alignment)
+    return alignments_with_reflen</code></pre>
 </details>
 </section>
 <section>
@@ -108,8 +108,8 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.format.append_reference_sequence_length"><code class="name flex">
-<span>def <span class="ident">append_reference_sequence_length</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
+<dt id="mids.format.append_reflen"><code class="name flex">
+<span>def <span class="ident">append_reflen</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Append reference sequence length</p>
@@ -127,7 +127,7 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
+<pre><code class="python">def append_reflen(sam: list[list]) -&gt; list[dict]:
     &#34;&#34;&#34;Append reference sequence length
 
     Args:
@@ -137,16 +137,16 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
         list[dict]: alignments appended LN named as &#34;RLEN&#34;
     &#34;&#34;&#34;
     headers = extract_headers(sam)
-    alignments = extract_alignments(sam)
-    alingment_with_reference_sequence_length = []
+    alignments = dictionarize_alignments(sam)
+    alignments_with_reflen = []
     for alignment in alignments:
         alignment[&#34;RLEN&#34;] = headers[alignment[&#34;RNAME&#34;]]
-        alingment_with_reference_sequence_length.append(alignment)
-    return alingment_with_reference_sequence_length</code></pre>
+        alignments_with_reflen.append(alignment)
+    return alignments_with_reflen</code></pre>
 </details>
 </dd>
-<dt id="mids.format.extract_alignments"><code class="name flex">
-<span>def <span class="ident">extract_alignments</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
+<dt id="mids.format.dictionarize_alignments"><code class="name flex">
+<span>def <span class="ident">dictionarize_alignments</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract mapped alignments from SAM</p>
@@ -164,7 +164,7 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_alignments(sam: list[list]) -&gt; list[dict]:
+<pre><code class="python">def dictionarize_alignments(sam: list[list]) -&gt; list[dict]:
     &#34;&#34;&#34;Extract mapped alignments from SAM
 
     Args:
@@ -181,12 +181,12 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
         if alignment[2] == &#34;*&#34;:
             continue
         if idx_cstag == -1:
-            try:
-                idx_cstag = [i for i, a in enumerate(alignment) if a.startswith(&#34;cs:Z:=&#34;)][0]
-            except IndexError:
-                print(f&#34;IndexError: CS tag is not found&#34;)
+            for i, a in enumerate(alignment):
+                if a.startswith(&#34;cs:Z:=&#34;):
+                    idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(&#34;,&#34;, &#34;_&#34;),
+            FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
             QUOL=alignment[10],
@@ -253,8 +253,8 @@ def append_reference_sequence_length(sam: list[list]) -&gt; list[dict]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="mids.format.append_reference_sequence_length" href="#mids.format.append_reference_sequence_length">append_reference_sequence_length</a></code></li>
-<li><code><a title="mids.format.extract_alignments" href="#mids.format.extract_alignments">extract_alignments</a></code></li>
+<li><code><a title="mids.format.append_reflen" href="#mids.format.append_reflen">append_reflen</a></code></li>
+<li><code><a title="mids.format.dictionarize_alignments" href="#mids.format.dictionarize_alignments">dictionarize_alignments</a></code></li>
 <li><code><a title="mids.format.extract_headers" href="#mids.format.extract_headers">extract_headers</a></code></li>
 </ul>
 </li>
