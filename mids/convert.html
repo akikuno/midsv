@@ -159,11 +159,41 @@ def cstag_to_mids(cstag: str) -&gt; str:
 ###########################################################
 
 
-def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
+# def ascii_to_qscore(ascii_quality: str) -&gt; str:
+#     qscore = []
+#     for ascii in ascii_quality:
+#         qscore.append(str(ord(ascii) - 33))
+#     return &#34;,&#34;.join(qscore)
+
+
+def ascii_to_phred(ascii: str) -&gt; str:
+    return str(ord(ascii) - 33)
+
+
+def to_qscore_with_indel_compensation(qual: str, mids: str) -&gt; str:
+    &#34;&#34;&#34;Convert ascii quality to phred score.
+    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+
+    Args:
+        qual (str): QUAL in SAM format
+        mids (str): MIDS
+
+    Returns:
+        str: Phred quality score with indel compensation
+    &#34;&#34;&#34;
     qscore = []
-    for ascii in ascii_quality:
-        qscore.append(ord(ascii) - 33)
-    return qscore</code></pre>
+    idx = 0
+    for m in mids.split(&#34;,&#34;):
+        if m == &#34;D&#34;:
+            qscore.append(str(-1))
+            idx -= 1
+        elif m[0].isdigit():
+            idx += int(m[:-1])
+            qscore.append(ascii_to_phred(qual[idx]))
+        else:
+            qscore.append(ascii_to_phred(qual[idx]))
+        idx += 1
+    return &#34;,&#34;.join(qscore)</code></pre>
 </details>
 </section>
 <section>
@@ -173,8 +203,8 @@ def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.convert.ascii_to_qscore"><code class="name flex">
-<span>def <span class="ident">ascii_to_qscore</span></span>(<span>ascii_quality: str) ‑> list[int]</span>
+<dt id="mids.convert.ascii_to_phred"><code class="name flex">
+<span>def <span class="ident">ascii_to_phred</span></span>(<span>ascii: str) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -182,11 +212,8 @@ def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
-    qscore = []
-    for ascii in ascii_quality:
-        qscore.append(ord(ascii) - 33)
-    return qscore</code></pre>
+<pre><code class="python">def ascii_to_phred(ascii: str) -&gt; str:
+    return str(ord(ascii) - 33)</code></pre>
 </details>
 </dd>
 <dt id="mids.convert.cstag_to_mids"><code class="name flex">
@@ -383,6 +410,54 @@ def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
     return mids</code></pre>
 </details>
 </dd>
+<dt id="mids.convert.to_qscore_with_indel_compensation"><code class="name flex">
+<span>def <span class="ident">to_qscore_with_indel_compensation</span></span>(<span>qual: str, mids: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert ascii quality to phred score.
+To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>qual</code></strong> :&ensp;<code>str</code></dt>
+<dd>QUAL in SAM format</dd>
+<dt><strong><code>mids</code></strong> :&ensp;<code>str</code></dt>
+<dd>MIDS</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Phred quality score with indel compensation</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_qscore_with_indel_compensation(qual: str, mids: str) -&gt; str:
+    &#34;&#34;&#34;Convert ascii quality to phred score.
+    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+
+    Args:
+        qual (str): QUAL in SAM format
+        mids (str): MIDS
+
+    Returns:
+        str: Phred quality score with indel compensation
+    &#34;&#34;&#34;
+    qscore = []
+    idx = 0
+    for m in mids.split(&#34;,&#34;):
+        if m == &#34;D&#34;:
+            qscore.append(str(-1))
+            idx -= 1
+        elif m[0].isdigit():
+            idx += int(m[:-1])
+            qscore.append(ascii_to_phred(qual[idx]))
+        else:
+            qscore.append(ascii_to_phred(qual[idx]))
+        idx += 1
+    return &#34;,&#34;.join(qscore)</code></pre>
+</details>
+</dd>
 <dt id="mids.convert.to_string"><code class="name flex">
 <span>def <span class="ident">to_string</span></span>(<span>mids: list[str]) ‑> str</span>
 </code></dt>
@@ -450,13 +525,14 @@ def ascii_to_qscore(ascii_quality: str) -&gt; list[int]:
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="mids.convert.ascii_to_qscore" href="#mids.convert.ascii_to_qscore">ascii_to_qscore</a></code></li>
+<ul class="">
+<li><code><a title="mids.convert.ascii_to_phred" href="#mids.convert.ascii_to_phred">ascii_to_phred</a></code></li>
 <li><code><a title="mids.convert.cstag_to_mids" href="#mids.convert.cstag_to_mids">cstag_to_mids</a></code></li>
 <li><code><a title="mids.convert.numerize_insertion" href="#mids.convert.numerize_insertion">numerize_insertion</a></code></li>
 <li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
 <li><code><a title="mids.convert.split" href="#mids.convert.split">split</a></code></li>
 <li><code><a title="mids.convert.to_mids" href="#mids.convert.to_mids">to_mids</a></code></li>
+<li><code><a title="mids.convert.to_qscore_with_indel_compensation" href="#mids.convert.to_qscore_with_indel_compensation">to_qscore_with_indel_compensation</a></code></li>
 <li><code><a title="mids.convert.to_string" href="#mids.convert.to_string">to_string</a></code></li>
 </ul>
 </li>

@@ -33,16 +33,19 @@ from src.mids import preprocess
 from src.mids import format
 from src.mids import convert
 
-sampath = Path(&#34;tests&#34;, &#34;data&#34;, &#34;dictionalize_alignments&#34;, &#34;sub_cslong.sam&#34;)
+sampath = Path(&#34;tests&#34;, &#34;data&#34;, &#34;inversion&#34;, &#34;inv_cslong.sam&#34;)
 sam = preprocess.read_sam(str(sampath))
 
 preprocess.check_sam_format(sam)
 
-sam_dict = format.append_reflen(sam)
+sqheaders = format.extract_sqheaders(sam)
+sam_dict = format.dictionarize_sam(sam)
 
 for i, alignment in enumerate(sam_dict):
     sam_dict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
-    sam_dict[i][&#34;QSCORE&#34;] = convert.ascii_to_qscore(alignment[&#34;QUAL&#34;])
+
+for i, alignment in enumerate(sam_dict):
+    sam_dict[i][&#34;QSCORE&#34;] = convert.to_qscore_with_indel_compensation(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
 
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor
