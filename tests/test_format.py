@@ -31,3 +31,11 @@ def test_dictionarize_sam():
     answer = eval(answer)
     assert test == answer
 
+
+def test_dictionarize_sam_inversion():
+    sampath = Path("tests", "data", "inversion", "inv_cslong.sam")
+    sam = preprocess.read_sam(str(sampath))
+    test = format.dictionarize_sam(sam)
+    answer = Path("tests", "data", "dictionalize_alignments", "answer_inversion.txt").read_text()
+    answer = eval(answer)
+    assert test == answer

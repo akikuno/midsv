@@ -50,16 +50,14 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
         dict: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
     """
     aligns = []
-    idx_cstag = -1
     for alignment in sam:
         if "@" in alignment[0]:
             continue
         if alignment[2] == "*":
             continue
-        if idx_cstag == -1:
-            for i, a in enumerate(alignment):
-                if a.startswith("cs:Z:="):
-                    idx_cstag = i
+        for i, a in enumerate(alignment):
+            if a.startswith("cs:Z:="):
+                idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(",", "_"),
             FLAG=int(alignment[1]),

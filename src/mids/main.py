@@ -5,7 +5,7 @@ from src.mids import preprocess
 from src.mids import format
 from src.mids import convert
 
-sampath = Path("tests", "data", "subindel", "subindel_cslong.sam")
+sampath = Path("tests", "data", "inversion", "inv_cslong.sam")
 sam = preprocess.read_sam(str(sampath))
 
 preprocess.check_sam_format(sam)
@@ -15,7 +15,9 @@ sam_dict = format.dictionarize_sam(sam)
 
 for i, alignment in enumerate(sam_dict):
     sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-    sam_dict[i]["QSCORE"] = convert.ascii_to_qscore(alignment["QUAL"])
+
+for i, alignment in enumerate(sam_dict):
+    sam_dict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
 
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor
