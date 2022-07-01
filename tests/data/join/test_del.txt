@@ -1,0 +1,4 @@
+[
+    {'QNAME': 'deletion-5bp', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDS': 'M,M,M,M,M', 'QSCORE': '0,0,0,0,0'},
+    {'QNAME': 'deletion-5bp', 'FLAG': 0, 'RNAME': 'random_15bp', 'POS': 11, 'MIDS': 'M,M,M,M,M', 'QSCORE': '0,0,0,0,0'},
+]
