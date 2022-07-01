@@ -28,6 +28,7 @@
 </summary>
 <pre><code class="python">from __future__ import annotations
 from pathlib import Path
+import re
 
 ###########################################################
 # Read sam
@@ -91,7 +92,43 @@ def check_sam_format(sam: list[list]):
 
 ###########################################################
 # Remove undesired reads
-###########################################################</code></pre>
+###########################################################
+
+
+def remove_softclips(sam: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;_summary_
+
+    Args:
+        sam (list[list]): _description_
+
+    Returns:
+        list[list]: _description_
+    &#34;&#34;&#34;
+    sam_list = []
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            sam_list.append(alignment)
+            continue
+        cigar = alignment[5]
+        if &#34;S&#34; not in cigar:
+            sam_list.append(alignment)
+            continue
+        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
+        if left[:-1].isdigit():
+            left = int(left[:-1])
+            alignment[9] = alignment[9][left:]
+            alignment[10] = alignment[10][left:]
+        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
+        if right[:-1].isdigit():
+            right = int(right[:-1])
+            alignment[9] = alignment[9][:-right]
+            alignment[10] = alignment[10][:-right]
+        sam_list.append(alignment)
+    return sam_list
+
+
+def remove_overlapped(sam: list[list]) -&gt; list[list]:
+    pass</code></pre>
 </details>
 </section>
 <section>
@@ -197,6 +234,70 @@ def check_sam_format(sam: list[list]):
     return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
 </details>
 </dd>
+<dt id="mids.preprocess.remove_overlapped"><code class="name flex">
+<span>def <span class="ident">remove_overlapped</span></span>(<span>sam: list[list]) ‑> list[list]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_overlapped(sam: list[list]) -&gt; list[list]:
+    pass</code></pre>
+</details>
+</dd>
+<dt id="mids.preprocess.remove_softclips"><code class="name flex">
+<span>def <span class="ident">remove_softclips</span></span>(<span>sam: list[list]) ‑> list[list]</span>
+</code></dt>
+<dd>
+<div class="desc"><p><em>summary</em></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd><em>description</em></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[list]</code></dt>
+<dd><em>description</em></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_softclips(sam: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;_summary_
+
+    Args:
+        sam (list[list]): _description_
+
+    Returns:
+        list[list]: _description_
+    &#34;&#34;&#34;
+    sam_list = []
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            sam_list.append(alignment)
+            continue
+        cigar = alignment[5]
+        if &#34;S&#34; not in cigar:
+            sam_list.append(alignment)
+            continue
+        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
+        if left[:-1].isdigit():
+            left = int(left[:-1])
+            alignment[9] = alignment[9][left:]
+            alignment[10] = alignment[10][left:]
+        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
+        if right[:-1].isdigit():
+            right = int(right[:-1])
+            alignment[9] = alignment[9][:-right]
+            alignment[10] = alignment[10][:-right]
+        sam_list.append(alignment)
+    return sam_list</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -214,11 +315,13 @@ def check_sam_format(sam: list[list]):
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="mids.preprocess.check_alignments" href="#mids.preprocess.check_alignments">check_alignments</a></code></li>
 <li><code><a title="mids.preprocess.check_headers" href="#mids.preprocess.check_headers">check_headers</a></code></li>
 <li><code><a title="mids.preprocess.check_sam_format" href="#mids.preprocess.check_sam_format">check_sam_format</a></code></li>
 <li><code><a title="mids.preprocess.read_sam" href="#mids.preprocess.read_sam">read_sam</a></code></li>
+<li><code><a title="mids.preprocess.remove_overlapped" href="#mids.preprocess.remove_overlapped">remove_overlapped</a></code></li>
+<li><code><a title="mids.preprocess.remove_softclips" href="#mids.preprocess.remove_softclips">remove_softclips</a></code></li>
 </ul>
 </li>
 </ul>
