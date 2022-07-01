@@ -27,8 +27,72 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from __future__ import annotations
-
+from pathlib import Path
 import re
+
+###########################################################
+# Read sam
+###########################################################
+
+
+def read_sam(path_of_sam: str) -&gt; list[list]:
+    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
+    return [s.split(&#34;\t&#34;) for s in sam]
+
+
+###########################################################
+# Check sam format
+###########################################################
+
+
+def check_headers(sam: list[list]):
+    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
+
+    Args:
+        sam (list[list]): a list of lists of SAM format
+
+    &#34;&#34;&#34;
+    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
+    if not sqheaders:
+        raise AttributeError(&#34;Input does not have @SQ header&#34;)
+
+
+def check_alignments(sam: list[list]):
+    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
+
+    Args:
+        sam (list[list]): a list of lists of SAM format including CS tag
+    &#34;&#34;&#34;
+    is_alignment = False
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            continue
+        is_alignment = True
+        if len(alignment) &lt; 10:
+            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
+        if alignment[2] == &#34;*&#34;:
+            continue
+        idx_cstag = -1
+        for i, a in enumerate(alignment):
+            if a.startswith(&#34;cs:Z:=&#34;):
+                idx_cstag = i
+                break
+        if idx_cstag == -1:
+            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
+        if &#34;~&#34; in alignment[idx_cstag]:
+            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+    if not is_alignment:
+        raise AttributeError(&#34;No alignment information&#34;)
+
+
+def check_sam_format(sam: list[list]):
+    check_headers(sam)
+    check_alignments(sam)
+
+
+###########################################################
+# Format headers and alignments
+###########################################################
 
 
 def extract_sqheaders(sam: list[list]) -&gt; dict[str, int]:
@@ -48,24 +112,6 @@ def extract_sqheaders(sam: list[list]) -&gt; dict[str, int]:
         ln = sn_ln[1].replace(&#34;LN:&#34;, &#34;&#34;)
         SNLN.update({sn: int(ln)})
     return SNLN
-
-
-# def append_reflen(sam: list[list]) -&gt; list[dict]:
-#     &#34;&#34;&#34;Append reference sequence length
-
-#     Args:
-#         sam (list[list]): a list of lists of SAM format including CS tag
-
-#     Returns:
-#         list[list]: alignments appended LN named as &#34;RLEN&#34;
-#     &#34;&#34;&#34;
-#     headers = extract_headers(sam)
-#     for i, alignment in enumerate(sam):
-#         if &#34;@&#34; in alignment[0]:
-#             continue
-#         RNAME = alignment[2]
-#         sam[i].append(headers[RNAME])
-#     return sam
 
 
 def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
@@ -91,12 +137,49 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
             FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
+            CIGAR=alignment[5],
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
         aligns.append(samdict)
     aligns = sorted(aligns, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
-    return aligns</code></pre>
+    return aligns
+
+
+###########################################################
+# Remove undesired reads
+###########################################################
+
+
+def remove_softclips(sam: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;_summary_
+
+    Args:
+        sam (list[list]): _description_
+
+    Returns:
+        list[list]: _description_
+    &#34;&#34;&#34;
+    sam_list = []
+    for alignment in sam:
+        cigar = alignment[&#34;CIGAR&#34;]
+        if &#34;S&#34; not in cigar:
+            sam_list.append(alignment)
+            continue
+        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
+        if left[:-1].isdigit():
+            left = int(left[:-1])
+            alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
+        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
+        if right[:-1].isdigit():
+            right = int(right[:-1])
+            alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
+        sam_list.append(alignment)
+    return sam_list
+
+
+def remove_overlapped(sam: list[list]) -&gt; list[list]:
+    pass</code></pre>
 </details>
 </section>
 <section>
@@ -106,6 +189,88 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="mids.format.check_alignments"><code class="name flex">
+<span>def <span class="ident">check_alignments</span></span>(<span>sam: list[list])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check alignments are mapped and have long-formatted cs tag</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>a list of lists of SAM format including CS tag</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_alignments(sam: list[list]):
+    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
+
+    Args:
+        sam (list[list]): a list of lists of SAM format including CS tag
+    &#34;&#34;&#34;
+    is_alignment = False
+    for alignment in sam:
+        if &#34;@&#34; in alignment[0]:
+            continue
+        is_alignment = True
+        if len(alignment) &lt; 10:
+            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
+        if alignment[2] == &#34;*&#34;:
+            continue
+        idx_cstag = -1
+        for i, a in enumerate(alignment):
+            if a.startswith(&#34;cs:Z:=&#34;):
+                idx_cstag = i
+                break
+        if idx_cstag == -1:
+            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
+        if &#34;~&#34; in alignment[idx_cstag]:
+            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+    if not is_alignment:
+        raise AttributeError(&#34;No alignment information&#34;)</code></pre>
+</details>
+</dd>
+<dt id="mids.format.check_headers"><code class="name flex">
+<span>def <span class="ident">check_headers</span></span>(<span>sam: list[list])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check headers containing SN (Reference sequence name) and LN (Reference sequence length)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>a list of lists of SAM format</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_headers(sam: list[list]):
+    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
+
+    Args:
+        sam (list[list]): a list of lists of SAM format
+
+    &#34;&#34;&#34;
+    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
+    if not sqheaders:
+        raise AttributeError(&#34;Input does not have @SQ header&#34;)</code></pre>
+</details>
+</dd>
+<dt id="mids.format.check_sam_format"><code class="name flex">
+<span>def <span class="ident">check_sam_format</span></span>(<span>sam: list[list])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_sam_format(sam: list[list]):
+    check_headers(sam)
+    check_alignments(sam)</code></pre>
+</details>
+</dd>
 <dt id="mids.format.dictionarize_sam"><code class="name flex">
 <span>def <span class="ident">dictionarize_sam</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
 </code></dt>
@@ -148,6 +313,7 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
             FLAG=int(alignment[1]),
             RNAME=alignment[2],
             POS=int(alignment[3]),
+            CIGAR=alignment[5],
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
@@ -194,6 +360,79 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
     return SNLN</code></pre>
 </details>
 </dd>
+<dt id="mids.format.read_sam"><code class="name flex">
+<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str) ‑> list[list]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_sam(path_of_sam: str) -&gt; list[list]:
+    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
+    return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
+</details>
+</dd>
+<dt id="mids.format.remove_overlapped"><code class="name flex">
+<span>def <span class="ident">remove_overlapped</span></span>(<span>sam: list[list]) ‑> list[list]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_overlapped(sam: list[list]) -&gt; list[list]:
+    pass</code></pre>
+</details>
+</dd>
+<dt id="mids.format.remove_softclips"><code class="name flex">
+<span>def <span class="ident">remove_softclips</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<div class="desc"><p><em>summary</em></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd><em>description</em></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[list]</code></dt>
+<dd><em>description</em></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_softclips(sam: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;_summary_
+
+    Args:
+        sam (list[list]): _description_
+
+    Returns:
+        list[list]: _description_
+    &#34;&#34;&#34;
+    sam_list = []
+    for alignment in sam:
+        cigar = alignment[&#34;CIGAR&#34;]
+        if &#34;S&#34; not in cigar:
+            sam_list.append(alignment)
+            continue
+        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
+        if left[:-1].isdigit():
+            left = int(left[:-1])
+            alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
+        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
+        if right[:-1].isdigit():
+            right = int(right[:-1])
+            alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
+        sam_list.append(alignment)
+    return sam_list</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -211,9 +450,15 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="mids.format.check_alignments" href="#mids.format.check_alignments">check_alignments</a></code></li>
+<li><code><a title="mids.format.check_headers" href="#mids.format.check_headers">check_headers</a></code></li>
+<li><code><a title="mids.format.check_sam_format" href="#mids.format.check_sam_format">check_sam_format</a></code></li>
 <li><code><a title="mids.format.dictionarize_sam" href="#mids.format.dictionarize_sam">dictionarize_sam</a></code></li>
 <li><code><a title="mids.format.extract_sqheaders" href="#mids.format.extract_sqheaders">extract_sqheaders</a></code></li>
+<li><code><a title="mids.format.read_sam" href="#mids.format.read_sam">read_sam</a></code></li>
+<li><code><a title="mids.format.remove_overlapped" href="#mids.format.remove_overlapped">remove_overlapped</a></code></li>
+<li><code><a title="mids.format.remove_softclips" href="#mids.format.remove_softclips">remove_softclips</a></code></li>
 </ul>
 </li>
 </ul>
