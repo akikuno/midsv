@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.mids import convert, preprocess, format
+from src.mids import convert, format
 from importlib import reload
 
 reload(convert)
@@ -82,7 +82,7 @@ def test_to_string():
 
 def test_to_qscore_with_indel_adjustment():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
-    sam = preprocess.read_sam(str(sampath))
+    sam = format.read_sam(str(sampath))
     sam_dict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(sam_dict):
         sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
