@@ -28,23 +28,27 @@ def join(sam: list[dict]) -> list[dict]:
                     strand_first = 0
                 else:
                     strand_first = 1
+                continue
+            # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
+                strand = 0
             else:
-                # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-                if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
-                    strand = 0
-                else:
-                    strand = 1
-                if strand_first != strand:
-                    alignment["MIDS"] = alignment["MIDS"].lower()
-                # 3. Fill in the gap between the first read and the next read with a D (deletion)
-                previous_end = alignments[i - 1]["POS"] - 1
-                previous_end += len(alignments[i - 1]["MIDS"].split(","))
-                current_start = alignments[i]["POS"] - 1
-                gap = current_start - previous_end
-                sam_dict["MIDS"] += ",D" * gap
-                sam_dict["QSCORE"] += ",-1" * gap
-                # 4. Update sam_dict
-                sam_dict["MIDS"] += "," + alignment["MIDS"]
-                sam_dict["QSCORE"] += "," + alignment["QSCORE"]
+                strand = 1
+            if strand_first != strand:
+                alignment["MIDS"] = alignment["MIDS"].lower()
+            # 3. Fill in the gap between the first read and the next read with a D (deletion)
+            previous_end = alignments[i - 1]["POS"] - 1
+            previous_end += len(alignments[i - 1]["MIDS"].split(","))
+            current_start = alignments[i]["POS"] - 1
+            gap = current_start - previous_end
+            sam_dict["MIDS"] += ",D" * gap
+            sam_dict["QSCORE"] += ",-1" * gap
+            # 4. Update sam_dict
+            sam_dict["MIDS"] += "," + alignment["MIDS"]
+            sam_dict["QSCORE"] += "," + alignment["QSCORE"]
         sam_joined.append(sam_dict)
     return sam_joined
+
+
+def pad(sam: list[dict], sqheaders: dict) -> list[dict]:
+    pass

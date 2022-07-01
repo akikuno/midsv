@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
+import re
 
 ###########################################################
 # Read sam
@@ -65,3 +66,38 @@ def check_sam_format(sam: list[list]):
 # Remove undesired reads
 ###########################################################
 
+
+def remove_softclips(sam: list[list]) -> list[list]:
+    """_summary_
+
+    Args:
+        sam (list[list]): _description_
+
+    Returns:
+        list[list]: _description_
+    """
+    sam_list = []
+    for alignment in sam:
+        if "@" in alignment[0]:
+            sam_list.append(alignment)
+            continue
+        cigar = alignment[5]
+        if "S" not in cigar:
+            sam_list.append(alignment)
+            continue
+        left = re.sub(r"^([0-9]+S).*", r"\1", cigar)
+        if left[:-1].isdigit():
+            left = int(left[:-1])
+            alignment[9] = alignment[9][left:]
+            alignment[10] = alignment[10][left:]
+        right = re.sub(r".*([0-9]+S$)", r"\1", cigar)
+        if right[:-1].isdigit():
+            right = int(right[:-1])
+            alignment[9] = alignment[9][:-right]
+            alignment[10] = alignment[10][:-right]
+        sam_list.append(alignment)
+    return sam_list
+
+
+def remove_overlapped(sam: list[list]) -> list[list]:
+    pass

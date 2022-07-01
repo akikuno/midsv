@@ -30,3 +30,16 @@ def test_check_alignments_splicing():
         preprocess.check_sam_format(sam)
     assert str(excinfo.value) == "Spliced long reads are currently not supported"
 
+
+from importlib import reload
+
+reload(preprocess)
+
+
+def test_remove_softclips():
+    path = Path("tests", "data", "softclip", "softclip_cslong.sam")
+    sam = preprocess.read_sam(str(path))
+    test = preprocess.remove_softclips(sam)
+    answer = Path("tests", "data", "softclip", "answer_removed.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
