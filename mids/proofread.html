@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids.join API documentation</title>
+<title>mids.proofread API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mids.join</code></h1>
+<h1 class="title">Module <code>mids.proofread</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -27,10 +27,55 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from __future__ import annotations
+from itertools import groupby
+from copy import deepcopy
 
 
-def inversion(sam: list[dict]) -&gt; list[dict]:
-    pass</code></pre>
+def join(sam: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;Join splitted reads including large deletion or inversion.
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+
+    Returns:
+        list[dict]: SAM with joined splitted reads to single read
+    &#34;&#34;&#34;
+    sam_sorted = sorted(sam, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
+    sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
+    sam_joined = []
+    for _, alignments in sam_groupby:
+        alignments = list(alignments)
+        if len(alignments) == 1:
+            sam_joined.append(alignments)
+            continue
+        for i, alignment in enumerate(alignments):
+            # 1. Determine the strand (strand_first) of the first read
+            if i == 0:
+                sam_dict = deepcopy(alignment)
+                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                    strand_first = 0
+                else:
+                    strand_first = 1
+            else:
+                # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                    strand = 0
+                else:
+                    strand = 1
+                if strand_first != strand:
+                    alignment[&#34;MIDS&#34;] = alignment[&#34;MIDS&#34;].lower()
+                # 3. Fill in the gap between the first read and the next read with a D (deletion)
+                previous_end = alignments[i - 1][&#34;POS&#34;] - 1
+                previous_end += len(alignments[i - 1][&#34;MIDS&#34;].split(&#34;,&#34;))
+                current_start = alignments[i][&#34;POS&#34;] - 1
+                gap = current_start - previous_end
+                sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
+                sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
+                # 4. Update sam_dict
+                sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
+                sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+        sam_joined.append(sam_dict)
+    return sam_joined</code></pre>
 </details>
 </section>
 <section>
@@ -40,17 +85,70 @@ def inversion(sam: list[dict]) -&gt; list[dict]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.join.inversion"><code class="name flex">
-<span>def <span class="ident">inversion</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
+<dt id="mids.proofread.join"><code class="name flex">
+<span>def <span class="ident">join</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Join splitted reads including large deletion or inversion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dd>dictionarized SAM</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict]</code></dt>
+<dd>SAM with joined splitted reads to single read</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def inversion(sam: list[dict]) -&gt; list[dict]:
-    pass</code></pre>
+<pre><code class="python">def join(sam: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;Join splitted reads including large deletion or inversion.
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+
+    Returns:
+        list[dict]: SAM with joined splitted reads to single read
+    &#34;&#34;&#34;
+    sam_sorted = sorted(sam, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
+    sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
+    sam_joined = []
+    for _, alignments in sam_groupby:
+        alignments = list(alignments)
+        if len(alignments) == 1:
+            sam_joined.append(alignments)
+            continue
+        for i, alignment in enumerate(alignments):
+            # 1. Determine the strand (strand_first) of the first read
+            if i == 0:
+                sam_dict = deepcopy(alignment)
+                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                    strand_first = 0
+                else:
+                    strand_first = 1
+            else:
+                # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                    strand = 0
+                else:
+                    strand = 1
+                if strand_first != strand:
+                    alignment[&#34;MIDS&#34;] = alignment[&#34;MIDS&#34;].lower()
+                # 3. Fill in the gap between the first read and the next read with a D (deletion)
+                previous_end = alignments[i - 1][&#34;POS&#34;] - 1
+                previous_end += len(alignments[i - 1][&#34;MIDS&#34;].split(&#34;,&#34;))
+                current_start = alignments[i][&#34;POS&#34;] - 1
+                gap = current_start - previous_end
+                sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
+                sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
+                # 4. Update sam_dict
+                sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
+                sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+        sam_joined.append(sam_dict)
+    return sam_joined</code></pre>
 </details>
 </dd>
 </dl>
@@ -71,7 +169,7 @@ def inversion(sam: list[dict]) -&gt; list[dict]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="mids.join.inversion" href="#mids.join.inversion">inversion</a></code></li>
+<li><code><a title="mids.proofread.join" href="#mids.proofread.join">join</a></code></li>
 </ul>
 </li>
 </ul>
