@@ -1,14 +1,13 @@
 from __future__ import annotations
 import re
 from pathlib import Path
-from src.mids import preprocess
 from src.mids import format
 from src.mids import convert
 
 sampath = Path("tests", "data", "inversion", "inv_cslong.sam")
-sam = preprocess.read_sam(str(sampath))
+sam = format.read_sam(str(sampath))
 
-preprocess.check_sam_format(sam)
+format.check_sam_format(sam)
 
 sqheaders = format.extract_sqheaders(sam)
 sam_dict = format.dictionarize_sam(sam)
