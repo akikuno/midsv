@@ -27,24 +27,31 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from __future__ import annotations
-import re
 from pathlib import Path
 from src.mids import format
 from src.mids import convert
+from src.mids import proofread
 
 sampath = Path(&#34;tests&#34;, &#34;data&#34;, &#34;inversion&#34;, &#34;inv_cslong.sam&#34;)
 sam = format.read_sam(str(sampath))
 
 format.check_sam_format(sam)
 
+
 sqheaders = format.extract_sqheaders(sam)
-sam_dict = format.dictionarize_sam(sam)
+samdict = format.dictionarize_sam(sam)
 
-for i, alignment in enumerate(sam_dict):
-    sam_dict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
+samdict = format.remove_softclips(samdict)
+samdict = format.remove_overlapped(samdict)
 
-for i, alignment in enumerate(sam_dict):
-    sam_dict[i][&#34;QSCORE&#34;] = convert.to_qscore_with_indel_compensation(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
+for i, alignment in enumerate(samdict):
+    samdict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
+
+for i, alignment in enumerate(samdict):
+    samdict[i][&#34;QSCORE&#34;] = convert.to_qscore_with_indel_compensation(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
+
+samdict_polished = proofread.join(samdict)
+samdict_polished = proofread.pad(samdict_polished, sqheaders)
 
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor
