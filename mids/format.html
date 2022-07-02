@@ -152,14 +152,20 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
 ###########################################################
 
 
+def split_cigar(cigar: str) -&gt; list[str]:
+    cigar_iter = iter(re.split(r&#34;([MIDNSHPX=])&#34;, cigar))
+    cigar_splitted = [i + op for i, op in zip(cigar_iter, cigar_iter)]
+    return cigar_splitted
+
+
 def remove_softclips(sam: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;_summary_
+    &#34;&#34;&#34;Remove softclip quality score from QUAL.
 
     Args:
-        sam (list[list]): _description_
+        sam (list[list]): disctionalized SAM
 
     Returns:
-        list[list]: _description_
+        list[list]: disctionalized SAM with trimmed softclips in QUAL
     &#34;&#34;&#34;
     sam_list = []
     for alignment in sam:
@@ -167,12 +173,12 @@ def remove_softclips(sam: list[dict]) -&gt; list[dict]:
         if &#34;S&#34; not in cigar:
             sam_list.append(alignment)
             continue
-        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
-        if left[:-1].isdigit():
+        cigar_split = split_cigar(cigar)
+        left, right = cigar_split[0], cigar_split[-1]
+        if &#34;S&#34; in left:
             left = int(left[:-1])
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
-        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
-        if right[:-1].isdigit():
+        if &#34;S&#34; in right:
             right = int(right[:-1])
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
         sam_list.append(alignment)
@@ -180,6 +186,14 @@ def remove_softclips(sam: list[dict]) -&gt; list[dict]:
 
 
 def remove_overlapped(samdict: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;Remove overlapped reads within the same QNAME.
+
+    Args:
+        sam (list[list]): disctionalized SAM
+
+    Returns:
+        list[list]: disctionalized SAM with removed overlaped reads
+    &#34;&#34;&#34;
     samdict.sort(key=lambda x: x[&#34;QNAME&#34;])
     sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
     sam_nonoverlapped = []
@@ -194,10 +208,10 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
                 break
             alignment_length = 0
             cigar = alignment[&#34;CIGAR&#34;]
-            cigar_split = re.split(r&#34;([A-Z])&#34;, cigar)
-            for i, cigar in enumerate(cigar_split):
-                if cigar == &#34;M&#34; or cigar == &#34;D&#34;:
-                    alignment_length += int(cigar_split[i - 1])
+            cigar_split = split_cigar(cigar)
+            for cig in cigar_split:
+                if &#34;M&#34; in cig or &#34;D&#34; in cig:
+                    alignment_length += int(cig[:-1])
             end_of_previous_read = start_of_current_read + alignment_length - 1
         if not is_overraped:
             sam_nonoverlapped += alignments
@@ -400,12 +414,30 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <span>def <span class="ident">remove_overlapped</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Remove overlapped reads within the same QNAME.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>disctionalized SAM</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[list]</code></dt>
+<dd>disctionalized SAM with removed overlaped reads</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def remove_overlapped(samdict: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;Remove overlapped reads within the same QNAME.
+
+    Args:
+        sam (list[list]): disctionalized SAM
+
+    Returns:
+        list[list]: disctionalized SAM with removed overlaped reads
+    &#34;&#34;&#34;
     samdict.sort(key=lambda x: x[&#34;QNAME&#34;])
     sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
     sam_nonoverlapped = []
@@ -420,10 +452,10 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
                 break
             alignment_length = 0
             cigar = alignment[&#34;CIGAR&#34;]
-            cigar_split = re.split(r&#34;([A-Z])&#34;, cigar)
-            for i, cigar in enumerate(cigar_split):
-                if cigar == &#34;M&#34; or cigar == &#34;D&#34;:
-                    alignment_length += int(cigar_split[i - 1])
+            cigar_split = split_cigar(cigar)
+            for cig in cigar_split:
+                if &#34;M&#34; in cig or &#34;D&#34; in cig:
+                    alignment_length += int(cig[:-1])
             end_of_previous_read = start_of_current_read + alignment_length - 1
         if not is_overraped:
             sam_nonoverlapped += alignments
@@ -434,29 +466,29 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <span>def <span class="ident">remove_softclips</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
-<div class="desc"><p><em>summary</em></p>
+<div class="desc"><p>Remove softclip quality score from QUAL.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
-<dd><em>description</em></dd>
+<dd>disctionalized SAM</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[list]</code></dt>
-<dd><em>description</em></dd>
+<dd>disctionalized SAM with trimmed softclips in QUAL</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def remove_softclips(sam: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;_summary_
+    &#34;&#34;&#34;Remove softclip quality score from QUAL.
 
     Args:
-        sam (list[list]): _description_
+        sam (list[list]): disctionalized SAM
 
     Returns:
-        list[list]: _description_
+        list[list]: disctionalized SAM with trimmed softclips in QUAL
     &#34;&#34;&#34;
     sam_list = []
     for alignment in sam:
@@ -464,16 +496,31 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
         if &#34;S&#34; not in cigar:
             sam_list.append(alignment)
             continue
-        left = re.sub(r&#34;^([0-9]+S).*&#34;, r&#34;\1&#34;, cigar)
-        if left[:-1].isdigit():
+        cigar_split = split_cigar(cigar)
+        left, right = cigar_split[0], cigar_split[-1]
+        if &#34;S&#34; in left:
             left = int(left[:-1])
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
-        right = re.sub(r&#34;.*([0-9]+S$)&#34;, r&#34;\1&#34;, cigar)
-        if right[:-1].isdigit():
+        if &#34;S&#34; in right:
             right = int(right[:-1])
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
         sam_list.append(alignment)
     return sam_list</code></pre>
+</details>
+</dd>
+<dt id="mids.format.split_cigar"><code class="name flex">
+<span>def <span class="ident">split_cigar</span></span>(<span>cigar: str) ‑> list[str]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def split_cigar(cigar: str) -&gt; list[str]:
+    cigar_iter = iter(re.split(r&#34;([MIDNSHPX=])&#34;, cigar))
+    cigar_splitted = [i + op for i, op in zip(cigar_iter, cigar_iter)]
+    return cigar_splitted</code></pre>
 </details>
 </dd>
 </dl>
@@ -502,6 +549,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <li><code><a title="mids.format.read_sam" href="#mids.format.read_sam">read_sam</a></code></li>
 <li><code><a title="mids.format.remove_overlapped" href="#mids.format.remove_overlapped">remove_overlapped</a></code></li>
 <li><code><a title="mids.format.remove_softclips" href="#mids.format.remove_softclips">remove_softclips</a></code></li>
+<li><code><a title="mids.format.split_cigar" href="#mids.format.split_cigar">split_cigar</a></code></li>
 </ul>
 </li>
 </ul>
