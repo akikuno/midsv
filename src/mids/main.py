@@ -1,22 +1,29 @@
 from __future__ import annotations
-import re
 from pathlib import Path
 from src.mids import format
 from src.mids import convert
+from src.mids import proofread
 
 sampath = Path("tests", "data", "inversion", "inv_cslong.sam")
 sam = format.read_sam(str(sampath))
 
 format.check_sam_format(sam)
 
+
 sqheaders = format.extract_sqheaders(sam)
-sam_dict = format.dictionarize_sam(sam)
+samdict = format.dictionarize_sam(sam)
 
-for i, alignment in enumerate(sam_dict):
-    sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+samdict = format.remove_softclips(samdict)
+samdict = format.remove_overlapped(samdict)
 
-for i, alignment in enumerate(sam_dict):
-    sam_dict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
+for i, alignment in enumerate(samdict):
+    samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+
+for i, alignment in enumerate(samdict):
+    samdict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
+
+samdict_polished = proofread.join(samdict)
+samdict_polished = proofread.pad(samdict_polished, sqheaders)
 
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor

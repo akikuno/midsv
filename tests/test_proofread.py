@@ -8,6 +8,15 @@ from importlib import reload
 reload(proofread)
 
 
+def test_join_control():
+    sam = Path("tests", "data", "join", "test_control.txt").read_text()
+    sam = eval(sam)
+    test = proofread.join(sam)
+    answer = Path("tests", "data", "join", "answer_control.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
 def test_join_inversion():
     sam = Path("tests", "data", "join", "test_inv.txt").read_text()
     sam = eval(sam)

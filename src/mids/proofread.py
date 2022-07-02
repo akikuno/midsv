@@ -18,7 +18,7 @@ def join(sam: list[dict]) -> list[dict]:
     for _, alignments in sam_groupby:
         alignments = list(alignments)
         if len(alignments) == 1:
-            sam_joined.append(alignments)
+            sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
             # 1. Determine the strand (strand_first) of the first read
