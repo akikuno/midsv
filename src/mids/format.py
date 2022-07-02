@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 import re
+from itertools import groupby
 
 ###########################################################
 # Read sam
@@ -150,5 +151,26 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
     return sam_list
 
 
-def remove_overlapped(sam: list[list]) -> list[list]:
-    pass
+def remove_overlapped(samdict: list[list]) -> list[list]:
+    samdict.sort(key=lambda x: x["QNAME"])
+    sam_groupby = groupby(samdict, lambda x: x["QNAME"])
+    sam_nonoverlapped = []
+    for _, alignments in sam_groupby:
+        alignments = sorted(alignments, key=lambda x: x["POS"])
+        is_overraped = False
+        end_of_previous_read = -1
+        for alignment in alignments:
+            start_of_current_read = alignment["POS"]
+            if end_of_previous_read > start_of_current_read:
+                is_overraped = True
+                break
+            alignment_length = 0
+            cigar = alignment["CIGAR"]
+            cigar_split = re.split(r"([A-Z])", cigar)
+            for i, cigar in enumerate(cigar_split):
+                if cigar == "M" or cigar == "D":
+                    alignment_length += int(cigar_split[i - 1])
+            end_of_previous_read = start_of_current_read + alignment_length - 1
+        if not is_overraped:
+            sam_nonoverlapped += alignments
+    return sam_nonoverlapped

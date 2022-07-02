@@ -86,7 +86,17 @@ def test_dictionarize_sam_inversion():
 def test_remove_softclips():
     path = Path("tests", "data", "softclip", "softclip_cslong.sam")
     sam = format.read_sam(str(path))
-    test = format.dictionarize_sam(sam)
-    test = format.remove_softclips(test)
+    samdict = format.dictionarize_sam(sam)
+    test = format.remove_softclips(samdict)
     for t in test:
         assert len(t["QUAL"]) == 100
+
+
+def test_remove_overlapped():
+    path = Path("tests", "data", "overlap", "overlapped.sam")
+    sam = format.read_sam(str(path))
+    samdict = format.dictionarize_sam(sam)
+    test = format.remove_overlapped(samdict)
+    for t in test:
+        assert not t["QNAME"].startswith("overlap")
+
