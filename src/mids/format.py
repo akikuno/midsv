@@ -124,14 +124,20 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
 ###########################################################
 
 
+def split_cigar(cigar: str) -> list[str]:
+    cigar_iter = iter(re.split(r"([MIDNSHPX=])", cigar))
+    cigar_splitted = [i + op for i, op in zip(cigar_iter, cigar_iter)]
+    return cigar_splitted
+
+
 def remove_softclips(sam: list[dict]) -> list[dict]:
-    """_summary_
+    """Remove softclip quality score from QUAL.
 
     Args:
-        sam (list[list]): _description_
+        sam (list[list]): disctionalized SAM
 
     Returns:
-        list[list]: _description_
+        list[list]: disctionalized SAM with trimmed softclips in QUAL
     """
     sam_list = []
     for alignment in sam:
@@ -139,12 +145,12 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
         if "S" not in cigar:
             sam_list.append(alignment)
             continue
-        left = re.sub(r"^([0-9]+S).*", r"\1", cigar)
-        if left[:-1].isdigit():
+        cigar_split = split_cigar(cigar)
+        left, right = cigar_split[0], cigar_split[-1]
+        if "S" in left:
             left = int(left[:-1])
             alignment["QUAL"] = alignment["QUAL"][left:]
-        right = re.sub(r".*([0-9]+S$)", r"\1", cigar)
-        if right[:-1].isdigit():
+        if "S" in right:
             right = int(right[:-1])
             alignment["QUAL"] = alignment["QUAL"][:-right]
         sam_list.append(alignment)
@@ -152,6 +158,14 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
 
 
 def remove_overlapped(samdict: list[list]) -> list[list]:
+    """Remove overlapped reads within the same QNAME.
+
+    Args:
+        sam (list[list]): disctionalized SAM
+
+    Returns:
+        list[list]: disctionalized SAM with removed overlaped reads
+    """
     samdict.sort(key=lambda x: x["QNAME"])
     sam_groupby = groupby(samdict, lambda x: x["QNAME"])
     sam_nonoverlapped = []
@@ -166,10 +180,10 @@ def remove_overlapped(samdict: list[list]) -> list[list]:
                 break
             alignment_length = 0
             cigar = alignment["CIGAR"]
-            cigar_split = re.split(r"([A-Z])", cigar)
-            for i, cigar in enumerate(cigar_split):
-                if cigar == "M" or cigar == "D":
-                    alignment_length += int(cigar_split[i - 1])
+            cigar_split = split_cigar(cigar)
+            for cig in cigar_split:
+                if "M" in cig or "D" in cig:
+                    alignment_length += int(cig[:-1])
             end_of_previous_read = start_of_current_read + alignment_length - 1
         if not is_overraped:
             sam_nonoverlapped += alignments
