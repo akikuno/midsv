@@ -29,6 +29,7 @@
 <pre><code class="python">from __future__ import annotations
 from pathlib import Path
 import re
+from itertools import groupby
 
 ###########################################################
 # Read sam
@@ -178,8 +179,29 @@ def remove_softclips(sam: list[dict]) -&gt; list[dict]:
     return sam_list
 
 
-def remove_overlapped(sam: list[list]) -&gt; list[list]:
-    pass</code></pre>
+def remove_overlapped(samdict: list[list]) -&gt; list[list]:
+    samdict.sort(key=lambda x: x[&#34;QNAME&#34;])
+    sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
+    sam_nonoverlapped = []
+    for _, alignments in sam_groupby:
+        alignments = sorted(alignments, key=lambda x: x[&#34;POS&#34;])
+        is_overraped = False
+        end_of_previous_read = -1
+        for alignment in alignments:
+            start_of_current_read = alignment[&#34;POS&#34;]
+            if end_of_previous_read &gt; start_of_current_read:
+                is_overraped = True
+                break
+            alignment_length = 0
+            cigar = alignment[&#34;CIGAR&#34;]
+            cigar_split = re.split(r&#34;([A-Z])&#34;, cigar)
+            for i, cigar in enumerate(cigar_split):
+                if cigar == &#34;M&#34; or cigar == &#34;D&#34;:
+                    alignment_length += int(cigar_split[i - 1])
+            end_of_previous_read = start_of_current_read + alignment_length - 1
+        if not is_overraped:
+            sam_nonoverlapped += alignments
+    return sam_nonoverlapped</code></pre>
 </details>
 </section>
 <section>
@@ -375,7 +397,7 @@ def remove_overlapped(sam: list[list]) -&gt; list[list]:
 </details>
 </dd>
 <dt id="mids.format.remove_overlapped"><code class="name flex">
-<span>def <span class="ident">remove_overlapped</span></span>(<span>sam: list[list]) ‑> list[list]</span>
+<span>def <span class="ident">remove_overlapped</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -383,8 +405,29 @@ def remove_overlapped(sam: list[list]) -&gt; list[list]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_overlapped(sam: list[list]) -&gt; list[list]:
-    pass</code></pre>
+<pre><code class="python">def remove_overlapped(samdict: list[list]) -&gt; list[list]:
+    samdict.sort(key=lambda x: x[&#34;QNAME&#34;])
+    sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
+    sam_nonoverlapped = []
+    for _, alignments in sam_groupby:
+        alignments = sorted(alignments, key=lambda x: x[&#34;POS&#34;])
+        is_overraped = False
+        end_of_previous_read = -1
+        for alignment in alignments:
+            start_of_current_read = alignment[&#34;POS&#34;]
+            if end_of_previous_read &gt; start_of_current_read:
+                is_overraped = True
+                break
+            alignment_length = 0
+            cigar = alignment[&#34;CIGAR&#34;]
+            cigar_split = re.split(r&#34;([A-Z])&#34;, cigar)
+            for i, cigar in enumerate(cigar_split):
+                if cigar == &#34;M&#34; or cigar == &#34;D&#34;:
+                    alignment_length += int(cigar_split[i - 1])
+            end_of_previous_read = start_of_current_read + alignment_length - 1
+        if not is_overraped:
+            sam_nonoverlapped += alignments
+    return sam_nonoverlapped</code></pre>
 </details>
 </dd>
 <dt id="mids.format.remove_softclips"><code class="name flex">
