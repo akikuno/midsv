@@ -50,5 +50,29 @@ def join(sam: list[dict]) -> list[dict]:
     return sam_joined
 
 
-def pad(sam: list[dict], sqheaders: dict) -> list[dict]:
+def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
+    """Padding left and right flanks as "=" in MIDS, "-1" in QUAL
+
+    Args:
+        sam (list[dict]): _description_
+        sqheaders (dict): _description_
+
+    Returns:
+        list[dict]: _description_
+    """
+    samdict_padding = []
+    for alignment in samdict:
+        reflength = sqheaders[alignment["RNAME"]]
+        leftpad = max(0, alignment["POS"] - 1)
+        rightpad = reflength - (len(alignment["MIDS"].split(",")) + leftpad)
+        rightpad = max(0, rightpad)
+        leftpad_mids, rightpad_mids = "=," * leftpad, ",=" * rightpad
+        leftpad_qscore, rightpad_qscore = "-1," * leftpad, ",-1" * rightpad
+        alignment["MIDS"] = leftpad_mids + alignment["MIDS"] + rightpad_mids
+        alignment["QSCORE"] = leftpad_qscore + alignment["QSCORE"] + rightpad_qscore
+        samdict_padding.append(alignment)
+    return samdict_padding
+
+
+def trim(sam: list[dict], sqheaders: dict) -> list[dict]:
     pass
