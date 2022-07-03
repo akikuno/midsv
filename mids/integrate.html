@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids API documentation</title>
-<meta name="description" content="mids …" />
+<title>mids.integrate API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,117 +19,106 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>mids</code></h1>
+<h1 class="title">Module <code>mids.integrate</code></h1>
 </header>
 <section id="section-intro">
-<h1 id="mids">mids</h1>
-<p><code><a title="mids" href="#mids">mids</a></code> is a Python module to manipulate MIDS format.</p>
-<p>MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide.<br>
-The details are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec002:~:text=Cas%2Dcutting%20site.-,Preprocessing,-We%20performed%20preprocessing">our paper</a>.
-</p>
-<h2 id="functions">Functions</h2>
-<ul>
-<li><code>mids.convert_from_sam()</code>: convert to mids from a SAM with cs long tag</li>
-<li><code>mids.extract_full_length()</code>: to convert a cs tag from short to long format</li>
-</ul>
-<p>See <a href="https://akikuno.github.io/cstag/cstag/">documentation</a> for more information.</p>
-<h2 id="installation">Installation</h2>
-<p>From <a href="https://pypi.org/project/cstag/">PyPI</a>:</p>
-<pre><code class="language-bash">pip install cstag
-</code></pre>
-<p>From <a href="https://anaconda.org/bioconda/cstag">Bioconda</a>:</p>
-<pre><code class="language-bash">conda config --add channels defaults
-conda config --add channels conda-forge
-conda config --add channels bioconda
-
-conda install cstag
-</code></pre>
-<h2 id="examples">Examples</h2>
-<h3 id="shortenlengthen">Shorten/Lengthen</h3>
-<pre><code class="language-python">import cstag
-
-# Convert a cs tag from long to short
-cs = &quot;cs:Z:=ACGT*ag=CGT&quot;
-
-cstag.shorten(cs)
-# =&gt; cs:Z::4*ag:3
-
-
-# Convert a cs tag from short to long
-cs = &quot;cs:Z::4*ag:3&quot;
-cigar = &quot;8M&quot;
-seq = &quot;ACGTACGT&quot;
-
-cstag.lengthen(cs, cigar, seq)
-# =&gt; cs:Z:=ACGT*ag=CGT
-</code></pre>
-<h3 id="call-consensus">Call consensus</h3>
-<pre><code class="language-python">import cstag
-
-cs_list = [&quot;cs:Z:=ACGT&quot;, &quot;cs:Z:=AC*gt=T&quot;, &quot;cs:Z:=C*gt=T&quot;, &quot;cs:Z:=C*gt=T&quot;, &quot;cs:Z:=ACT+ccc=T&quot;]
-cigar_list = [&quot;4M&quot;, &quot;4M&quot;, &quot;1S3M&quot;, &quot;3M&quot;, &quot;3M3I1M&quot;]
-pos_list = [1, 1, 1, 2, 1]
-
-cstag.consensus(cs_list, cigar_list, pos_list)
-# =&gt; cs:Z:=AC*gt*T
-</code></pre>
-<h3 id="mask-low-quality-bases-in-a-cs-tag">Mask low-quality bases in a cs tag</h3>
-<pre><code class="language-python">import cstag
-
-cs = &quot;cs:Z:=ACGT*ac+gg-cc=T&quot;
-cigar = &quot;5M2I2D1M&quot;
-qual = &quot;AA!!!!AA&quot;
-phred_threshold = 10
-cstag.mask(cs, cigar, qual, phred_threshold)
-# =&gt; cs:Z:=ACNN*an+ng-cc=T
-</code></pre>
-<h3 id="output-html-report">Output HTML report</h3>
-<pre><code class="language-python">import cstag
-
-cs = &quot;cs:Z:=AC+GGG=T-ACGT*at~gt10cg=GNNN&quot;
-output = &quot;report&quot;
-description = &quot;Example&quot;
-
-cstag.to_html(cs, output, description)
-# =&gt; Output &quot;report.html&quot;
-</code></pre>
-<p>The <code>report.html</code> is :point_down:</p>
-<p><img width="414" alt="example_report" src="https://user-images.githubusercontent.com/15861316/158910398-67f480d2-8742-412a-b528-40e545c46513.png"></p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-.. include:: ../../README.md
-&#34;&#34;&#34;
+<pre><code class="python">from __future__ import annotations
+from src.mids import format
+from src.mids import convert
+from src.mids import proofread
 
-from .integrate import integrate</code></pre>
+
+def integrate(sam: list[list]) -&gt; list[dict]:
+    &#34;&#34;&#34;Integrated function to perform MIDS conversion
+
+    Args:
+        sam (list[list]): Lists ot SAM format
+
+    Returns:
+        list[dict]: Dictionary containing QNAME, RNAME, MIDS, and QSCORE
+    &#34;&#34;&#34;
+
+    format.check_sam_format(sam)
+
+    sqheaders = format.extract_sqheaders(sam)
+    samdict = format.dictionarize_sam(sam)
+
+    samdict = format.remove_softclips(samdict)
+    samdict = format.remove_overlapped(samdict)
+
+    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
+
+    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
+
+    samdict_polished = proofread.join(samdict)
+    samdict_polished = proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = proofread.select(samdict_polished)
+    return samdict_polished</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="mids.convert" href="convert.html">mids.convert</a></code></dt>
+<dt id="mids.integrate.integrate"><code class="name flex">
+<span>def <span class="ident">integrate</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="mids.format" href="format.html">mids.format</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="mids.integrate" href="integrate.html">mids.integrate</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="mids.proofread" href="proofread.html">mids.proofread</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Integrated function to perform MIDS conversion</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dd>Lists ot SAM format</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict]</code></dt>
+<dd>Dictionary containing QNAME, RNAME, MIDS, and QSCORE</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def integrate(sam: list[list]) -&gt; list[dict]:
+    &#34;&#34;&#34;Integrated function to perform MIDS conversion
+
+    Args:
+        sam (list[list]): Lists ot SAM format
+
+    Returns:
+        list[dict]: Dictionary containing QNAME, RNAME, MIDS, and QSCORE
+    &#34;&#34;&#34;
+
+    format.check_sam_format(sam)
+
+    sqheaders = format.extract_sqheaders(sam)
+    samdict = format.dictionarize_sam(sam)
+
+    samdict = format.remove_softclips(samdict)
+    samdict = format.remove_overlapped(samdict)
+
+    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
+
+    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
+
+    samdict_polished = proofread.join(samdict)
+    samdict_polished = proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = proofread.select(samdict_polished)
+    return samdict_polished</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -137,28 +126,17 @@ from .integrate import integrate</code></pre>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#mids">mids</a><ul>
-<li><a href="#functions">Functions</a></li>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#examples">Examples</a><ul>
-<li><a href="#shortenlengthen">Shorten/Lengthen</a></li>
-<li><a href="#call-consensus">Call consensus</a></li>
-<li><a href="#mask-low-quality-bases-in-a-cs-tag">Mask low-quality bases in a cs tag</a></li>
-<li><a href="#output-html-report">Output HTML report</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="mids.convert" href="convert.html">mids.convert</a></code></li>
-<li><code><a title="mids.format" href="format.html">mids.format</a></code></li>
-<li><code><a title="mids.integrate" href="integrate.html">mids.integrate</a></code></li>
-<li><code><a title="mids.proofread" href="proofread.html">mids.proofread</a></code></li>
+<li><code><a title="mids" href="index.html">mids</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="mids.integrate.integrate" href="#mids.integrate.integrate">integrate</a></code></li>
 </ul>
 </li>
 </ul>
