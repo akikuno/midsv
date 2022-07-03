@@ -42,7 +42,7 @@ def test_pad():
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
     test = proofread.pad(samdict, sqheaders)
     for t in test:
         assert len(t["MIDS"].split(",")) == len(t["QSCORE"].split(","))

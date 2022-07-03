@@ -4,22 +4,6 @@ from importlib import reload
 
 reload(convert)
 
-# substitution = Path("tests", "data", "substitution", "sub_cslong.sam").read_text().strip().split("\n")
-# substitution = [s.split("\t") for s in substitution]
-
-# headers = extract.headers(substitution)
-# alignments = extract.alignments(substitution)
-# alignments = format.append_reference_sequence_length(headers, alignments)
-
-# mids_list = []
-# for alignment in alignments:
-#     mids_list.append(convert.cstag_to_mids(alignment["CSTAG"]))
-
-# alignments_with_mids = []
-# for alignment, mids in zip(alignments, mids_list):
-#     alignment["MIDS"] = mids
-#     alignments_with_mids.append(alignment)
-
 ###########################################################
 # MIDS conversion
 ###########################################################
@@ -72,21 +56,13 @@ def test_to_string():
 ###########################################################
 
 
-# def test_ascii_to_qscore():
-#     ascii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJK"
-#     qscore = convert.ascii_to_qscore(ascii)
-#     qscore = qscore.split(",")
-#     for i in range(43):
-#         assert qscore[i] == str(i)
-
-
-def test_to_qscore_with_indel_adjustment():
+def test_qual_to_qscore():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
     sam = format.read_sam(str(sampath))
     sam_dict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(sam_dict):
         sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-        sam_dict[i]["QSCORE"] = convert.to_qscore_with_indel_compensation(alignment["QUAL"], alignment["MIDS"])
+        sam_dict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
     test = sam_dict
     answer = Path("tests", "data", "phredscore", "answer.txt").read_text()
     answer = eval(answer)

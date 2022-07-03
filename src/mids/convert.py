@@ -142,7 +142,7 @@ def ascii_to_phred(ascii: str) -> str:
     return str(ord(ascii) - 33)
 
 
-def to_qscore_with_indel_compensation(qual: str, mids: str) -> str:
+def qual_to_qscore(qual: str, mids: str) -> str:
     """Convert ascii quality to phred score.
     To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
 
