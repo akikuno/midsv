@@ -51,15 +51,6 @@ def test_extract_sqheaders():
     assert test == answer
 
 
-# def test_append_reflen():
-#     sampath = Path("tests", "data", "append_reflen", "query.sam")
-#     sam = format.read_sam(str(sampath))
-#     test = format.append_reflen(sam)
-#     answer = Path("tests", "data", "append_reflen", "answer.txt").read_text()
-#     answer = eval(answer)
-#     assert test == answer
-
-
 def test_dictionarize_sam():
     sampath = Path("tests", "data", "dictionalize_alignments", "sub_cslong.sam")
     sam = format.read_sam(str(sampath))
