@@ -27,26 +27,15 @@
 <p>MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide.<br>
 The details are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec002:~:text=Cas%2Dcutting%20site.-,Preprocessing,-We%20performed%20preprocessing">our paper</a>.
 </p>
-<h2 id="functions">Functions</h2>
-<ul>
-<li><code>mids.convert_from_sam()</code>: convert to mids from a SAM with cs long tag</li>
-<li><code>mids.extract_full_length()</code>: to convert a cs tag from short to long format</li>
-</ul>
-<p>See <a href="https://akikuno.github.io/cstag/cstag/">documentation</a> for more information.</p>
 <h2 id="installation">Installation</h2>
-<p>From <a href="https://pypi.org/project/cstag/">PyPI</a>:</p>
-<pre><code class="language-bash">pip install cstag
+<p>From <a href="https://pypi.org/project/mids/">PyPI</a>:</p>
+<pre><code class="language-bash">pip install mids
 </code></pre>
-<p>From <a href="https://anaconda.org/bioconda/cstag">Bioconda</a>:</p>
-<pre><code class="language-bash">conda config --add channels defaults
-conda config --add channels conda-forge
-conda config --add channels bioconda
-
-conda install cstag
+<p>From <a href="https://anaconda.org/bioconda/mids">Bioconda</a>:</p>
+<pre><code class="language-bash">conda install -c bioconda mids
 </code></pre>
-<h2 id="examples">Examples</h2>
-<h3 id="shortenlengthen">Shorten/Lengthen</h3>
-<pre><code class="language-python">import cstag
+<h2 id="usage">Usage</h2>
+<pre><code class="language-python">import mids
 
 # Convert a cs tag from long to short
 cs = &quot;cs:Z:=ACGT*ag=CGT&quot;
@@ -139,10 +128,8 @@ from .integrate import integrate</code></pre>
 <div class="toc">
 <ul>
 <li><a href="#mids">mids</a><ul>
-<li><a href="#functions">Functions</a></li>
 <li><a href="#installation">Installation</a></li>
-<li><a href="#examples">Examples</a><ul>
-<li><a href="#shortenlengthen">Shorten/Lengthen</a></li>
+<li><a href="#usage">Usage</a><ul>
 <li><a href="#call-consensus">Call consensus</a></li>
 <li><a href="#mask-low-quality-bases-in-a-cs-tag">Mask low-quality bases in a cs tag</a></li>
 <li><a href="#output-html-report">Output HTML report</a></li>
