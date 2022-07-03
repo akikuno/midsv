@@ -64,15 +64,18 @@ def join(sam: list[dict]) -&gt; list[dict]:
                 strand = 1
             if strand_first != strand:
                 alignment[&#34;MIDS&#34;] = alignment[&#34;MIDS&#34;].lower()
+                alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
             # 3. Fill in the gap between the first read and the next read with a D (deletion)
             previous_end = alignments[i - 1][&#34;POS&#34;] - 1
             previous_end += len(alignments[i - 1][&#34;MIDS&#34;].split(&#34;,&#34;))
             current_start = alignments[i][&#34;POS&#34;] - 1
             gap = current_start - previous_end
             sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,n&#34; * gap
             sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # 4. Update sam_dict
             sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
             sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
         sam_joined.append(sam_dict)
     return sam_joined
@@ -95,23 +98,28 @@ def pad(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
         rightpad = reflength - (len(alignment[&#34;MIDS&#34;].split(&#34;,&#34;)) + leftpad)
         rightpad = max(0, rightpad)
         leftpad_mids, rightpad_mids = &#34;=,&#34; * leftpad, &#34;,=&#34; * rightpad
+        leftpad_cssplit, rightpad_cssplit = &#34;n,&#34; * leftpad, &#34;,n&#34; * rightpad
         leftpad_qscore, rightpad_qscore = &#34;-1,&#34; * leftpad, &#34;,-1&#34; * rightpad
         alignment[&#34;MIDS&#34;] = leftpad_mids + alignment[&#34;MIDS&#34;] + rightpad_mids
+        alignment[&#34;CSSPLIT&#34;] = leftpad_cssplit + alignment[&#34;CSSPLIT&#34;] + rightpad_cssplit
         alignment[&#34;QSCORE&#34;] = leftpad_qscore + alignment[&#34;QSCORE&#34;] + rightpad_qscore
         samdict_padding.append(alignment)
     return samdict_padding
 
 
 def select(samdict: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;Select QNAME, RNAME, MIDS, and QSCORE
+    &#34;&#34;&#34;Select QNAME, RNAME, MIDS, CSSPLIT and QSCORE
 
     Args:
         sam (list[dict]): dictionarized SAM
 
     Returns:
-        list[dict]: dictionarized SAM of QNAME, RNAME, MIDS, and QSCORE
+        list[dict]: dictionarized SAM of QNAME, RNAME, MIDS, CSSPLIT and QSCORE
     &#34;&#34;&#34;
-    return [{&#34;QNAME&#34;: m[&#34;QNAME&#34;], &#34;RNAME&#34;: m[&#34;RNAME&#34;], &#34;MIDS&#34;: m[&#34;MIDS&#34;], &#34;QSCORE&#34;: m[&#34;QSCORE&#34;]} for m in samdict]</code></pre>
+    return [
+        {&#34;QNAME&#34;: m[&#34;QNAME&#34;], &#34;RNAME&#34;: m[&#34;RNAME&#34;], &#34;MIDS&#34;: m[&#34;MIDS&#34;], &#34;CSSPLIT&#34;: m[&#34;CSSPLIT&#34;], &#34;QSCORE&#34;: m[&#34;QSCORE&#34;]}
+        for m in samdict
+    ]</code></pre>
 </details>
 </section>
 <section>
@@ -173,15 +181,18 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 strand = 1
             if strand_first != strand:
                 alignment[&#34;MIDS&#34;] = alignment[&#34;MIDS&#34;].lower()
+                alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
             # 3. Fill in the gap between the first read and the next read with a D (deletion)
             previous_end = alignments[i - 1][&#34;POS&#34;] - 1
             previous_end += len(alignments[i - 1][&#34;MIDS&#34;].split(&#34;,&#34;))
             current_start = alignments[i][&#34;POS&#34;] - 1
             gap = current_start - previous_end
             sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,n&#34; * gap
             sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # 4. Update sam_dict
             sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
             sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
         sam_joined.append(sam_dict)
     return sam_joined</code></pre>
@@ -225,8 +236,10 @@ def select(samdict: list[dict]) -&gt; list[dict]:
         rightpad = reflength - (len(alignment[&#34;MIDS&#34;].split(&#34;,&#34;)) + leftpad)
         rightpad = max(0, rightpad)
         leftpad_mids, rightpad_mids = &#34;=,&#34; * leftpad, &#34;,=&#34; * rightpad
+        leftpad_cssplit, rightpad_cssplit = &#34;n,&#34; * leftpad, &#34;,n&#34; * rightpad
         leftpad_qscore, rightpad_qscore = &#34;-1,&#34; * leftpad, &#34;,-1&#34; * rightpad
         alignment[&#34;MIDS&#34;] = leftpad_mids + alignment[&#34;MIDS&#34;] + rightpad_mids
+        alignment[&#34;CSSPLIT&#34;] = leftpad_cssplit + alignment[&#34;CSSPLIT&#34;] + rightpad_cssplit
         alignment[&#34;QSCORE&#34;] = leftpad_qscore + alignment[&#34;QSCORE&#34;] + rightpad_qscore
         samdict_padding.append(alignment)
     return samdict_padding</code></pre>
@@ -236,7 +249,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <span>def <span class="ident">select</span></span>(<span>samdict: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select QNAME, RNAME, MIDS, and QSCORE</p>
+<div class="desc"><p>Select QNAME, RNAME, MIDS, CSSPLIT and QSCORE</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>sam</code></strong> :&ensp;<code>list[dict]</code></dt>
@@ -245,22 +258,25 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[dict]</code></dt>
-<dd>dictionarized SAM of QNAME, RNAME, MIDS, and QSCORE</dd>
+<dd>dictionarized SAM of QNAME, RNAME, MIDS, CSSPLIT and QSCORE</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select(samdict: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;Select QNAME, RNAME, MIDS, and QSCORE
+    &#34;&#34;&#34;Select QNAME, RNAME, MIDS, CSSPLIT and QSCORE
 
     Args:
         sam (list[dict]): dictionarized SAM
 
     Returns:
-        list[dict]: dictionarized SAM of QNAME, RNAME, MIDS, and QSCORE
+        list[dict]: dictionarized SAM of QNAME, RNAME, MIDS, CSSPLIT and QSCORE
     &#34;&#34;&#34;
-    return [{&#34;QNAME&#34;: m[&#34;QNAME&#34;], &#34;RNAME&#34;: m[&#34;RNAME&#34;], &#34;MIDS&#34;: m[&#34;MIDS&#34;], &#34;QSCORE&#34;: m[&#34;QSCORE&#34;]} for m in samdict]</code></pre>
+    return [
+        {&#34;QNAME&#34;: m[&#34;QNAME&#34;], &#34;RNAME&#34;: m[&#34;RNAME&#34;], &#34;MIDS&#34;: m[&#34;MIDS&#34;], &#34;CSSPLIT&#34;: m[&#34;CSSPLIT&#34;], &#34;QSCORE&#34;: m[&#34;QSCORE&#34;]}
+        for m in samdict
+    ]</code></pre>
 </details>
 </dd>
 </dl>

@@ -52,8 +52,7 @@ def transform(sam: list[list]) -&gt; list[dict]:
 
     for i, alignment in enumerate(samdict):
         samdict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
-
-    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
         samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
 
     samdict_polished = proofread.join(samdict)
@@ -108,8 +107,7 @@ def transform(sam: list[list]) -&gt; list[dict]:
 
     for i, alignment in enumerate(samdict):
         samdict[i][&#34;MIDS&#34;] = convert.cstag_to_mids(alignment[&#34;CSTAG&#34;])
-
-    for i, alignment in enumerate(samdict):
+        samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
         samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDS&#34;])
 
     samdict_polished = proofread.join(samdict)
