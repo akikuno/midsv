@@ -24,6 +24,7 @@ def test_integration():
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = proofread.select(samdict_polished)
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]

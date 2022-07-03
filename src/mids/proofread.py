@@ -54,11 +54,11 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
     """Padding left and right flanks as "=" in MIDS, "-1" in QUAL
 
     Args:
-        sam (list[dict]): _description_
-        sqheaders (dict): _description_
+        sam (list[dict]): dictionarized SAM
+        sqheaders (dict): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: _description_
+        list[dict]: dictionarized SAM with padding as "=" in MIDS and "-1" in QUAL
     """
     samdict_padding = []
     for alignment in samdict:
@@ -74,5 +74,14 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_padding
 
 
-def trim(sam: list[dict], sqheaders: dict) -> list[dict]:
-    pass
+def select(samdict: list[dict]) -> list[dict]:
+    """Select QNAME, RNAME, MIDS, and QSCORE
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+
+    Returns:
+        list[dict]: dictionarized SAM of QNAME, RNAME, MIDS, and QSCORE
+    """
+    return [{"QNAME": m["QNAME"], "RNAME": m["RNAME"], "MIDS": m["MIDS"], "QSCORE": m["QSCORE"]} for m in samdict]
+
