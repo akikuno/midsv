@@ -47,6 +47,9 @@ def test_integration_eachcomponent():
         samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
 
     for i, alignment in enumerate(samdict):
+        samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
+
+    for i, alignment in enumerate(samdict):
         samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
 
     samdict_polished = proofread.join(samdict)
@@ -56,8 +59,10 @@ def test_integration_eachcomponent():
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
         MIDS = alignment["MIDS"]
+        CSSPLIT = alignment["CSSPLIT"]
         QSCORE = alignment["QSCORE"]
         RLEN = sqheaders[RNAME]
         mlen = len(MIDS.split(","))
+        clen = len(CSSPLIT.split(","))
         qlen = len(QSCORE.split(","))
-        assert mlen == qlen == RLEN
+        assert RLEN == mlen == clen == qlen

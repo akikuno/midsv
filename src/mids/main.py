@@ -24,8 +24,7 @@ def transform(sam: list[list]) -> list[dict]:
 
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-
-    for i, alignment in enumerate(samdict):
+        samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
         samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
 
     samdict_polished = proofread.join(samdict)

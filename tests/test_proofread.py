@@ -42,10 +42,14 @@ def test_pad():
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        samdict[i]["CSSPLIT"] = convert.cstag_to_mids(alignment["CSTAG"])
         samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
     test = proofread.pad(samdict, sqheaders)
     for t in test:
-        assert len(t["MIDS"].split(",")) == len(t["QSCORE"].split(","))
+        mlen = len(t["MIDS"].split(","))
+        clen = len(t["CSSPLIT"].split(","))
+        qlen = len(t["QSCORE"].split(","))
+        assert mlen == clen == qlen
     answer = Path("tests", "data", "pad", "answer.txt").read_text()
     answer = eval(answer)
     assert test == answer
