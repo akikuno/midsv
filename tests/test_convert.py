@@ -11,7 +11,7 @@ reload(convert)
 
 def test_split():
     cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    test = convert.split(cstag)
+    test = convert.split_cstag(cstag)
     answer = ["=ACGT", "*ag", "=C", "-g", "=T", "+t", "=ACGT"]
     assert test == answer
 
@@ -44,10 +44,36 @@ def test_cstag_to_mids():
     assert test == answer
 
 
+def test_cstag_to_mids_insertion_at_last():
+    cstag = "cs:Z:+tt*ag-aa+tt"
+    test = convert.cstag_to_mids(cstag)
+    answer = "2S,D,D,2"
+    assert test == answer
+
+
 def test_to_string():
     mids = ["3M", "4S", "MM", "DDD"]
     test = convert.to_string(mids)
     answer = "3M,4S,M,M,D,D,D"
+    assert test == answer
+
+
+###########################################################
+# Split CS tags
+###########################################################
+
+
+def test_cstag_to_cssplit():
+    cstag = "cs:Z:=A+ttt=C-aa=T*ag=TT"
+    test = convert.cstag_to_cssplit(cstag)
+    answer = "A,tttC,a,a,T,g,T,T"
+    assert test == answer
+
+
+def test_cstag_to_cssplit_insertion_at_last():
+    cstag = "cs:Z:+tt*ag-aa+tt"
+    test = convert.cstag_to_cssplit(cstag)
+    answer = "ttg,a,a,tt"
     assert test == answer
 
 
@@ -59,11 +85,11 @@ def test_to_string():
 def test_qual_to_qscore():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
     sam = format.read_sam(str(sampath))
-    sam_dict = format.dictionarize_sam(sam)
-    for i, alignment in enumerate(sam_dict):
-        sam_dict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-        sam_dict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
-    test = sam_dict
+    samdict = format.dictionarize_sam(sam)
+    for i, alignment in enumerate(samdict):
+        samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
+    test = samdict
     answer = Path("tests", "data", "phredscore", "answer.txt").read_text()
     answer = eval(answer)
     assert test == answer

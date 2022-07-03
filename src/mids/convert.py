@@ -6,7 +6,7 @@ import re
 ###########################################################
 
 
-def split(cstag: str) -> list[str]:
+def split_cstag(cstag: str) -> list[str]:
     """Split cstag
     Args:
         cstag (str): a string of CS tags
@@ -15,7 +15,7 @@ def split(cstag: str) -> list[str]:
     Example:
         >>> from mids import convert
         >>> cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-        >>> convert.split(cstag)
+        >>> convert.split_cstag(cstag)
         "['=ACGT', '*ag', '=C', '-g', '=T', '+t', '=ACGT']"
     """
     cstag_splitted = []
@@ -69,7 +69,7 @@ def numerize_insertion(mids: list[str]) -> list[str]:
     return mids
 
 
-def slide_insertion(mids: list[str]) -> list[str]:
+def slide_insertion(mids_numerized: list[str]) -> list[str]:
     """Append one base from the next index at an inserted base.
 
     Args:
@@ -84,13 +84,16 @@ def slide_insertion(mids: list[str]) -> list[str]:
         >>> convert.slide_insertion(mids)
         "['3M', '4S', "MM"]"
     """
-    for i, m in enumerate(mids):
+    for i, m in enumerate(mids_numerized):
         if not m:
             continue
+        if i + 1 == len(mids_numerized):
+            mids_numerized[i] = str(mids_numerized[i])
+            continue
         if isinstance(m, int):
-            mids[i] = str(m) + mids[i + 1][0]
-            mids[i + 1] = mids[i + 1][1:]
-    return [m for m in mids if m]
+            mids_numerized[i] = str(m) + mids_numerized[i + 1][0]
+            mids_numerized[i + 1] = mids_numerized[i + 1][1:]
+    return [m for m in mids_numerized if m]
 
 
 def to_string(mids: list[str]) -> str:
@@ -119,7 +122,15 @@ def to_string(mids: list[str]) -> str:
 
 
 def cstag_to_mids(cstag: str) -> str:
-    cstag_splited = split(cstag)
+    """Integrated function to convert cstag to MIDS
+
+    Args:
+        cstag (str): a long format cstag
+
+    Returns:
+        str: MIDS format
+    """
+    cstag_splited = split_cstag(cstag)
     mids_splited = to_mids(cstag_splited)
     mids_numerized = numerize_insertion(mids_splited)
     mids_slided = slide_insertion(mids_numerized)
@@ -127,15 +138,49 @@ def cstag_to_mids(cstag: str) -> str:
 
 
 ###########################################################
-# Phred score
+# Split CS tags
 ###########################################################
 
 
-# def ascii_to_qscore(ascii_quality: str) -> str:
-#     qscore = []
-#     for ascii in ascii_quality:
-#         qscore.append(str(ord(ascii) - 33))
-#     return ",".join(qscore)
+def cstag_to_cssplit(cstag: str) -> str:
+    """Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDS
+
+    Args:
+        cstag (str): a long format cstag
+
+    Returns:
+        str: cs split
+    """
+    cstag_list = split_cstag(cstag)
+    cssplit = []
+    for i, cs in enumerate(cstag_list):
+        if len(cs) == 1:
+            continue
+        if cs[0] == "+":
+            insertion = list(cs[1:])
+            if i + 1 == len(cstag_list):
+                cssplit.append("".join(insertion))
+                break
+            next_cstag = cstag_list[i + 1]
+            next_op = next_cstag[0]
+            if next_op == "*":
+                next_cs = next_cstag[-1]
+                cstag_list[i + 1] = next_op
+            else:
+                next_cs = next_cstag[1]
+                cstag_list[i + 1] = next_op + next_cstag[2:]
+            insertion.append(next_cs)
+            cssplit.append("".join(insertion))
+        elif cs[0] == "*":
+            cssplit.append(cs[-1])
+        else:
+            cssplit.append(",".join(cs[1:]))
+    return ",".join(cssplit)
+
+
+###########################################################
+# Phred score
+###########################################################
 
 
 def ascii_to_phred(ascii: str) -> str:
