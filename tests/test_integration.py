@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.mids import integrate
+from src.mids import transform
 from src.mids import format
 from src.mids import convert
 from src.mids import proofread
@@ -8,7 +8,7 @@ from src.mids import proofread
 def test_integration_subindel():
     sampath = Path("tests", "data", "integrate", "subindel_cslong_10bp.sam")
     sam = format.read_sam(str(sampath))
-    test = integrate(sam)
+    test = transform(sam)
     answer = Path("tests", "data", "integrate", "answer.txt").read_text()
     answer = eval(answer)
     assert test == answer
@@ -19,7 +19,7 @@ def test_integration_integrate():
     sam = format.read_sam(str(sampath))
 
     sqheaders = format.extract_sqheaders(sam)
-    samdict_polished = integrate(sam)
+    samdict_polished = transform(sam)
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]

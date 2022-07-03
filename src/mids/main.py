@@ -4,7 +4,7 @@ from src.mids import convert
 from src.mids import proofread
 
 
-def integrate(sam: list[list]) -> list[dict]:
+def transform(sam: list[list]) -> list[dict]:
     """Integrated function to perform MIDS conversion
 
     Args:
