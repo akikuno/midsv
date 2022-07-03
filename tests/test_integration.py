@@ -5,6 +5,15 @@ from src.mids import convert
 from src.mids import proofread
 
 
+def test_integration_subindel():
+    sampath = Path("tests", "data", "integrate", "subindel_cslong_10bp.sam")
+    sam = format.read_sam(str(sampath))
+    test = integrate(sam)
+    answer = Path("tests", "data", "integrate", "answer.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
 def test_integration_integrate():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = format.read_sam(str(sampath))

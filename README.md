@@ -5,37 +5,24 @@
 MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide.  
 The details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec002:~:text=Cas%2Dcutting%20site.-,Preprocessing,-We%20performed%20preprocessing).  
 
-## Functions
-
-- `mids.convert_from_sam()`: convert to mids from a SAM with cs long tag
-- `mids.extract_full_length()`: to convert a cs tag from short to long format
-
-See [documentation](https://akikuno.github.io/cstag/cstag/) for more information.
-
 ## Installation
 
-From [PyPI](https://pypi.org/project/cstag/):
+From [PyPI](https://pypi.org/project/mids/):
 
 ```bash
-pip install cstag
+pip install mids
 ```
 
-From [Bioconda](https://anaconda.org/bioconda/cstag):
+From [Bioconda](https://anaconda.org/bioconda/mids):
 
 ```bash
-conda config --add channels defaults
-conda config --add channels conda-forge
-conda config --add channels bioconda
-
-conda install cstag
+conda install -c bioconda mids
 ```
 
-## Examples
-
-### Shorten/Lengthen
+## Usage
 
 ```python
-import cstag
+import mids
 
 # Convert a cs tag from long to short
 cs = "cs:Z:=ACGT*ag=CGT"
