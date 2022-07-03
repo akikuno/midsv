@@ -33,10 +33,10 @@ from src.mids import convert
 from src.mids import proofread
 
 sampath = Path(&#34;tests&#34;, &#34;data&#34;, &#34;inversion&#34;, &#34;inv_cslong.sam&#34;)
+sampath = Path(&#34;tests&#34;, &#34;data&#34;, &#34;real&#34;, &#34;tyr_cslong.sam&#34;)
 sam = format.read_sam(str(sampath))
 
 format.check_sam_format(sam)
-
 
 sqheaders = format.extract_sqheaders(sam)
 samdict = format.dictionarize_sam(sam)
@@ -52,6 +52,15 @@ for i, alignment in enumerate(samdict):
 
 samdict_polished = proofread.join(samdict)
 samdict_polished = proofread.pad(samdict_polished, sqheaders)
+
+for alignment in samdict_polished:
+    RNAME = alignment[&#34;RNAME&#34;]
+    MIDS = alignment[&#34;MIDS&#34;]
+    QSCORE = alignment[&#34;QSCORE&#34;]
+    RLEN = sqheaders[RNAME]
+    mlen = len(MIDS.split(&#34;,&#34;))
+    qlen = len(QSCORE.split(&#34;,&#34;))
+    assert mlen == qlen == RLEN
 
 # from itertools import groupby
 # from concurrent.futures import ProcessPoolExecutor
