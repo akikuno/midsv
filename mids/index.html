@@ -24,7 +24,7 @@
 <section id="section-intro">
 <h1 id="mids">mids</h1>
 <p><code><a title="mids" href="#mids">mids</a></code> is a Python module to manipulate MIDS format.</p>
-<p>MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide.<br>
+<p>MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide of sequencing reads.<br>
 The details are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec002:~:text=Cas%2Dcutting%20site.-,Preprocessing,-We%20performed%20preprocessing">our paper</a>.
 </p>
 <h2 id="installation">Installation</h2>
@@ -34,56 +34,73 @@ The details are described in <a href="https://journals.plos.org/plosbiology/arti
 <p>From <a href="https://anaconda.org/bioconda/mids">Bioconda</a>:</p>
 <pre><code class="language-bash">conda install -c bioconda mids
 </code></pre>
-<h2 id="usage">Usage</h2>
+<h2 id="examples">Examples</h2>
 <pre><code class="language-python">import mids
 
-# Convert a cs tag from long to short
-cs = &quot;cs:Z:=ACGT*ag=CGT&quot;
+# match ---------------------------------------------------
 
-cstag.shorten(cs)
-# =&gt; cs:Z::4*ag:3
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['match', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTACGTAC', '0123456789', 'cs:Z:=ACGTACGTAC']
+    ]
 
+mids.transform(sam)
+# [{'QNAME': 'match', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,M,M,M,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
 
-# Convert a cs tag from short to long
-cs = &quot;cs:Z::4*ag:3&quot;
-cigar = &quot;8M&quot;
-seq = &quot;ACGTACGT&quot;
+# insertion -----------------------------------------------
 
-cstag.lengthen(cs, cigar, seq)
-# =&gt; cs:Z:=ACGT*ag=CGT
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['insertion', '0', 'example', '1', '60', '5M3I5M', '*', '0', '0', 'ACGTATTTCGTAC', '01234!!!56789', 'cs:Z:=ACGTA+ttt=CGTAC']
+    ]
+
+mids.transform(sam)
+# [{'QNAME': 'insertion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,3M,M,M,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
+
+# deleton -------------------------------------------------
+
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['deletion', '0', 'example', '1', '60', '5M3D2M', '*', '0', '0', 'ACGTAAC', '0123489', 'cs:Z:=ACGTA-cgt=AC']
+    ]
+
+mids.transform(sam)
+# [{'QNAME': 'deletion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,D,D,D,M,M', 'QSCORE': '15,16,17,18,19,-1,-1,-1,23,24'}]
+
+# substitution --------------------------------------------
+
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['substitution', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTGCGTAC', '01234!6789', 'cs:Z:=ACGT*ag=CGTAC']
+    ]
+
+mids.transform(sam)
+# [{'QNAME': 'substitution', 'RNAME': 'example', 'MIDS': 'M,M,M,M,S,M,M,M,M,M', 'QSCORE': '15,16,17,18,19,0,21,22,23,24'}]
+
+# large deletion ------------------------------------------
+
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['large-deletion', '0', 'example', '1', '60', '2M', '*', '0', '0', 'AC', '01', 'cs:Z:=AC'],
+    ['large-deletion', '0', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
+    ]
+
+mids.transform(sam)
+# [{'QNAME': 'large-deletion', 'RNAME': 'example', 'MIDS': 'M,M,D,D,D,D,D,D,M,M', 'QSCORE': '15,16,-1,-1,-1,-1,-1,-1,23,24'}]
+
+# inversion -----------------------------------------------
+
+sam = [
+    ['@SQ', 'SN:example', 'LN:10'],
+    ['inversion', '0', 'example', '1', '60', '5M', '*', '0', '0', 'ACGTA', '01234', 'cs:Z:=ACGTA'],
+    ['inversion', '16', 'example', '6', '60', '3M', '*', '0', '0', 'CGT', '567', 'cs:Z:=CGT'],
+    ['inversion', '2048', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
+    ]
+
+mids.transform(sam)
+# [{'QNAME': 'inversion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,m,m,m,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
+
 </code></pre>
-<h3 id="call-consensus">Call consensus</h3>
-<pre><code class="language-python">import cstag
-
-cs_list = [&quot;cs:Z:=ACGT&quot;, &quot;cs:Z:=AC*gt=T&quot;, &quot;cs:Z:=C*gt=T&quot;, &quot;cs:Z:=C*gt=T&quot;, &quot;cs:Z:=ACT+ccc=T&quot;]
-cigar_list = [&quot;4M&quot;, &quot;4M&quot;, &quot;1S3M&quot;, &quot;3M&quot;, &quot;3M3I1M&quot;]
-pos_list = [1, 1, 1, 2, 1]
-
-cstag.consensus(cs_list, cigar_list, pos_list)
-# =&gt; cs:Z:=AC*gt*T
-</code></pre>
-<h3 id="mask-low-quality-bases-in-a-cs-tag">Mask low-quality bases in a cs tag</h3>
-<pre><code class="language-python">import cstag
-
-cs = &quot;cs:Z:=ACGT*ac+gg-cc=T&quot;
-cigar = &quot;5M2I2D1M&quot;
-qual = &quot;AA!!!!AA&quot;
-phred_threshold = 10
-cstag.mask(cs, cigar, qual, phred_threshold)
-# =&gt; cs:Z:=ACNN*an+ng-cc=T
-</code></pre>
-<h3 id="output-html-report">Output HTML report</h3>
-<pre><code class="language-python">import cstag
-
-cs = &quot;cs:Z:=AC+GGG=T-ACGT*at~gt10cg=GNNN&quot;
-output = &quot;report&quot;
-description = &quot;Example&quot;
-
-cstag.to_html(cs, output, description)
-# =&gt; Output &quot;report.html&quot;
-</code></pre>
-<p>The <code>report.html</code> is :point_down:</p>
-<p><img width="414" alt="example_report" src="https://user-images.githubusercontent.com/15861316/158910398-67f480d2-8742-412a-b528-40e545c46513.png"></p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -92,7 +109,7 @@ cstag.to_html(cs, output, description)
 .. include:: ../../README.md
 &#34;&#34;&#34;
 
-from .integrate import integrate</code></pre>
+from .main import transform</code></pre>
 </details>
 </section>
 <section>
@@ -106,7 +123,7 @@ from .integrate import integrate</code></pre>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="mids.integrate" href="integrate.html">mids.integrate</a></code></dt>
+<dt><code class="name"><a title="mids.main" href="main.html">mids.main</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -129,12 +146,7 @@ from .integrate import integrate</code></pre>
 <ul>
 <li><a href="#mids">mids</a><ul>
 <li><a href="#installation">Installation</a></li>
-<li><a href="#usage">Usage</a><ul>
-<li><a href="#call-consensus">Call consensus</a></li>
-<li><a href="#mask-low-quality-bases-in-a-cs-tag">Mask low-quality bases in a cs tag</a></li>
-<li><a href="#output-html-report">Output HTML report</a></li>
-</ul>
-</li>
+<li><a href="#examples">Examples</a></li>
 </ul>
 </li>
 </ul>
@@ -144,7 +156,7 @@ from .integrate import integrate</code></pre>
 <ul>
 <li><code><a title="mids.convert" href="convert.html">mids.convert</a></code></li>
 <li><code><a title="mids.format" href="format.html">mids.format</a></code></li>
-<li><code><a title="mids.integrate" href="integrate.html">mids.integrate</a></code></li>
+<li><code><a title="mids.main" href="main.html">mids.main</a></code></li>
 <li><code><a title="mids.proofread" href="proofread.html">mids.proofread</a></code></li>
 </ul>
 </li>
