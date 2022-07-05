@@ -42,7 +42,7 @@ sam = [
     ]
 
 mids.transform(sam)
-# [{'QNAME': 'insertion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,3M,M,M,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
+# [{'QNAME': 'insertion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,3M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A,tttC,G,T,A,C', 'QSCORE': '15,16,17,18,19,0|0|0|20,21,22,23,24'}]
 
 # deleton -------------------------------------------------
 

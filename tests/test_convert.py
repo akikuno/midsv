@@ -82,7 +82,31 @@ def test_cstag_to_cssplit_insertion_at_last():
 ###########################################################
 
 
-def test_qual_to_qscore():
+def test_cstag_to_qscore_insertion():
+    qual = "@!!!@@"
+    mids = "M,3M,D,M"
+    test = convert.qual_to_qscore(qual, mids)
+    answer = "31,0|0|0|31,-1,31"
+    assert test == answer
+
+
+def test_cstag_to_qscore_deletion():
+    qual = "@0"
+    mids = "M,D,D,D,D,D,M"
+    test = convert.qual_to_qscore(qual, mids)
+    answer = "31,-1,-1,-1,-1,-1,15"
+    assert test == answer
+
+
+def test_cstag_to_qscore_substitution():
+    qual = "@012@"
+    mids = "M,S,S,S,M"
+    test = convert.qual_to_qscore(qual, mids)
+    answer = "31,15,16,17,31"
+    assert test == answer
+
+
+def test_qual_to_qscore_real():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
     sam = format.read_sam(str(sampath))
     samdict = format.dictionarize_sam(sam)

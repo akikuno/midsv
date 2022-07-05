@@ -205,8 +205,13 @@ def qual_to_qscore(qual: str, mids: str) -> str:
             qscore.append(str(-1))
             idx -= 1
         elif m[0].isdigit():
-            idx += int(m[:-1])
-            qscore.append(ascii_to_phred(qual[idx]))
+            num_insertion = int(m[:-1])
+            insertion = []
+            for j in range(idx, idx + num_insertion):
+                insertion.append(ascii_to_phred(qual[j]) + "|")
+            insertion.append(ascii_to_phred(qual[j + 1]))
+            qscore.append("".join(insertion))
+            idx += num_insertion
         else:
             qscore.append(ascii_to_phred(qual[idx]))
         idx += 1
