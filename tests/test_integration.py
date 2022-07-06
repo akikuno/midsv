@@ -1,5 +1,4 @@
 from pathlib import Path
-from pprint import pprint
 from src.mids import transform
 from src.mids import format
 from src.mids import convert
