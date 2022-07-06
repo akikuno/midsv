@@ -37,7 +37,7 @@ conda install -c bioconda midsv
 ## Usage
 
 ```python
-midsv.transform(sam: list[list])
+midsv.transform(sam: list[list]) -> list[dict]
 ```
 
 `midsv.transform()` returns a list of dictionaries incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
