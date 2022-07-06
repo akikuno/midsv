@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids.format API documentation</title>
+<title>midsv.format API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mids.format</code></h1>
+<h1 class="title">Module <code>midsv.format</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -225,7 +225,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.format.check_alignments"><code class="name flex">
+<dt id="midsv.format.check_alignments"><code class="name flex">
 <span>def <span class="ident">check_alignments</span></span>(<span>sam: list[list])</span>
 </code></dt>
 <dd>
@@ -267,7 +267,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
         raise AttributeError(&#34;No alignment information&#34;)</code></pre>
 </details>
 </dd>
-<dt id="mids.format.check_headers"><code class="name flex">
+<dt id="midsv.format.check_headers"><code class="name flex">
 <span>def <span class="ident">check_headers</span></span>(<span>sam: list[list])</span>
 </code></dt>
 <dd>
@@ -293,7 +293,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
         raise AttributeError(&#34;Input does not have @SQ header&#34;)</code></pre>
 </details>
 </dd>
-<dt id="mids.format.check_sam_format"><code class="name flex">
+<dt id="midsv.format.check_sam_format"><code class="name flex">
 <span>def <span class="ident">check_sam_format</span></span>(<span>sam: list[list])</span>
 </code></dt>
 <dd>
@@ -307,7 +307,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     check_alignments(sam)</code></pre>
 </details>
 </dd>
-<dt id="mids.format.dictionarize_sam"><code class="name flex">
+<dt id="midsv.format.dictionarize_sam"><code class="name flex">
 <span>def <span class="ident">dictionarize_sam</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
 </code></dt>
 <dd>
@@ -358,7 +358,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return aligns</code></pre>
 </details>
 </dd>
-<dt id="mids.format.extract_sqheaders"><code class="name flex">
+<dt id="midsv.format.extract_sqheaders"><code class="name flex">
 <span>def <span class="ident">extract_sqheaders</span></span>(<span>sam: list[list]) ‑> dict[str, int]</span>
 </code></dt>
 <dd>
@@ -396,7 +396,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return SNLN</code></pre>
 </details>
 </dd>
-<dt id="mids.format.read_sam"><code class="name flex">
+<dt id="midsv.format.read_sam"><code class="name flex">
 <span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str) ‑> list[list]</span>
 </code></dt>
 <dd>
@@ -410,7 +410,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
 </details>
 </dd>
-<dt id="mids.format.remove_overlapped"><code class="name flex">
+<dt id="midsv.format.remove_overlapped"><code class="name flex">
 <span>def <span class="ident">remove_overlapped</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
 </code></dt>
 <dd>
@@ -462,7 +462,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return sam_nonoverlapped</code></pre>
 </details>
 </dd>
-<dt id="mids.format.remove_softclips"><code class="name flex">
+<dt id="midsv.format.remove_softclips"><code class="name flex">
 <span>def <span class="ident">remove_softclips</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
@@ -508,7 +508,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return sam_list</code></pre>
 </details>
 </dd>
-<dt id="mids.format.split_cigar"><code class="name flex">
+<dt id="midsv.format.split_cigar"><code class="name flex">
 <span>def <span class="ident">split_cigar</span></span>(<span>cigar: str) ‑> list[str]</span>
 </code></dt>
 <dd>
@@ -536,20 +536,20 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="mids" href="index.html">mids</a></code></li>
+<li><code><a title="midsv" href="index.html">midsv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="mids.format.check_alignments" href="#mids.format.check_alignments">check_alignments</a></code></li>
-<li><code><a title="mids.format.check_headers" href="#mids.format.check_headers">check_headers</a></code></li>
-<li><code><a title="mids.format.check_sam_format" href="#mids.format.check_sam_format">check_sam_format</a></code></li>
-<li><code><a title="mids.format.dictionarize_sam" href="#mids.format.dictionarize_sam">dictionarize_sam</a></code></li>
-<li><code><a title="mids.format.extract_sqheaders" href="#mids.format.extract_sqheaders">extract_sqheaders</a></code></li>
-<li><code><a title="mids.format.read_sam" href="#mids.format.read_sam">read_sam</a></code></li>
-<li><code><a title="mids.format.remove_overlapped" href="#mids.format.remove_overlapped">remove_overlapped</a></code></li>
-<li><code><a title="mids.format.remove_softclips" href="#mids.format.remove_softclips">remove_softclips</a></code></li>
-<li><code><a title="mids.format.split_cigar" href="#mids.format.split_cigar">split_cigar</a></code></li>
+<li><code><a title="midsv.format.check_alignments" href="#midsv.format.check_alignments">check_alignments</a></code></li>
+<li><code><a title="midsv.format.check_headers" href="#midsv.format.check_headers">check_headers</a></code></li>
+<li><code><a title="midsv.format.check_sam_format" href="#midsv.format.check_sam_format">check_sam_format</a></code></li>
+<li><code><a title="midsv.format.dictionarize_sam" href="#midsv.format.dictionarize_sam">dictionarize_sam</a></code></li>
+<li><code><a title="midsv.format.extract_sqheaders" href="#midsv.format.extract_sqheaders">extract_sqheaders</a></code></li>
+<li><code><a title="midsv.format.read_sam" href="#midsv.format.read_sam">read_sam</a></code></li>
+<li><code><a title="midsv.format.remove_overlapped" href="#midsv.format.remove_overlapped">remove_overlapped</a></code></li>
+<li><code><a title="midsv.format.remove_softclips" href="#midsv.format.remove_softclips">remove_softclips</a></code></li>
+<li><code><a title="midsv.format.split_cigar" href="#midsv.format.split_cigar">split_cigar</a></code></li>
 </ul>
 </li>
 </ul>

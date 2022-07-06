@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mids.convert API documentation</title>
+<title>midsv.convert API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mids.convert</code></h1>
+<h1 class="title">Module <code>midsv.convert</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -30,7 +30,7 @@
 import re
 
 ###########################################################
-# MIDS conversion (from CS tag to MIDS)
+# MIDSV conversion (from CS tag to MIDSV)
 ###########################################################
 
 
@@ -41,7 +41,7 @@ def split_cstag(cstag: str) -&gt; list[str]:
     Returns:
         list[str]: splitted CS tags
     Example:
-        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
         &gt;&gt;&gt; convert.split_cstag(cstag)
         &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
@@ -57,112 +57,112 @@ def split_cstag(cstag: str) -&gt; list[str]:
     return cstag_splitted
 
 
-def to_mids(cstag_splitted: list[str]) -&gt; list[str]:
-    &#34;&#34;&#34;Convert to MIDS
+def to_midsv(cstag_splitted: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert to MIDSV
     Args:
         cstag_splitted (list[str]): splitted CS tags
     Returns:
-        list[str]: splitted MIDS
+        list[str]: splitted MIDSV
     Example:
-        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
-        &gt;&gt;&gt; convert.to_mids(cstag_splitted)
+        &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
     &#34;&#34;&#34;
-    mids = []
+    midsv = []
     for cs in cstag_splitted:
         num = len(cs) - 1
         if cs.startswith(&#34;=&#34;):
-            mids.append(&#34;M&#34; * num)
+            midsv.append(&#34;M&#34; * num)
         elif cs.startswith(&#34;+&#34;):
-            mids.append(&#34;I&#34; * num)
+            midsv.append(&#34;I&#34; * num)
         elif cs.startswith(&#34;-&#34;):
-            mids.append(&#34;D&#34; * num)
+            midsv.append(&#34;D&#34; * num)
         else:
-            mids.append(&#34;S&#34;)
-    return mids
+            midsv.append(&#34;S&#34;)
+    return midsv
 
 
-def numerize_insertion(mids: list[str]) -&gt; list[str]:
+def numerize_insertion(midsv: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Convert insertion to numeric numbers
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
-        &gt;&gt;&gt; convert.numerize_insertion(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
+        &gt;&gt;&gt; convert.numerize_insertion(midsv)
         &#34;[&#39;MMM&#39;, 3, &#39;D&#39;, &#39;S&#39;]&#34;
     &#34;&#34;&#34;
-    for i, m in enumerate(mids):
+    for i, m in enumerate(midsv):
         if m.startswith(&#34;I&#34;):
-            mids[i] = len(m)
-    return mids
+            midsv[i] = len(m)
+    return midsv
 
 
-def slide_insertion(mids_numerized: list[str]) -&gt; list[str]:
+def slide_insertion(midsv_numerized: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
     Args:
-        mids (list[str]): numerized MIDS
+        midsv (list[str]): numerized MIDSV
 
     Returns:
-        list[str]: slided MIDS
+        list[str]: slided MIDSV
 
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
-        &gt;&gt;&gt; convert.slide_insertion(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
+        &gt;&gt;&gt; convert.slide_insertion(midsv)
         &#34;[&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;]&#34;
     &#34;&#34;&#34;
-    for i, m in enumerate(mids_numerized):
+    for i, m in enumerate(midsv_numerized):
         if not m:
             continue
-        if i + 1 == len(mids_numerized):
-            mids_numerized[i] = str(mids_numerized[i])
+        if i + 1 == len(midsv_numerized):
+            midsv_numerized[i] = str(midsv_numerized[i])
             continue
         if isinstance(m, int):
-            mids_numerized[i] = str(m) + mids_numerized[i + 1][0]
-            mids_numerized[i + 1] = mids_numerized[i + 1][1:]
-    return [m for m in mids_numerized if m]
+            midsv_numerized[i] = str(m) + midsv_numerized[i + 1][0]
+            midsv_numerized[i + 1] = midsv_numerized[i + 1][1:]
+    return [m for m in midsv_numerized if m]
 
 
-def to_string(mids: list[str]) -&gt; str:
+def to_string(midsv: list[str]) -&gt; str:
     &#34;&#34;&#34;Convert to string in CSV format
 
     Args:
-        mids (list[str]): a list of MIDS
+        midsv (list[str]): a list of MIDSV
 
     Returns:
-        str: MIDS
+        str: MIDSV
 
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
-        &gt;&gt;&gt; convert.to_string(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
+        &gt;&gt;&gt; convert.to_string(midsv)
         &#34;3M,4S,M,M,D,D,D&#34;
     &#34;&#34;&#34;
-    mids_csv = []
-    for m in mids:
+    midsv_csv = []
+    for m in midsv:
         if m[0].isdigit():
-            mids_csv.append(m)
+            midsv_csv.append(m)
             continue
         for mm in m:
-            mids_csv.append(mm)
-    return &#34;,&#34;.join(mids_csv)
+            midsv_csv.append(mm)
+    return &#34;,&#34;.join(midsv_csv)
 
 
-def cstag_to_mids(cstag: str) -&gt; str:
-    &#34;&#34;&#34;Integrated function to convert cstag to MIDS
+def cstag_to_midsv(cstag: str) -&gt; str:
+    &#34;&#34;&#34;Integrated function to convert cstag to MIDSV
 
     Args:
         cstag (str): a long format cstag
 
     Returns:
-        str: MIDS format
+        str: MIDSV format
     &#34;&#34;&#34;
     cstag_splited = split_cstag(cstag)
-    mids_splited = to_mids(cstag_splited)
-    mids_numerized = numerize_insertion(mids_splited)
-    mids_slided = slide_insertion(mids_numerized)
-    return to_string(mids_slided)
+    midsv_splited = to_midsv(cstag_splited)
+    midsv_numerized = numerize_insertion(midsv_splited)
+    midsv_slided = slide_insertion(midsv_numerized)
+    return to_string(midsv_slided)
 
 
 ###########################################################
@@ -171,7 +171,7 @@ def cstag_to_mids(cstag: str) -&gt; str:
 
 
 def cstag_to_cssplit(cstag: str) -&gt; str:
-    &#34;&#34;&#34;Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDS
+    &#34;&#34;&#34;Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDSV
 
     Args:
         cstag (str): a long format cstag
@@ -223,20 +223,20 @@ def ascii_to_phred(ascii: str) -&gt; str:
     return str(ord(ascii) - 33)
 
 
-def qual_to_qscore(qual: str, mids: str) -&gt; str:
+def qual_to_qscore(qual: str, midsv: str) -&gt; str:
     &#34;&#34;&#34;Convert ascii quality to phred score.
-    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+    To adjust the same length as MIDSV, insertion is discarded and deletion is interpolated as -1.
 
     Args:
         qual (str): QUAL in SAM format
-        mids (str): MIDS
+        midsv (str): MIDSV
 
     Returns:
         str: Phred quality score with indel compensation
     &#34;&#34;&#34;
     qscore = []
     idx = 0
-    for m in mids.split(&#34;,&#34;):
+    for m in midsv.split(&#34;,&#34;):
         if m == &#34;D&#34;:
             qscore.append(str(-1))
             idx -= 1
@@ -265,7 +265,7 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="mids.convert.ascii_to_phred"><code class="name flex">
+<dt id="midsv.convert.ascii_to_phred"><code class="name flex">
 <span>def <span class="ident">ascii_to_phred</span></span>(<span>ascii: str) ‑> str</span>
 </code></dt>
 <dd>
@@ -278,11 +278,11 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
     return str(ord(ascii) - 33)</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.cstag_to_cssplit"><code class="name flex">
+<dt id="midsv.convert.cstag_to_cssplit"><code class="name flex">
 <span>def <span class="ident">cstag_to_cssplit</span></span>(<span>cstag: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDS</p>
+<div class="desc"><p>Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDSV</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cstag</code></strong> :&ensp;<code>str</code></dt>
@@ -303,7 +303,7 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def cstag_to_cssplit(cstag: str) -&gt; str:
-    &#34;&#34;&#34;Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDS
+    &#34;&#34;&#34;Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDSV
 
     Args:
         cstag (str): a long format cstag
@@ -346,11 +346,11 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
     return &#34;,&#34;.join([cs.upper() for cs in cssplit])</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.cstag_to_mids"><code class="name flex">
-<span>def <span class="ident">cstag_to_mids</span></span>(<span>cstag: str) ‑> str</span>
+<dt id="midsv.convert.cstag_to_midsv"><code class="name flex">
+<span>def <span class="ident">cstag_to_midsv</span></span>(<span>cstag: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Integrated function to convert cstag to MIDS</p>
+<div class="desc"><p>Integrated function to convert cstag to MIDSV</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cstag</code></strong> :&ensp;<code>str</code></dt>
@@ -359,69 +359,69 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
-<dd>MIDS format</dd>
+<dd>MIDSV format</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def cstag_to_mids(cstag: str) -&gt; str:
-    &#34;&#34;&#34;Integrated function to convert cstag to MIDS
+<pre><code class="python">def cstag_to_midsv(cstag: str) -&gt; str:
+    &#34;&#34;&#34;Integrated function to convert cstag to MIDSV
 
     Args:
         cstag (str): a long format cstag
 
     Returns:
-        str: MIDS format
+        str: MIDSV format
     &#34;&#34;&#34;
     cstag_splited = split_cstag(cstag)
-    mids_splited = to_mids(cstag_splited)
-    mids_numerized = numerize_insertion(mids_splited)
-    mids_slided = slide_insertion(mids_numerized)
-    return to_string(mids_slided)</code></pre>
+    midsv_splited = to_midsv(cstag_splited)
+    midsv_numerized = numerize_insertion(midsv_splited)
+    midsv_slided = slide_insertion(midsv_numerized)
+    return to_string(midsv_slided)</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.numerize_insertion"><code class="name flex">
-<span>def <span class="ident">numerize_insertion</span></span>(<span>mids: list[str]) ‑> list[str]</span>
+<dt id="midsv.convert.numerize_insertion"><code class="name flex">
+<span>def <span class="ident">numerize_insertion</span></span>(<span>midsv: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert insertion to numeric numbers</p>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
-&gt;&gt;&gt; mids = ['MMM', 'III', 'D', 'S']
-&gt;&gt;&gt; convert.numerize_insertion(mids)
+<pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
+&gt;&gt;&gt; midsv = ['MMM', 'III', 'D', 'S']
+&gt;&gt;&gt; convert.numerize_insertion(midsv)
 &quot;['MMM', 3, 'D', 'S']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def numerize_insertion(mids: list[str]) -&gt; list[str]:
+<pre><code class="python">def numerize_insertion(midsv: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Convert insertion to numeric numbers
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
-        &gt;&gt;&gt; convert.numerize_insertion(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [&#39;MMM&#39;, &#39;III&#39;, &#39;D&#39;, &#39;S&#39;]
+        &gt;&gt;&gt; convert.numerize_insertion(midsv)
         &#34;[&#39;MMM&#39;, 3, &#39;D&#39;, &#39;S&#39;]&#34;
     &#34;&#34;&#34;
-    for i, m in enumerate(mids):
+    for i, m in enumerate(midsv):
         if m.startswith(&#34;I&#34;):
-            mids[i] = len(m)
-    return mids</code></pre>
+            midsv[i] = len(m)
+    return midsv</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.qual_to_qscore"><code class="name flex">
-<span>def <span class="ident">qual_to_qscore</span></span>(<span>qual: str, mids: str) ‑> str</span>
+<dt id="midsv.convert.qual_to_qscore"><code class="name flex">
+<span>def <span class="ident">qual_to_qscore</span></span>(<span>qual: str, midsv: str) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert ascii quality to phred score.
-To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.</p>
+To adjust the same length as MIDSV, insertion is discarded and deletion is interpolated as -1.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>qual</code></strong> :&ensp;<code>str</code></dt>
 <dd>QUAL in SAM format</dd>
-<dt><strong><code>mids</code></strong> :&ensp;<code>str</code></dt>
-<dd>MIDS</dd>
+<dt><strong><code>midsv</code></strong> :&ensp;<code>str</code></dt>
+<dd>MIDSV</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -432,20 +432,20 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def qual_to_qscore(qual: str, mids: str) -&gt; str:
+<pre><code class="python">def qual_to_qscore(qual: str, midsv: str) -&gt; str:
     &#34;&#34;&#34;Convert ascii quality to phred score.
-    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+    To adjust the same length as MIDSV, insertion is discarded and deletion is interpolated as -1.
 
     Args:
         qual (str): QUAL in SAM format
-        mids (str): MIDS
+        midsv (str): MIDSV
 
     Returns:
         str: Phred quality score with indel compensation
     &#34;&#34;&#34;
     qscore = []
     idx = 0
-    for m in mids.split(&#34;,&#34;):
+    for m in midsv.split(&#34;,&#34;):
         if m == &#34;D&#34;:
             qscore.append(str(-1))
             idx -= 1
@@ -467,59 +467,59 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
     return &#34;,&#34;.join(qscore)</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.slide_insertion"><code class="name flex">
-<span>def <span class="ident">slide_insertion</span></span>(<span>mids_numerized: list[str]) ‑> list[str]</span>
+<dt id="midsv.convert.slide_insertion"><code class="name flex">
+<span>def <span class="ident">slide_insertion</span></span>(<span>midsv_numerized: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Append one base from the next index at an inserted base.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>mids</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd>numerized MIDS</dd>
+<dt><strong><code>midsv</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>numerized MIDSV</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd>slided MIDS</dd>
+<dd>slided MIDSV</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
-&gt;&gt;&gt; mids = [3, 'M', 4, &quot;S&quot;, &quot;MM&quot;]
-&gt;&gt;&gt; convert.slide_insertion(mids)
+<pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
+&gt;&gt;&gt; midsv = [3, 'M', 4, &quot;S&quot;, &quot;MM&quot;]
+&gt;&gt;&gt; convert.slide_insertion(midsv)
 &quot;['3M', '4S', &quot;MM&quot;]&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def slide_insertion(mids_numerized: list[str]) -&gt; list[str]:
+<pre><code class="python">def slide_insertion(midsv_numerized: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Append one base from the next index at an inserted base.
 
     Args:
-        mids (list[str]): numerized MIDS
+        midsv (list[str]): numerized MIDSV
 
     Returns:
-        list[str]: slided MIDS
+        list[str]: slided MIDSV
 
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
-        &gt;&gt;&gt; convert.slide_insertion(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [3, &#39;M&#39;, 4, &#34;S&#34;, &#34;MM&#34;]
+        &gt;&gt;&gt; convert.slide_insertion(midsv)
         &#34;[&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;]&#34;
     &#34;&#34;&#34;
-    for i, m in enumerate(mids_numerized):
+    for i, m in enumerate(midsv_numerized):
         if not m:
             continue
-        if i + 1 == len(mids_numerized):
-            mids_numerized[i] = str(mids_numerized[i])
+        if i + 1 == len(midsv_numerized):
+            midsv_numerized[i] = str(midsv_numerized[i])
             continue
         if isinstance(m, int):
-            mids_numerized[i] = str(m) + mids_numerized[i + 1][0]
-            mids_numerized[i + 1] = mids_numerized[i + 1][1:]
-    return [m for m in mids_numerized if m]</code></pre>
+            midsv_numerized[i] = str(m) + midsv_numerized[i + 1][0]
+            midsv_numerized[i + 1] = midsv_numerized[i + 1][1:]
+    return [m for m in midsv_numerized if m]</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.split_cstag"><code class="name flex">
+<dt id="midsv.convert.split_cstag"><code class="name flex">
 <span>def <span class="ident">split_cstag</span></span>(<span>cstag: str) ‑> list[str]</span>
 </code></dt>
 <dd>
@@ -535,7 +535,7 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
 <dd>splitted CS tags</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+<pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
 &gt;&gt;&gt; cstag = &quot;cs:Z:=ACGT*ag=C-g=T+t=ACGT&quot;
 &gt;&gt;&gt; convert.split_cstag(cstag)
 &quot;['=ACGT', '*ag', '=C', '-g', '=T', '+t', '=ACGT']&quot;
@@ -551,7 +551,7 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
     Returns:
         list[str]: splitted CS tags
     Example:
-        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag = &#34;cs:Z:=ACGT*ag=C-g=T+t=ACGT&#34;
         &gt;&gt;&gt; convert.split_cstag(cstag)
         &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
@@ -567,11 +567,11 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
     return cstag_splitted</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.to_mids"><code class="name flex">
-<span>def <span class="ident">to_mids</span></span>(<span>cstag_splitted: list[str]) ‑> list[str]</span>
+<dt id="midsv.convert.to_midsv"><code class="name flex">
+<span>def <span class="ident">to_midsv</span></span>(<span>cstag_splitted: list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert to MIDS</p>
+<div class="desc"><p>Convert to MIDSV</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cstag_splitted</code></strong> :&ensp;<code>list[str]</code></dt>
@@ -580,92 +580,92 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[str]</code></dt>
-<dd>splitted MIDS</dd>
+<dd>splitted MIDSV</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
+<pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
 &gt;&gt;&gt; cstag_splitted = ['=ACGT', '*ag', '=C', '-gg', '=T', '+t', '=ACGT']
-&gt;&gt;&gt; convert.to_mids(cstag_splitted)
+&gt;&gt;&gt; convert.to_midsv(cstag_splitted)
 &quot;['MMMM', 'S', 'M', 'DD', 'M', 'I', 'MMMM']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_mids(cstag_splitted: list[str]) -&gt; list[str]:
-    &#34;&#34;&#34;Convert to MIDS
+<pre><code class="python">def to_midsv(cstag_splitted: list[str]) -&gt; list[str]:
+    &#34;&#34;&#34;Convert to MIDSV
     Args:
         cstag_splitted (list[str]): splitted CS tags
     Returns:
-        list[str]: splitted MIDS
+        list[str]: splitted MIDSV
     Example:
-        &gt;&gt;&gt; from mids import convert
+        &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
-        &gt;&gt;&gt; convert.to_mids(cstag_splitted)
+        &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
     &#34;&#34;&#34;
-    mids = []
+    midsv = []
     for cs in cstag_splitted:
         num = len(cs) - 1
         if cs.startswith(&#34;=&#34;):
-            mids.append(&#34;M&#34; * num)
+            midsv.append(&#34;M&#34; * num)
         elif cs.startswith(&#34;+&#34;):
-            mids.append(&#34;I&#34; * num)
+            midsv.append(&#34;I&#34; * num)
         elif cs.startswith(&#34;-&#34;):
-            mids.append(&#34;D&#34; * num)
+            midsv.append(&#34;D&#34; * num)
         else:
-            mids.append(&#34;S&#34;)
-    return mids</code></pre>
+            midsv.append(&#34;S&#34;)
+    return midsv</code></pre>
 </details>
 </dd>
-<dt id="mids.convert.to_string"><code class="name flex">
-<span>def <span class="ident">to_string</span></span>(<span>mids: list[str]) ‑> str</span>
+<dt id="midsv.convert.to_string"><code class="name flex">
+<span>def <span class="ident">to_string</span></span>(<span>midsv: list[str]) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert to string in CSV format</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>mids</code></strong> :&ensp;<code>list[str]</code></dt>
-<dd>a list of MIDS</dd>
+<dt><strong><code>midsv</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>a list of MIDSV</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
-<dd>MIDS</dd>
+<dd>MIDSV</dd>
 </dl>
 <h2 id="example">Example</h2>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from mids import convert
-&gt;&gt;&gt; mids = ['3M', '4S', &quot;MM&quot;, &quot;DDD&quot;]
-&gt;&gt;&gt; convert.to_string(mids)
+<pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
+&gt;&gt;&gt; midsv = ['3M', '4S', &quot;MM&quot;, &quot;DDD&quot;]
+&gt;&gt;&gt; convert.to_string(midsv)
 &quot;3M,4S,M,M,D,D,D&quot;
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_string(mids: list[str]) -&gt; str:
+<pre><code class="python">def to_string(midsv: list[str]) -&gt; str:
     &#34;&#34;&#34;Convert to string in CSV format
 
     Args:
-        mids (list[str]): a list of MIDS
+        midsv (list[str]): a list of MIDSV
 
     Returns:
-        str: MIDS
+        str: MIDSV
 
     Example:
-        &gt;&gt;&gt; from mids import convert
-        &gt;&gt;&gt; mids = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
-        &gt;&gt;&gt; convert.to_string(mids)
+        &gt;&gt;&gt; from midsv import convert
+        &gt;&gt;&gt; midsv = [&#39;3M&#39;, &#39;4S&#39;, &#34;MM&#34;, &#34;DDD&#34;]
+        &gt;&gt;&gt; convert.to_string(midsv)
         &#34;3M,4S,M,M,D,D,D&#34;
     &#34;&#34;&#34;
-    mids_csv = []
-    for m in mids:
+    midsv_csv = []
+    for m in midsv:
         if m[0].isdigit():
-            mids_csv.append(m)
+            midsv_csv.append(m)
             continue
         for mm in m:
-            mids_csv.append(mm)
-    return &#34;,&#34;.join(mids_csv)</code></pre>
+            midsv_csv.append(mm)
+    return &#34;,&#34;.join(midsv_csv)</code></pre>
 </details>
 </dd>
 </dl>
@@ -681,20 +681,20 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="mids" href="index.html">mids</a></code></li>
+<li><code><a title="midsv" href="index.html">midsv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="mids.convert.ascii_to_phred" href="#mids.convert.ascii_to_phred">ascii_to_phred</a></code></li>
-<li><code><a title="mids.convert.cstag_to_cssplit" href="#mids.convert.cstag_to_cssplit">cstag_to_cssplit</a></code></li>
-<li><code><a title="mids.convert.cstag_to_mids" href="#mids.convert.cstag_to_mids">cstag_to_mids</a></code></li>
-<li><code><a title="mids.convert.numerize_insertion" href="#mids.convert.numerize_insertion">numerize_insertion</a></code></li>
-<li><code><a title="mids.convert.qual_to_qscore" href="#mids.convert.qual_to_qscore">qual_to_qscore</a></code></li>
-<li><code><a title="mids.convert.slide_insertion" href="#mids.convert.slide_insertion">slide_insertion</a></code></li>
-<li><code><a title="mids.convert.split_cstag" href="#mids.convert.split_cstag">split_cstag</a></code></li>
-<li><code><a title="mids.convert.to_mids" href="#mids.convert.to_mids">to_mids</a></code></li>
-<li><code><a title="mids.convert.to_string" href="#mids.convert.to_string">to_string</a></code></li>
+<li><code><a title="midsv.convert.ascii_to_phred" href="#midsv.convert.ascii_to_phred">ascii_to_phred</a></code></li>
+<li><code><a title="midsv.convert.cstag_to_cssplit" href="#midsv.convert.cstag_to_cssplit">cstag_to_cssplit</a></code></li>
+<li><code><a title="midsv.convert.cstag_to_midsv" href="#midsv.convert.cstag_to_midsv">cstag_to_midsv</a></code></li>
+<li><code><a title="midsv.convert.numerize_insertion" href="#midsv.convert.numerize_insertion">numerize_insertion</a></code></li>
+<li><code><a title="midsv.convert.qual_to_qscore" href="#midsv.convert.qual_to_qscore">qual_to_qscore</a></code></li>
+<li><code><a title="midsv.convert.slide_insertion" href="#midsv.convert.slide_insertion">slide_insertion</a></code></li>
+<li><code><a title="midsv.convert.split_cstag" href="#midsv.convert.split_cstag">split_cstag</a></code></li>
+<li><code><a title="midsv.convert.to_midsv" href="#midsv.convert.to_midsv">to_midsv</a></code></li>
+<li><code><a title="midsv.convert.to_string" href="#midsv.convert.to_string">to_string</a></code></li>
 </ul>
 </li>
 </ul>
