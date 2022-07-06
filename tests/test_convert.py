@@ -120,6 +120,22 @@ def test_cstag_to_qscore_substitution():
     assert test == answer
 
 
+def test_cstag_to_qscore_indel():
+    qual = "@0@"
+    mids = "M,1D,D,M"
+    test = convert.qual_to_qscore(qual, mids)
+    answer = "31,15|-1,-1,31"
+    assert test == answer
+
+
+def test_cstag_to_qscore_ins_sub():
+    qual = "@012!"
+    mids = "M,3S"
+    test = convert.qual_to_qscore(qual, mids)
+    answer = "31,15|16|17|0"
+    assert test == answer
+
+
 def test_qual_to_qscore_real():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
     sam = format.read_sam(str(sampath))

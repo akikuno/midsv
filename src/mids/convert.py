@@ -217,7 +217,11 @@ def qual_to_qscore(qual: str, mids: str) -> str:
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + "|")
-            insertion.append(ascii_to_phred(qual[j + 1]))
+            if m[-1] == "D":
+                insertion.append("-1")
+                idx -= 1
+            else:
+                insertion.append(ascii_to_phred(qual[j + 1]))
             qscore.append("".join(insertion))
             idx += num_insertion
         else:
