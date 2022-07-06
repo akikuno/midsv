@@ -27,8 +27,9 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from __future__ import annotations
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Union
 from itertools import groupby
 
 ###########################################################
@@ -36,7 +37,9 @@ from itertools import groupby
 ###########################################################
 
 
-def read_sam(path_of_sam: str) -&gt; list[list]:
+def read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]:
+    if &#34;str&#34; in str(type(path_of_sam)):
+        path_of_sam = Path(path_of_sam)
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
     return [s.split(&#34;\t&#34;) for s in sam]
 
@@ -81,7 +84,7 @@ def check_alignments(sam: list[list]):
         if idx_cstag == -1:
             raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
         if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
     if not is_alignment:
         raise AttributeError(&#34;No alignment information&#34;)
 
@@ -262,7 +265,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
         if idx_cstag == -1:
             raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
         if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;Spliced long reads are currently not supported&#34;)
+            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
     if not is_alignment:
         raise AttributeError(&#34;No alignment information&#34;)</code></pre>
 </details>
@@ -397,7 +400,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 </details>
 </dd>
 <dt id="midsv.format.read_sam"><code class="name flex">
-<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str) ‑> list[list]</span>
+<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: Union[str, Path]) ‑> list[list]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -405,7 +408,9 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_sam(path_of_sam: str) -&gt; list[list]:
+<pre><code class="python">def read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]:
+    if &#34;str&#34; in str(type(path_of_sam)):
+        path_of_sam = Path(path_of_sam)
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
     return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
 </details>

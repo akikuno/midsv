@@ -47,7 +47,9 @@
 <pre><code class="language-bash">conda install -c bioconda midsv
 </code></pre>
 <h2 id="usage">Usage</h2>
-<p><code>midsv.transcorm(sam: list[list])</code> returns a dictionary incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
+<pre><code class="language-python">midsv.transform(sam: list[list])
+</code></pre>
+<p><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
 <p>Notice <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code> are comma-separated and have the same reference sequence length.</p>
 <p>(*LN represents the length of a reference sequence).</p>
 <pre><code class="language-python">import mids
@@ -228,6 +230,18 @@ midsv.transform(sam)
 </table>
 <p><code>QSCORE</code> uses <code>-1</code> at deletion sites.</p>
 <p>As with <code>CSSPLIT</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
+<h2 id="miscellaneous-functions">Miscellaneous functions</h2>
+<pre><code class="language-python">midsv.read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]
+</code></pre>
+<p><code>midsv.read_sam</code> read SAM file into a list of lists.</p>
+<pre><code class="language-python">midsv.check_sam_format(sam: list[list])
+</code></pre>
+<p><code>midsv.check_sam_format</code> checks the followings.</p>
+<ul>
+<li>SQ header</li>
+<li>CS tag (long form)</li>
+<li>No long-read spliced alignment</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -236,7 +250,8 @@ midsv.transform(sam)
 .. include:: ../../README.md
 &#34;&#34;&#34;
 
-from .main import transform</code></pre>
+from .main import transform
+from .format import read_sam, check_sam_format</code></pre>
 </details>
 </section>
 <section>
@@ -280,6 +295,7 @@ from .main import transform</code></pre>
 <li><a href="#qscore">QSCORE</a></li>
 </ul>
 </li>
+<li><a href="#miscellaneous-functions">Miscellaneous functions</a></li>
 </ul>
 </li>
 </ul>
