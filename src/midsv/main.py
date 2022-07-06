@@ -1,17 +1,17 @@
 from __future__ import annotations
-from src.mids import format
-from src.mids import convert
-from src.mids import proofread
+from src.midsv import format
+from src.midsv import convert
+from src.midsv import proofread
 
 
 def transform(sam: list[list]) -> list[dict]:
-    """Integrated function to perform MIDS conversion
+    """Integrated function to perform MIDSV conversion
 
     Args:
         sam (list[list]): Lists ot SAM format
 
     Returns:
-        list[dict]: Dictionary containing QNAME, RNAME, MIDS, and QSCORE
+        list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     """
 
     format.check_sam_format(sam)
@@ -23,9 +23,9 @@ def transform(sam: list[list]) -> list[dict]:
     samdict = format.remove_overlapped(samdict)
 
     for i, alignment in enumerate(samdict):
-        samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
         samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)

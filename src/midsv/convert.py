@@ -2,7 +2,7 @@ from __future__ import annotations
 import re
 
 ###########################################################
-# MIDS conversion (from CS tag to MIDS)
+# MIDSV conversion (from CS tag to MIDSV)
 ###########################################################
 
 
@@ -13,7 +13,7 @@ def split_cstag(cstag: str) -> list[str]:
     Returns:
         list[str]: splitted CS tags
     Example:
-        >>> from mids import convert
+        >>> from midsv import convert
         >>> cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
         >>> convert.split_cstag(cstag)
         "['=ACGT', '*ag', '=C', '-g', '=T', '+t', '=ACGT']"
@@ -29,112 +29,112 @@ def split_cstag(cstag: str) -> list[str]:
     return cstag_splitted
 
 
-def to_mids(cstag_splitted: list[str]) -> list[str]:
-    """Convert to MIDS
+def to_midsv(cstag_splitted: list[str]) -> list[str]:
+    """Convert to MIDSV
     Args:
         cstag_splitted (list[str]): splitted CS tags
     Returns:
-        list[str]: splitted MIDS
+        list[str]: splitted MIDSV
     Example:
-        >>> from mids import convert
+        >>> from midsv import convert
         >>> cstag_splitted = ['=ACGT', '*ag', '=C', '-gg', '=T', '+t', '=ACGT']
-        >>> convert.to_mids(cstag_splitted)
+        >>> convert.to_midsv(cstag_splitted)
         "['MMMM', 'S', 'M', 'DD', 'M', 'I', 'MMMM']"
     """
-    mids = []
+    midsv = []
     for cs in cstag_splitted:
         num = len(cs) - 1
         if cs.startswith("="):
-            mids.append("M" * num)
+            midsv.append("M" * num)
         elif cs.startswith("+"):
-            mids.append("I" * num)
+            midsv.append("I" * num)
         elif cs.startswith("-"):
-            mids.append("D" * num)
+            midsv.append("D" * num)
         else:
-            mids.append("S")
-    return mids
+            midsv.append("S")
+    return midsv
 
 
-def numerize_insertion(mids: list[str]) -> list[str]:
+def numerize_insertion(midsv: list[str]) -> list[str]:
     """Convert insertion to numeric numbers
     Example:
-        >>> from mids import convert
-        >>> mids = ['MMM', 'III', 'D', 'S']
-        >>> convert.numerize_insertion(mids)
+        >>> from midsv import convert
+        >>> midsv = ['MMM', 'III', 'D', 'S']
+        >>> convert.numerize_insertion(midsv)
         "['MMM', 3, 'D', 'S']"
     """
-    for i, m in enumerate(mids):
+    for i, m in enumerate(midsv):
         if m.startswith("I"):
-            mids[i] = len(m)
-    return mids
+            midsv[i] = len(m)
+    return midsv
 
 
-def slide_insertion(mids_numerized: list[str]) -> list[str]:
+def slide_insertion(midsv_numerized: list[str]) -> list[str]:
     """Append one base from the next index at an inserted base.
 
     Args:
-        mids (list[str]): numerized MIDS
+        midsv (list[str]): numerized MIDSV
 
     Returns:
-        list[str]: slided MIDS
+        list[str]: slided MIDSV
 
     Example:
-        >>> from mids import convert
-        >>> mids = [3, 'M', 4, "S", "MM"]
-        >>> convert.slide_insertion(mids)
+        >>> from midsv import convert
+        >>> midsv = [3, 'M', 4, "S", "MM"]
+        >>> convert.slide_insertion(midsv)
         "['3M', '4S', "MM"]"
     """
-    for i, m in enumerate(mids_numerized):
+    for i, m in enumerate(midsv_numerized):
         if not m:
             continue
-        if i + 1 == len(mids_numerized):
-            mids_numerized[i] = str(mids_numerized[i])
+        if i + 1 == len(midsv_numerized):
+            midsv_numerized[i] = str(midsv_numerized[i])
             continue
         if isinstance(m, int):
-            mids_numerized[i] = str(m) + mids_numerized[i + 1][0]
-            mids_numerized[i + 1] = mids_numerized[i + 1][1:]
-    return [m for m in mids_numerized if m]
+            midsv_numerized[i] = str(m) + midsv_numerized[i + 1][0]
+            midsv_numerized[i + 1] = midsv_numerized[i + 1][1:]
+    return [m for m in midsv_numerized if m]
 
 
-def to_string(mids: list[str]) -> str:
+def to_string(midsv: list[str]) -> str:
     """Convert to string in CSV format
 
     Args:
-        mids (list[str]): a list of MIDS
+        midsv (list[str]): a list of MIDSV
 
     Returns:
-        str: MIDS
+        str: MIDSV
 
     Example:
-        >>> from mids import convert
-        >>> mids = ['3M', '4S', "MM", "DDD"]
-        >>> convert.to_string(mids)
+        >>> from midsv import convert
+        >>> midsv = ['3M', '4S', "MM", "DDD"]
+        >>> convert.to_string(midsv)
         "3M,4S,M,M,D,D,D"
     """
-    mids_csv = []
-    for m in mids:
+    midsv_csv = []
+    for m in midsv:
         if m[0].isdigit():
-            mids_csv.append(m)
+            midsv_csv.append(m)
             continue
         for mm in m:
-            mids_csv.append(mm)
-    return ",".join(mids_csv)
+            midsv_csv.append(mm)
+    return ",".join(midsv_csv)
 
 
-def cstag_to_mids(cstag: str) -> str:
-    """Integrated function to convert cstag to MIDS
+def cstag_to_midsv(cstag: str) -> str:
+    """Integrated function to convert cstag to MIDSV
 
     Args:
         cstag (str): a long format cstag
 
     Returns:
-        str: MIDS format
+        str: MIDSV format
     """
     cstag_splited = split_cstag(cstag)
-    mids_splited = to_mids(cstag_splited)
-    mids_numerized = numerize_insertion(mids_splited)
-    mids_slided = slide_insertion(mids_numerized)
-    return to_string(mids_slided)
+    midsv_splited = to_midsv(cstag_splited)
+    midsv_numerized = numerize_insertion(midsv_splited)
+    midsv_slided = slide_insertion(midsv_numerized)
+    return to_string(midsv_slided)
 
 
 ###########################################################
@@ -143,7 +143,7 @@ def cstag_to_mids(cstag: str) -> str:
 
 
 def cstag_to_cssplit(cstag: str) -> str:
-    """Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDS
+    """Generate CS SPLIT, a comma-separated nucreotide sequence corresponding to MIDSV
 
     Args:
         cstag (str): a long format cstag
@@ -195,20 +195,20 @@ def ascii_to_phred(ascii: str) -> str:
     return str(ord(ascii) - 33)
 
 
-def qual_to_qscore(qual: str, mids: str) -> str:
+def qual_to_qscore(qual: str, midsv: str) -> str:
     """Convert ascii quality to phred score.
-    To adjust the same length as MIDS, insertion is discarded and deletion is interpolated as -1.
+    To adjust the same length as MIDSV, insertion is discarded and deletion is interpolated as -1.
 
     Args:
         qual (str): QUAL in SAM format
-        mids (str): MIDS
+        midsv (str): MIDSV
 
     Returns:
         str: Phred quality score with indel compensation
     """
     qscore = []
     idx = 0
-    for m in mids.split(","):
+    for m in midsv.split(","):
         if m == "D":
             qscore.append(str(-1))
             idx -= 1

@@ -1,7 +1,7 @@
 from pathlib import Path
-from src.mids import format
-from src.mids import convert
-from src.mids import proofread
+from src.midsv import format
+from src.midsv import convert
+from src.midsv import proofread
 
 from importlib import reload
 
@@ -41,12 +41,12 @@ def test_pad():
     sqheaders = format.extract_sqheaders(sam)
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
-        samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
         samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
     test = proofread.pad(samdict, sqheaders)
     for t in test:
-        mlen = len(t["MIDS"].split(","))
+        mlen = len(t["MIDSV"].split(","))
         clen = len(t["CSSPLIT"].split(","))
         qlen = len(t["QSCORE"].split(","))
         assert mlen == clen == qlen

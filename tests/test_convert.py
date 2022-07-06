@@ -1,11 +1,11 @@
 from pathlib import Path
-from src.mids import convert, format
+from src.midsv import convert, format
 from importlib import reload
 
 reload(convert)
 
 ###########################################################
-# MIDS conversion
+# MIDSVV conversion
 ###########################################################
 
 
@@ -16,44 +16,44 @@ def test_split():
     assert test == answer
 
 
-def test_to_mids():
+def test_to_midsv():
     cstag_splitted = ["=ACGT", "*ag", "=C", "-gg", "=T", "+t", "=ACGT"]
-    test = convert.to_mids(cstag_splitted)
+    test = convert.to_midsv(cstag_splitted)
     answer = ["MMMM", "S", "M", "DD", "M", "I", "MMMM"]
     assert test == answer
 
 
 def test_numerize_insertion():
-    mids = ["MMM", "III", "D", "S"]
-    test = convert.numerize_insertion(mids)
+    midsv = ["MMM", "III", "D", "S"]
+    test = convert.numerize_insertion(midsv)
     answer = ["MMM", 3, "D", "S"]
     assert test == answer
 
 
 def test_slide_insertion():
-    mids = [3, "M", 4, "S", "MM"]
-    test = convert.slide_insertion(mids)
+    midsv = [3, "M", 4, "S", "MM"]
+    test = convert.slide_insertion(midsv)
     answer = ["3M", "4S", "MM"]
     assert test == answer
 
 
-def test_cstag_to_mids():
+def test_cstag_to_midsv():
     cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    test = convert.cstag_to_mids(cstag)
+    test = convert.cstag_to_midsv(cstag)
     answer = "M,M,M,M,S,M,D,M,1M,M,M,M"
     assert test == answer
 
 
-def test_cstag_to_mids_insertion_at_last():
+def test_cstag_to_midsv_insertion_at_last():
     cstag = "cs:Z:+tt*ag-aa+tt"
-    test = convert.cstag_to_mids(cstag)
+    test = convert.cstag_to_midsv(cstag)
     answer = "2S,D,D,2"
     assert test == answer
 
 
 def test_to_string():
-    mids = ["3M", "4S", "MM", "DDD"]
-    test = convert.to_string(mids)
+    midsv = ["3M", "4S", "MM", "DDD"]
+    test = convert.to_string(midsv)
     answer = "3M,4S,M,M,D,D,D"
     assert test == answer
 
@@ -98,40 +98,40 @@ def test_cstag_to_cssplit_insertion_at_last():
 
 def test_cstag_to_qscore_insertion():
     qual = "@!!!@@"
-    mids = "M,3M,D,M"
-    test = convert.qual_to_qscore(qual, mids)
+    midsv = "M,3M,D,M"
+    test = convert.qual_to_qscore(qual, midsv)
     answer = "31,0|0|0|31,-1,31"
     assert test == answer
 
 
 def test_cstag_to_qscore_deletion():
     qual = "@0"
-    mids = "M,D,D,D,D,D,M"
-    test = convert.qual_to_qscore(qual, mids)
+    midsv = "M,D,D,D,D,D,M"
+    test = convert.qual_to_qscore(qual, midsv)
     answer = "31,-1,-1,-1,-1,-1,15"
     assert test == answer
 
 
 def test_cstag_to_qscore_substitution():
     qual = "@012@"
-    mids = "M,S,S,S,M"
-    test = convert.qual_to_qscore(qual, mids)
+    midsv = "M,S,S,S,M"
+    test = convert.qual_to_qscore(qual, midsv)
     answer = "31,15,16,17,31"
     assert test == answer
 
 
 def test_cstag_to_qscore_indel():
     qual = "@0@"
-    mids = "M,1D,D,M"
-    test = convert.qual_to_qscore(qual, mids)
+    midsv = "M,1D,D,M"
+    test = convert.qual_to_qscore(qual, midsv)
     answer = "31,15|-1,-1,31"
     assert test == answer
 
 
 def test_cstag_to_qscore_ins_sub():
     qual = "@012!"
-    mids = "M,3S"
-    test = convert.qual_to_qscore(qual, mids)
+    midsv = "M,3S"
+    test = convert.qual_to_qscore(qual, midsv)
     answer = "31,15|16|17|0"
     assert test == answer
 
@@ -141,8 +141,8 @@ def test_qual_to_qscore_real():
     sam = format.read_sam(str(sampath))
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
-        samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
+        samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
     test = samdict
     answer = Path("tests", "data", "phredscore", "answer.txt").read_text()
     answer = eval(answer)

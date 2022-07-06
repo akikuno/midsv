@@ -1,8 +1,8 @@
 from pathlib import Path
-from src.mids import transform
-from src.mids import format
-from src.mids import convert
-from src.mids import proofread
+from src.midsv import transform
+from src.midsv import format
+from src.midsv import convert
+from src.midsv import proofread
 
 
 def test_integration_subindelinv():
@@ -23,10 +23,10 @@ def test_integration_integrate():
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
-        MIDS = alignment["MIDS"]
+        MIDSV = alignment["MIDSV"]
         QSCORE = alignment["QSCORE"]
         RLEN = sqheaders[RNAME]
-        mlen = len(MIDS.split(","))
+        mlen = len(MIDSV.split(","))
         qlen = len(QSCORE.split(","))
         assert mlen == qlen == RLEN
 
@@ -44,13 +44,13 @@ def test_integration_eachcomponent():
     samdict = format.remove_overlapped(samdict)
 
     for i, alignment in enumerate(samdict):
-        samdict[i]["MIDS"] = convert.cstag_to_mids(alignment["CSTAG"])
+        samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
 
     for i, alignment in enumerate(samdict):
         samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
 
     for i, alignment in enumerate(samdict):
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDS"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
@@ -58,11 +58,11 @@ def test_integration_eachcomponent():
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
-        MIDS = alignment["MIDS"]
+        MIDSV = alignment["MIDSV"]
         CSSPLIT = alignment["CSSPLIT"]
         QSCORE = alignment["QSCORE"]
         RLEN = sqheaders[RNAME]
-        mlen = len(MIDS.split(","))
+        mlen = len(MIDSV.split(","))
         clen = len(CSSPLIT.split(","))
         qlen = len(QSCORE.split(","))
         assert RLEN == mlen == clen == qlen

@@ -4,11 +4,11 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="mids",
-    version="0.1.0",
+    name="midsv",
+    version="0.2.0",
     author="Akihiro Kuno",
     author_email="akuno@md.tsukuba.ac.jp",
-    description="Python module to convert SAM to MIDS format.",
+    description="Python module to convert SAM to MIDSV format.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/akikuno/mids",

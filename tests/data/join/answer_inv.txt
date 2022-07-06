@@ -1,1 +1,1 @@
-[{'QNAME': 'inversion-5nt', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDS': 'M,M,M,M,M,m,m,m,m,m,M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A,n,n,n,n,n,A,C,G,T,A', 'QSCORE': '0,0,0,0,0,1,1,1,1,1,0,0,0,0,0'}]
+[{'QNAME': 'inversion-5nt', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDSV': 'M,M,M,M,M,m,m,m,m,m,M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A,n,n,n,n,n,A,C,G,T,A', 'QSCORE': '0,0,0,0,0,1,1,1,1,1,0,0,0,0,0'}]

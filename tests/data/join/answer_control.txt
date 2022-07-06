@@ -1,1 +1,1 @@
-[{'QNAME': 'control', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDS': 'M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A', 'QSCORE': '0,0,0,0,0'}]
+[{'QNAME': 'control', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDSV': 'M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A', 'QSCORE': '0,0,0,0,0'}]
