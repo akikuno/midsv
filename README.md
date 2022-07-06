@@ -35,7 +35,11 @@ conda install -c bioconda midsv
 
 ## Usage
 
-`midsv.transcorm(sam: list[list])` returns a dictionary incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
+```python
+midsv.transform(sam: list[list])
+```
+
+`midsv.transform()` returns a list of dictionaries incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
 
 Notice `MIDSV`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same reference sequence length.
 
@@ -157,3 +161,22 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 `QSCORE` uses `-1` at deletion sites.
 
 As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sites.
+
+## Miscellaneous functions
+
+```python
+midsv.read_sam(path_of_sam: Union[str, Path]) -> list[list]
+```
+
+`midsv.read_sam` read SAM file into a list of lists.
+
+
+```python
+midsv.check_sam_format(sam: list[list])
+```
+
+`midsv.check_sam_format` checks the followings.
+
+- SQ header
+- CS tag (long form)
+- No long-read spliced alignment

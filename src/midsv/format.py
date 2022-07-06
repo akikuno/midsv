@@ -1,6 +1,7 @@
 from __future__ import annotations
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Union
 from itertools import groupby
 
 ###########################################################
@@ -8,7 +9,9 @@ from itertools import groupby
 ###########################################################
 
 
-def read_sam(path_of_sam: str) -> list[list]:
+def read_sam(path_of_sam: Union[str, Path]) -> list[list]:
+    if "str" in str(type(path_of_sam)):
+        path_of_sam = Path(path_of_sam)
     sam = Path(path_of_sam).read_text().strip().split("\n")
     return [s.split("\t") for s in sam]
 
@@ -53,7 +56,7 @@ def check_alignments(sam: list[list]):
         if idx_cstag == -1:
             raise AttributeError("Input does not have long-formatted cs tag")
         if "~" in alignment[idx_cstag]:
-            raise AttributeError("Spliced long reads are currently not supported")
+            raise AttributeError("long-read spliced alignment are currently not supported")
     if not is_alignment:
         raise AttributeError("No alignment information")
 
