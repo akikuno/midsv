@@ -1,7 +1,8 @@
 from __future__ import annotations
-from src.midsv import format
-from src.midsv import convert
-from src.midsv import proofread
+
+from . import convert
+from . import format
+from . import proofread
 
 
 def transform(sam: list[list]) -> list[dict]:
