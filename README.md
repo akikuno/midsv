@@ -10,17 +10,17 @@ MIDSV provides `MIDSV`, `CSSPLIT`, and `QSCORE`.
 - `CSSPLIT` keeps original nucleotides
 - `QSCORE` provides Phred quality score on each nucleotide
 
-MIDSV details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).  
+MIDSV (formerly named MIDS) details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).  
 
 ## Installation
 
-From [PyPI](https://pypi.org/project/MIDSV/):
+From [PyPI](https://pypi.org/project/midsv/):
 
 ```bash
 pip install midsv
 ```
 
-From [Bioconda](https://anaconda.org/bioconda/MIDSV):
+From [Bioconda](https://anaconda.org/bioconda/midsv):
 
 ```bash
 conda install -c bioconda midsv
@@ -28,14 +28,14 @@ conda install -c bioconda midsv
 
 ## Usage
 
-`MIDSV.transcorm(sam: list[list])` returns a dictionary incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
+`midsv.transcorm(sam: list[list])` returns a dictionary incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
 
 Notice `MIDSV`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same reference sequence length.
 
 (*LN represents the length of a reference sequence).
 
 ```python
-import MIDSV
+import mids
 
 # Perfect match
 
@@ -44,7 +44,7 @@ sam = [
     ['match', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTACGTAC', '0123456789', 'cs:Z:=ACGTACGTAC']
     ]
 
-MIDSV.transform(sam)
+midsv.transform(sam)
 # [{
 #   'QNAME': 'control',
 #   'RNAME': 'example',
@@ -60,7 +60,7 @@ sam = [
     ['indel_sub', '0', 'example', '1', '60', '5M3I1M2D2M', '*', '0', '0', 'ACGTGTTTCGT', '01234!!!56789', 'cs:Z:=ACGT*ag+ttt=C-aa=GT']
     ]
 
-MIDSV.transform(sam)
+midsv.transform(sam)
 # [{
 #   'QNAME': 'indel_sub',
 #   'RNAME': 'example',
@@ -77,7 +77,7 @@ sam = [
     ['large-deletion', '0', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
     ]
 
-MIDSV.transform(sam)
+midsv.transform(sam)
 # [
 #   {'QNAME': 'large-deletion',
 #   'RNAME': 'example',
@@ -95,7 +95,7 @@ sam = [
     ['inversion', '2048', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
     ]
 
-MIDSV.transform(sam)
+midsv.transform(sam)
 # [
 #   {'QNAME': 'inversion',
 #   'RNAME': 'example',
