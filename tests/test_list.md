@@ -19,4 +19,4 @@
 + [ ] large inversion
 
 ## filter_full_length
-+ [ ] either 50 bp are missing
++ [ ] either 50 bp is missing

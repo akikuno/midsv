@@ -126,7 +126,7 @@ midsv.transform(sam)
 | [mdsn]      | Inversion                   |
 | N           | Unknown                     |
 
-`MIDSV` represents insertion as an integer and append the following operators.
+`MIDSV` represents insertion as an integer and appends the following operators.
 
 If five insertions follow three matches, MIDSV returns `5M,M,M` (not `5,M,M,M`) since `5M,M,M` keeps reference sequence length in a comma-separated field.
 
