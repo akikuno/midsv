@@ -1,9 +1,16 @@
 # mids
 
-`mids` is a Python module to manipulate MIDS format.
+`mids` is a Python module to convert SAM to MIDS format.
 
-MIDS is a format that represents Match/Insertion/Deletion/Substitution at each nucleotide of sequencing reads.  
-The details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec002:~:text=Cas%2Dcutting%20site.-,Preprocessing,-We%20performed%20preprocessing).  
+MIDS (match, insertion, deletion, and substitution) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.
+
+MIDS provides `MIDS`, `CSSPLIT`, and `QSCORE`.
+
+- `MIDS` is a simple representation focusing on mutations
+- `CSSPLIT` keeps original nucleotides
+- `QSCORE` provides Phred quality score on each nucleotide
+
+MIDS details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).  
 
 ## Installation
 
@@ -19,12 +26,18 @@ From [Bioconda](https://anaconda.org/bioconda/mids):
 conda install -c bioconda mids
 ```
 
-## Examples
+## Usage
+
+`mids.transcorm(sam: list[list])` returns a dictionary incuding `QNAME`, `RNAME`, `MIDS`, `CSSPLIT`, and `QSCORE`.
+
+Notice `MIDS`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same reference sequence length.
+
+(*LN represents the length of a reference sequence).
 
 ```python
 import mids
 
-# match ---------------------------------------------------
+# Perfect match
 
 sam = [
     ['@SQ', 'SN:example', 'LN:10'],
@@ -32,39 +45,31 @@ sam = [
     ]
 
 mids.transform(sam)
-# [{'QNAME': 'match', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,M,M,M,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
+# [{
+#   'QNAME': 'control',
+#   'RNAME': 'example',
+#   'MIDS': 'M,M,M,M,M,M,M,M,M,M',
+#   'CSSPLIT': '=A,=C,=G,=T,=A,=C,=G,=T,=A,=C',
+#   'QSCORE': '15,16,17,18,19,20,21,22,23,24'
+# }]
 
-# insertion -----------------------------------------------
-
-sam = [
-    ['@SQ', 'SN:example', 'LN:10'],
-    ['insertion', '0', 'example', '1', '60', '5M3I5M', '*', '0', '0', 'ACGTATTTCGTAC', '01234!!!56789', 'cs:Z:=ACGTA+ttt=CGTAC']
-    ]
-
-mids.transform(sam)
-# [{'QNAME': 'insertion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,3M,M,M,M,M', 'CSSPLIT': 'A,C,G,T,A,tttC,G,T,A,C', 'QSCORE': '15,16,17,18,19,0|0|0|20,21,22,23,24'}]
-
-# deleton -------------------------------------------------
+# Insertion, deletion and substitution
 
 sam = [
     ['@SQ', 'SN:example', 'LN:10'],
-    ['deletion', '0', 'example', '1', '60', '5M3D2M', '*', '0', '0', 'ACGTAAC', '0123489', 'cs:Z:=ACGTA-cgt=AC']
+    ['indel_sub', '0', 'example', '1', '60', '5M3I1M2D2M', '*', '0', '0', 'ACGTGTTTCGT', '01234!!!56789', 'cs:Z:=ACGT*ag+ttt=C-aa=GT']
     ]
 
 mids.transform(sam)
-# [{'QNAME': 'deletion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,D,D,D,M,M', 'QSCORE': '15,16,17,18,19,-1,-1,-1,23,24'}]
+# [{
+#   'QNAME': 'indel_sub',
+#   'RNAME': 'example',
+#   'MIDS': 'M,M,M,M,S,3M,D,D,M,M',
+#   'CSSPLIT': '=A,=C,=G,=T,*AG,+T|+T|+T|=C,-A,-A,=G,=T',
+#   'QSCORE': '15,16,17,18,19,0|0|0|20,-1,-1,21,22'
+# }]
 
-# substitution --------------------------------------------
-
-sam = [
-    ['@SQ', 'SN:example', 'LN:10'],
-    ['substitution', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTGCGTAC', '01234!6789', 'cs:Z:=ACGT*ag=CGTAC']
-    ]
-
-mids.transform(sam)
-# [{'QNAME': 'substitution', 'RNAME': 'example', 'MIDS': 'M,M,M,M,S,M,M,M,M,M', 'QSCORE': '15,16,17,18,19,0,21,22,23,24'}]
-
-# large deletion ------------------------------------------
+# Large deletion
 
 sam = [
     ['@SQ', 'SN:example', 'LN:10'],
@@ -73,9 +78,15 @@ sam = [
     ]
 
 mids.transform(sam)
-# [{'QNAME': 'large-deletion', 'RNAME': 'example', 'MIDS': 'M,M,D,D,D,D,D,D,M,M', 'QSCORE': '15,16,-1,-1,-1,-1,-1,-1,23,24'}]
+# [
+#   {'QNAME': 'large-deletion',
+#   'RNAME': 'example',
+#   'MIDS': 'M,M,D,D,D,D,D,D,M,M',
+#   'CSSPLIT': '=A,=C,N,N,N,N,N,N,=A,=C',
+#   'QSCORE': '15,16,-1,-1,-1,-1,-1,-1,23,24'}
+# ]
 
-# inversion -----------------------------------------------
+# Inversion
 
 sam = [
     ['@SQ', 'SN:example', 'LN:10'],
@@ -85,6 +96,57 @@ sam = [
     ]
 
 mids.transform(sam)
-# [{'QNAME': 'inversion', 'RNAME': 'example', 'MIDS': 'M,M,M,M,M,m,m,m,M,M', 'QSCORE': '15,16,17,18,19,20,21,22,23,24'}]
+# [
+#   {'QNAME': 'inversion',
+#   'RNAME': 'example',
+#   'MIDS': 'M,M,M,M,M,m,m,m,M,M',
+#   'CSSPLIT': '=A,=C,=G,=T,=A,=c,=g,=t,=A,=C',
+#   'QSCORE': '15,16,17,18,19,20,21,22,23,24'}
+# ]
 
 ```
+
+## Operators
+
+### MIDS
+
+| Op          | Description                 |
+| ----------- | --------------------------- |
+| M           | Identical sequence          |
+| [1-9][0-9]+ | Insertion to the reference  |
+| D           | Deletion from the reference |
+| S           | Substitution                |
+| [mdsn]      | Inversion                   |
+| N           | Unknown                     |
+
+`MIDS` represents insertion as an integer and append the following operators.
+
+If five insertions follow three matches, MIDS returns `5M,M,M` (not `5,M,M,M`) since `5M,M,M` keeps reference sequence length in a comma-separated field.
+
+### CSSPLIT
+
+| Op  | Regex          | Description                  |
+| --- | -------------- | ---------------------------- |
+| =   | [ACGTN]        | Identical sequence           |
+| +   | [ACGTN]        | Insertion to the reference   |
+| -   | [ACGTN]        | Deletion from the reference  |
+| *   | [ACGTN][ACGTN] | Substitution                 |
+|     | [acgtn]        | Inversion                    |
+| N   |                | Unknown                      |
+| \|  |                | Separater at insertion sites |
+
+`CSSPLIT` uses `|` to separate nucleotides in insertion sites.
+
+Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `"+A|+C|+G|+T|=A".split("|")` in Python.
+
+### QSCORE
+
+
+| Op  | Description                  |
+| --- | ---------------------------- |
+| -1  | Unknown                      |
+| \|  | Separater at insertion sites |
+
+`QSCORE` uses `-1` at deletion sites.
+
+As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sites.
