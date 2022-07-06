@@ -29,8 +29,8 @@
 <a href="https://pypi.org/project/midsv/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/midsv.svg?label=Python&amp;color=blue&amp;style=flat-square"></a>
 <a href="https://pypi.org/project/midsv/"><img alt="PyPI" src="https://img.shields.io/pypi/v/midsv.svg?label=PyPI&amp;color=orange&amp;style=flat-square"></a>
 <a href="https://anaconda.org/bioconda/midsv"><img alt="Bioconda" src="https://img.shields.io/conda/v/bioconda/midsv?label=Bioconda&amp;color=orange&amp;style=flat-square"></a></p>
-<h1 id="midsv">MIDSV</h1>
-<p><code>MIDSV</code> is a Python module to convert SAM to MIDSV format.</p>
+<h1 id="midsv">midsv</h1>
+<p><code><a title="midsv" href="#midsv">midsv</a></code> is a Python module to convert SAM to MIDSV format.</p>
 <p>MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.</p>
 <p>MIDSV provides <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
 <ul>
@@ -53,7 +53,7 @@
 <p><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
 <p>Notice <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code> are comma-separated and have the same reference sequence length.</p>
 <p>(*LN represents the length of a reference sequence).</p>
-<pre><code class="language-python">import mids
+<pre><code class="language-python">import midsv
 
 # Perfect match
 
@@ -287,7 +287,7 @@ from .format import read_sam, check_sam_format</code></pre>
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#midsv">MIDSV</a><ul>
+<li><a href="#midsv">midsv</a><ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#usage">Usage</a></li>
 <li><a href="#operators">Operators</a><ul>
