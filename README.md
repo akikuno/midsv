@@ -1,3 +1,10 @@
+[![Licence](https://img.shields.io/badge/License-MIT-9cf.svg?style=flat-square)](https://choosealicense.com/licenses/mit/)
+[![Test](https://img.shields.io/github/workflow/status/akikuno/midsv/CI?json&label=Test&color=brightgreen&style=flat-square)](https://github.com/akikuno/midsv/actions)
+[![Python](https://img.shields.io/pypi/pyversions/midsv.svg?label=Python&color=blue&style=flat-square)](https://pypi.org/project/midsv/)
+[![PyPI](https://img.shields.io/pypi/v/midsv.svg?label=PyPI&color=orange&style=flat-square)](https://pypi.org/project/midsv/)
+[![Bioconda](https://img.shields.io/conda/v/bioconda/midsv?label=Bioconda&color=orange&style=flat-square)](https://anaconda.org/bioconda/midsv)
+
+
 # MIDSV
 
 `MIDSV` is a Python module to convert SAM to MIDSV format.
