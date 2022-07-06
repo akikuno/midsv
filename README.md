@@ -6,9 +6,9 @@
 [![Bioconda](https://img.shields.io/conda/v/bioconda/midsv?label=Bioconda&color=orange&style=flat-square)](https://anaconda.org/bioconda/midsv)
 
 
-# MIDSV
+# midsv
 
-`MIDSV` is a Python module to convert SAM to MIDSV format.
+`midsv` is a Python module to convert SAM to MIDSV format.
 
 MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.
 
@@ -47,7 +47,7 @@ Notice `MIDSV`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same re
 (*LN represents the length of a reference sequence).
 
 ```python
-import mids
+import midsv
 
 # Perfect match
 
