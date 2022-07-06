@@ -71,7 +71,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
             current_start = alignments[i][&#34;POS&#34;] - 1
             gap = current_start - previous_end
             sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
-            sam_dict[&#34;CSSPLIT&#34;] += &#34;,n&#34; * gap
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
             sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # 4. Update sam_dict
             sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
@@ -89,7 +89,7 @@ def pad(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
         sqheaders (dict): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: dictionarized SAM with padding as &#34;=&#34; in MIDS and &#34;-1&#34; in QUAL
+        list[dict]: dictionarized SAM with padding as &#34;N&#34; in MIDS and CSSPLIT, and &#34;-1&#34; in QUAL
     &#34;&#34;&#34;
     samdict_padding = []
     for alignment in samdict:
@@ -97,8 +97,8 @@ def pad(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
         leftpad = max(0, alignment[&#34;POS&#34;] - 1)
         rightpad = reflength - (len(alignment[&#34;MIDS&#34;].split(&#34;,&#34;)) + leftpad)
         rightpad = max(0, rightpad)
-        leftpad_mids, rightpad_mids = &#34;=,&#34; * leftpad, &#34;,=&#34; * rightpad
-        leftpad_cssplit, rightpad_cssplit = &#34;n,&#34; * leftpad, &#34;,n&#34; * rightpad
+        leftpad_mids, rightpad_mids = &#34;N,&#34; * leftpad, &#34;,N&#34; * rightpad
+        leftpad_cssplit, rightpad_cssplit = &#34;N,&#34; * leftpad, &#34;,N&#34; * rightpad
         leftpad_qscore, rightpad_qscore = &#34;-1,&#34; * leftpad, &#34;,-1&#34; * rightpad
         alignment[&#34;MIDS&#34;] = leftpad_mids + alignment[&#34;MIDS&#34;] + rightpad_mids
         alignment[&#34;CSSPLIT&#34;] = leftpad_cssplit + alignment[&#34;CSSPLIT&#34;] + rightpad_cssplit
@@ -188,7 +188,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
             current_start = alignments[i][&#34;POS&#34;] - 1
             gap = current_start - previous_end
             sam_dict[&#34;MIDS&#34;] += &#34;,D&#34; * gap
-            sam_dict[&#34;CSSPLIT&#34;] += &#34;,n&#34; * gap
+            sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
             sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # 4. Update sam_dict
             sam_dict[&#34;MIDS&#34;] += &#34;,&#34; + alignment[&#34;MIDS&#34;]
@@ -213,7 +213,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[dict]</code></dt>
-<dd>dictionarized SAM with padding as "=" in MIDS and "-1" in QUAL</dd>
+<dd>dictionarized SAM with padding as "N" in MIDS and CSSPLIT, and "-1" in QUAL</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -227,7 +227,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
         sqheaders (dict): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: dictionarized SAM with padding as &#34;=&#34; in MIDS and &#34;-1&#34; in QUAL
+        list[dict]: dictionarized SAM with padding as &#34;N&#34; in MIDS and CSSPLIT, and &#34;-1&#34; in QUAL
     &#34;&#34;&#34;
     samdict_padding = []
     for alignment in samdict:
@@ -235,8 +235,8 @@ def select(samdict: list[dict]) -&gt; list[dict]:
         leftpad = max(0, alignment[&#34;POS&#34;] - 1)
         rightpad = reflength - (len(alignment[&#34;MIDS&#34;].split(&#34;,&#34;)) + leftpad)
         rightpad = max(0, rightpad)
-        leftpad_mids, rightpad_mids = &#34;=,&#34; * leftpad, &#34;,=&#34; * rightpad
-        leftpad_cssplit, rightpad_cssplit = &#34;n,&#34; * leftpad, &#34;,n&#34; * rightpad
+        leftpad_mids, rightpad_mids = &#34;N,&#34; * leftpad, &#34;,N&#34; * rightpad
+        leftpad_cssplit, rightpad_cssplit = &#34;N,&#34; * leftpad, &#34;,N&#34; * rightpad
         leftpad_qscore, rightpad_qscore = &#34;-1,&#34; * leftpad, &#34;,-1&#34; * rightpad
         alignment[&#34;MIDS&#34;] = leftpad_mids + alignment[&#34;MIDS&#34;] + rightpad_mids
         alignment[&#34;CSSPLIT&#34;] = leftpad_cssplit + alignment[&#34;CSSPLIT&#34;] + rightpad_cssplit
