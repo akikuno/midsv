@@ -245,7 +245,11 @@ def qual_to_qscore(qual: str, mids: str) -&gt; str:
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + &#34;|&#34;)
-            insertion.append(ascii_to_phred(qual[j + 1]))
+            if m[-1] == &#34;D&#34;:
+                insertion.append(&#34;-1&#34;)
+                idx -= 1
+            else:
+                insertion.append(ascii_to_phred(qual[j + 1]))
             qscore.append(&#34;&#34;.join(insertion))
             idx += num_insertion
         else:
@@ -450,7 +454,11 @@ To adjust the same length as MIDS, insertion is discarded and deletion is interp
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + &#34;|&#34;)
-            insertion.append(ascii_to_phred(qual[j + 1]))
+            if m[-1] == &#34;D&#34;:
+                insertion.append(&#34;-1&#34;)
+                idx -= 1
+            else:
+                insertion.append(ascii_to_phred(qual[j + 1]))
             qscore.append(&#34;&#34;.join(insertion))
             idx += num_insertion
         else:
