@@ -1,15 +1,16 @@
 from pathlib import Path
+from pprint import pprint
 from src.mids import transform
 from src.mids import format
 from src.mids import convert
 from src.mids import proofread
 
 
-def test_integration_subindel():
-    sampath = Path("tests", "data", "integrate", "subindel_cslong_10bp.sam")
+def test_integration_subindelinv():
+    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = format.read_sam(str(sampath))
     test = transform(sam)
-    answer = Path("tests", "data", "integrate", "answer.txt").read_text()
+    answer = Path("tests", "data", "integrate", "answer_integrate.txt").read_text()
     answer = eval(answer)
     assert test == answer
 

@@ -150,32 +150,40 @@ def cstag_to_cssplit(cstag: str) -> str:
 
     Returns:
         str: cs split
+
+    Examples:
+        >>> cstag = "cs:Z:=A+ttt=CC-aa=T*ag=TT"
+        >>> test = convert.cstag_to_cssplit(cstag)
+        "=A,+T|+T|+T|=C,=C,-A,-A,=T,*AG,=T,=T"
     """
     cstag_list = split_cstag(cstag)
     cssplit = []
     for i, cs in enumerate(cstag_list):
+        op = cs[0]
         if len(cs) == 1:
             continue
-        if cs[0] == "+":
+        if op == "+":
             insertion = list(cs[1:])
+            insertion = "+" + "|+".join(insertion)
             if i + 1 == len(cstag_list):
-                cssplit.append("".join(insertion))
+                cssplit.append(insertion)
                 break
             next_cstag = cstag_list[i + 1]
             next_op = next_cstag[0]
             if next_op == "*":
-                next_cs = next_cstag[-1]
-                cstag_list[i + 1] = next_op
+                cssplit.append(insertion + "|" + next_cstag)
+                cstag_list[i + 1] = "*"
             else:
-                next_cs = next_cstag[1]
                 cstag_list[i + 1] = next_op + next_cstag[2:]
-            insertion.append(next_cs)
-            cssplit.append("".join(insertion))
-        elif cs[0] == "*":
-            cssplit.append(cs[-1])
+                insertion = insertion + "|" + next_cstag[:2]
+                cssplit.append(insertion)
+        elif op == "*":
+            cssplit.append(cs)
         else:
-            cssplit.append(",".join(cs[1:]))
-    return ",".join(cssplit)
+            cs = list(cs[1:])
+            cs = op + f",{op}".join(cs)
+            cssplit.append(cs)
+    return ",".join([cs.upper() for cs in cssplit])
 
 
 ###########################################################
@@ -216,3 +224,4 @@ def qual_to_qscore(qual: str, mids: str) -> str:
             qscore.append(ascii_to_phred(qual[idx]))
         idx += 1
     return ",".join(qscore)
+

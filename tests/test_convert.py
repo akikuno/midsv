@@ -63,17 +63,31 @@ def test_to_string():
 ###########################################################
 
 
-def test_cstag_to_cssplit():
-    cstag = "cs:Z:=A+ttt=C-aa=T*ag=TT"
+def test_cstag_to_cssplit_repeat_match():
+    cstag = "cs:Z:=ACGTACGT"
     test = convert.cstag_to_cssplit(cstag)
-    answer = "A,tttC,a,a,T,g,T,T"
+    answer = "=A,=C,=G,=T,=A,=C,=G,=T"
+    assert test == answer
+
+
+def test_cstag_to_cssplit():
+    cstag = "cs:Z:=A+ttt=CC-aa=T*ag=TT"
+    test = convert.cstag_to_cssplit(cstag)
+    answer = "=A,+T|+T|+T|=C,=C,-A,-A,=T,*AG,=T,=T"
+    assert test == answer
+
+
+def test_cstag_to_cssplit_insertion_substitution():
+    cstag = "cs:Z:=A+tt*ag-aa"
+    test = convert.cstag_to_cssplit(cstag)
+    answer = "=A,+T|+T|*AG,-A,-A"
     assert test == answer
 
 
 def test_cstag_to_cssplit_insertion_at_last():
     cstag = "cs:Z:+tt*ag-aa+tt"
     test = convert.cstag_to_cssplit(cstag)
-    answer = "ttg,a,a,tt"
+    answer = "+T|+T|*AG,-A,-A,+T|+T"
     assert test == answer
 
 
