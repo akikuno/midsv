@@ -48,7 +48,7 @@
 <pre><code class="language-bash">conda install -c bioconda midsv
 </code></pre>
 <h2 id="usage">Usage</h2>
-<pre><code class="language-python">midsv.transform(sam: list[list])
+<pre><code class="language-python">midsv.transform(sam: list[list]) -&gt; list[dict]
 </code></pre>
 <p><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
 <p>Notice <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code> are comma-separated and have the same reference sequence length.</p>
