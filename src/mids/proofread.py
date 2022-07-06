@@ -43,7 +43,7 @@ def join(sam: list[dict]) -> list[dict]:
             current_start = alignments[i]["POS"] - 1
             gap = current_start - previous_end
             sam_dict["MIDS"] += ",D" * gap
-            sam_dict["CSSPLIT"] += ",n" * gap
+            sam_dict["CSSPLIT"] += ",N" * gap
             sam_dict["QSCORE"] += ",-1" * gap
             # 4. Update sam_dict
             sam_dict["MIDS"] += "," + alignment["MIDS"]
@@ -61,7 +61,7 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
         sqheaders (dict): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: dictionarized SAM with padding as "=" in MIDS and "-1" in QUAL
+        list[dict]: dictionarized SAM with padding as "N" in MIDS and CSSPLIT, and "-1" in QUAL
     """
     samdict_padding = []
     for alignment in samdict:
@@ -69,8 +69,8 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
         leftpad = max(0, alignment["POS"] - 1)
         rightpad = reflength - (len(alignment["MIDS"].split(",")) + leftpad)
         rightpad = max(0, rightpad)
-        leftpad_mids, rightpad_mids = "=," * leftpad, ",=" * rightpad
-        leftpad_cssplit, rightpad_cssplit = "n," * leftpad, ",n" * rightpad
+        leftpad_mids, rightpad_mids = "N," * leftpad, ",N" * rightpad
+        leftpad_cssplit, rightpad_cssplit = "N," * leftpad, ",N" * rightpad
         leftpad_qscore, rightpad_qscore = "-1," * leftpad, ",-1" * rightpad
         alignment["MIDS"] = leftpad_mids + alignment["MIDS"] + rightpad_mids
         alignment["CSSPLIT"] = leftpad_cssplit + alignment["CSSPLIT"] + rightpad_cssplit
