@@ -11,7 +11,7 @@ setuptools.setup(
     description="Python module to convert SAM to MIDSV format.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/akikuno/mids",
+    url="https://github.com/akikuno/midsv",
     packages=setuptools.find_packages(where="src",),
     package_dir={"": "src"},
     classifiers=[

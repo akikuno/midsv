@@ -1,4 +1,5 @@
 [![Licence](https://img.shields.io/badge/License-MIT-9cf.svg?style=flat-square)](https://choosealicense.com/licenses/mit/)
+[![Docs](https://img.shields.io/badge/Docs-passing-informational.svg?style=flat-square&color=brightgreen)](https://akikuno.github.io/midsv/midsv/)
 [![Test](https://img.shields.io/github/workflow/status/akikuno/midsv/CI?json&label=Test&color=brightgreen&style=flat-square)](https://github.com/akikuno/midsv/actions)
 [![Python](https://img.shields.io/pypi/pyversions/midsv.svg?label=Python&color=blue&style=flat-square)](https://pypi.org/project/midsv/)
 [![PyPI](https://img.shields.io/pypi/v/midsv.svg?label=PyPI&color=orange&style=flat-square)](https://pypi.org/project/midsv/)
