@@ -79,6 +79,35 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_padding
 
 
+def filter_length(samdict: list[dict]) -> list[dict]:
+    """Extract full length reads
+
+    Args:
+        samdict (list[dict]): dictionarized SAM
+
+    Returns:
+        List[dict]: dictionarized SAM filtered by length
+    """
+    reflength = len(samdict[0]["MIDSV"].split(","))
+    if reflength < 100:
+        return samdict
+    samdict_filtered = []
+    for alignment in samdict:
+        if reflength > 1000:
+            threshold = 50
+        else:
+            threshold = 10
+        is_filter = False
+        filterN = ["N"] * threshold
+        leftN = alignment["MIDSV"].split(",")[:threshold]
+        rightN = alignment["MIDSV"].split(",")[-threshold:]
+        if filterN == leftN or filterN == rightN:
+            is_filter = True
+        if not is_filter:
+            samdict_filtered.append(alignment)
+    return samdict_filtered
+
+
 def select(samdict: list[dict]) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 

@@ -30,5 +30,6 @@ def transform(sam: list[list]) -> list[dict]:
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = proofread.filter_length(samdict_polished)
     samdict_polished = proofread.select(samdict_polished)
     return samdict_polished
