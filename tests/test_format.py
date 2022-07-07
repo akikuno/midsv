@@ -37,6 +37,19 @@ def test_check_read_sam_FileNotFoundError():
 ###########################################################
 
 
+def test_check_alignments_cs_short():
+    with pytest.raises(AttributeError) as excinfo:
+        format.check_alignments([["id", "0", "test", "0", "0", "4M", "*", "0", "0", "ACGT", "0000", "cs:Z:*ga:3"]])
+    assert str(excinfo.value) == "Input does not have long-formatted cs tag"
+
+
+def test_check_alignments_start_substitution():
+    with pytest.raises(AssertionError):
+        assert format.check_alignments(
+            [["id", "0", "test", "0", "0", "4M", "*", "0", "0", "ACGT", "0000", "cs:Z:*ga=CGT"]]
+        )
+
+
 def test_check_headers_no_header():
     with pytest.raises(AttributeError) as excinfo:
         format.check_sam_format([["no sq header"]])
@@ -93,6 +106,14 @@ def test_dictionarize_sam_inversion():
     test = format.dictionarize_sam(sam)
     answer = Path("tests", "data", "dictionalize_alignments", "answer_inversion.txt").read_text()
     answer = eval(answer)
+    assert test == answer
+
+
+def test_dictionarize_sam_not_primary():
+    test = format.dictionarize_sam(
+        [["not-primary", "272", "test", "1", "0", "3M", "*", "0", "0", "*", "*", "cs:Z:=AGG"]]
+    )
+    answer = []
     assert test == answer
 
 

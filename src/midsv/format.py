@@ -50,7 +50,7 @@ def check_alignments(sam: list[list]):
             raise AttributeError("Alighment may not be SAM format")
         idx_cstag = -1
         for i, a in enumerate(alignment):
-            if a.startswith("cs:Z:="):
+            if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
                 idx_cstag = i
                 break
         if idx_cstag == -1:
@@ -105,8 +105,10 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
             continue
         if alignment[2] == "*":
             continue
+        if alignment[10] == "*":
+            continue
         for i, a in enumerate(alignment):
-            if a.startswith("cs:Z:="):
+            if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
                 idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(",", "_"),
