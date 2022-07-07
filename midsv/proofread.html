@@ -107,6 +107,35 @@ def pad(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
     return samdict_padding
 
 
+def filter_length(samdict: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;Extract full length reads
+
+    Args:
+        samdict (list[dict]): dictionarized SAM
+
+    Returns:
+        List[dict]: dictionarized SAM filtered by length
+    &#34;&#34;&#34;
+    reflength = len(samdict[0][&#34;MIDSV&#34;].split(&#34;,&#34;))
+    if reflength &lt; 100:
+        return samdict
+    samdict_filtered = []
+    for alignment in samdict:
+        if reflength &gt; 1000:
+            threshold = 50
+        else:
+            threshold = 10
+        is_filter = False
+        filterN = [&#34;N&#34;] * threshold
+        leftN = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)[:threshold]
+        rightN = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)[-threshold:]
+        if filterN == leftN or filterN == rightN:
+            is_filter = True
+        if not is_filter:
+            samdict_filtered.append(alignment)
+    return samdict_filtered
+
+
 def select(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
@@ -129,6 +158,54 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="midsv.proofread.filter_length"><code class="name flex">
+<span>def <span class="ident">filter_length</span></span>(<span>samdict: list[dict]) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extract full length reads</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>samdict</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dd>dictionarized SAM</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[dict]</code></dt>
+<dd>dictionarized SAM filtered by length</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def filter_length(samdict: list[dict]) -&gt; list[dict]:
+    &#34;&#34;&#34;Extract full length reads
+
+    Args:
+        samdict (list[dict]): dictionarized SAM
+
+    Returns:
+        List[dict]: dictionarized SAM filtered by length
+    &#34;&#34;&#34;
+    reflength = len(samdict[0][&#34;MIDSV&#34;].split(&#34;,&#34;))
+    if reflength &lt; 100:
+        return samdict
+    samdict_filtered = []
+    for alignment in samdict:
+        if reflength &gt; 1000:
+            threshold = 50
+        else:
+            threshold = 10
+        is_filter = False
+        filterN = [&#34;N&#34;] * threshold
+        leftN = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)[:threshold]
+        rightN = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)[-threshold:]
+        if filterN == leftN or filterN == rightN:
+            is_filter = True
+        if not is_filter:
+            samdict_filtered.append(alignment)
+    return samdict_filtered</code></pre>
+</details>
+</dd>
 <dt id="midsv.proofread.join"><code class="name flex">
 <span>def <span class="ident">join</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
 </code></dt>
@@ -297,6 +374,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="midsv.proofread.filter_length" href="#midsv.proofread.filter_length">filter_length</a></code></li>
 <li><code><a title="midsv.proofread.join" href="#midsv.proofread.join">join</a></code></li>
 <li><code><a title="midsv.proofread.pad" href="#midsv.proofread.pad">pad</a></code></li>
 <li><code><a title="midsv.proofread.select" href="#midsv.proofread.select">select</a></code></li>
