@@ -78,7 +78,7 @@ def check_alignments(sam: list[list]):
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
         idx_cstag = -1
         for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:=&#34;):
+            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
                 break
         if idx_cstag == -1:
@@ -133,8 +133,10 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
             continue
         if alignment[2] == &#34;*&#34;:
             continue
+        if alignment[10] == &#34;*&#34;:
+            continue
         for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:=&#34;):
+            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(&#34;,&#34;, &#34;_&#34;),
@@ -259,7 +261,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
         idx_cstag = -1
         for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:=&#34;):
+            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
                 break
         if idx_cstag == -1:
@@ -344,8 +346,10 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
             continue
         if alignment[2] == &#34;*&#34;:
             continue
+        if alignment[10] == &#34;*&#34;:
+            continue
         for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:=&#34;):
+            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
         samdict = dict(
             QNAME=alignment[0].replace(&#34;,&#34;, &#34;_&#34;),
