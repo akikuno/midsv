@@ -69,13 +69,13 @@ def check_alignments(sam: list[list]):
     &#34;&#34;&#34;
     is_alignment = False
     for alignment in sam:
-        if &#34;@&#34; in alignment[0]:
+        if alignment[0].startswith(&#34;@&#34;):
+            continue
+        if alignment[2] == &#34;*&#34;:
             continue
         is_alignment = True
         if len(alignment) &lt; 10:
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
-        if alignment[2] == &#34;*&#34;:
-            continue
         idx_cstag = -1
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:=&#34;):
@@ -129,7 +129,7 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
     &#34;&#34;&#34;
     aligns = []
     for alignment in sam:
-        if &#34;@&#34; in alignment[0]:
+        if alignment[0].startswith(&#34;@&#34;):
             continue
         if alignment[2] == &#34;*&#34;:
             continue
@@ -250,13 +250,13 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     &#34;&#34;&#34;
     is_alignment = False
     for alignment in sam:
-        if &#34;@&#34; in alignment[0]:
+        if alignment[0].startswith(&#34;@&#34;):
+            continue
+        if alignment[2] == &#34;*&#34;:
             continue
         is_alignment = True
         if len(alignment) &lt; 10:
             raise AttributeError(&#34;Alighment may not be SAM format&#34;)
-        if alignment[2] == &#34;*&#34;:
-            continue
         idx_cstag = -1
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:=&#34;):
@@ -340,7 +340,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     &#34;&#34;&#34;
     aligns = []
     for alignment in sam:
-        if &#34;@&#34; in alignment[0]:
+        if alignment[0].startswith(&#34;@&#34;):
             continue
         if alignment[2] == &#34;*&#34;:
             continue
