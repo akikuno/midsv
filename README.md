@@ -20,7 +20,7 @@ MIDSV provides `MIDSV`, `CSSPLIT`, and `QSCORE`.
 
 MIDSV (formerly named MIDS) details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).  
 
-## Installation
+# Installation
 
 From [PyPI](https://pypi.org/project/midsv/):
 
@@ -34,7 +34,7 @@ From [Bioconda](https://anaconda.org/bioconda/midsv):
 conda install -c bioconda midsv
 ```
 
-## Usage
+# Usage
 
 ```python
 midsv.transform(sam: list[list]) -> list[dict]
@@ -118,9 +118,9 @@ midsv.transform(sam)
 
 ```
 
-## Operators
+# Operators
 
-### MIDSV
+## MIDSV
 
 | Op          | Description                 |
 | ----------- | --------------------------- |
@@ -135,7 +135,7 @@ midsv.transform(sam)
 
 If five insertions follow three matches, MIDSV returns `5M,M,M` (not `5,M,M,M`) since `5M,M,M` keeps reference sequence length in a comma-separated field.
 
-### CSSPLIT
+## CSSPLIT
 
 | Op  | Regex          | Description                  |
 | --- | -------------- | ---------------------------- |
@@ -151,7 +151,7 @@ If five insertions follow three matches, MIDSV returns `5M,M,M` (not `5,M,M,M`) 
 
 Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `"+A|+C|+G|+T|=A".split("|")` in Python.
 
-### QSCORE
+## QSCORE
 
 
 | Op  | Description                  |
@@ -163,9 +163,9 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 
 As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sites.
 
-## Miscellaneous functions
+# Miscellaneous functions
 
-### Read/Check SAM file
+## Read/Check SAM file
 
 ```python
 midsv.read_sam(path_of_sam: Union[str, Path]) -> list[list]
@@ -184,7 +184,7 @@ midsv.check_sam_format(sam: list[list])
 - CS tag (long form)
 - No long-read spliced alignment
 
-### Read/Write JSON Line (JSONL)
+## Read/Write JSON Line (JSONL)
 
 ```python
 midsv.write_jsonl(dicts: list[dict], path_of_jsonl: Union[str, Path])
@@ -197,3 +197,4 @@ midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -> list[dict]
 Since `midsv` returns a list of dictionaries, `midsv.write_jsonl` outputs it to file as JSONL format.
 
 Conversely, `midsv.read_jsonl` reads JSONL as a list of dictionaries.
+
