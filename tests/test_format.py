@@ -139,3 +139,21 @@ def test_remove_overlapped():
     for t in test:
         assert not t["QNAME"].startswith("overlap")
 
+
+###########################################################
+# Read / Write jsonl
+###########################################################
+
+
+def test_read_jsonl():
+    path_jsonl = Path("tests", "data", "read_jsonl", "test.jsonl")
+    test = format.read_jsonl(path_jsonl)
+    answer = [{"hoge": 1, "fuga": 2}, {"foo": "3", "bar": "4"}]
+    assert test == answer
+
+
+def test_write_jsonl(tmp_path):
+    dicts = [{"hoge": 1, "fuga": 2}, {"foo": "3", "bar": "4"}]
+    output_path = Path(tmp_path, "tmp.jsonl")
+    format.write_jsonl(dicts, output_path)
+    assert output_path.read_text() == '{"hoge": 1, "fuga": 2}\n{"foo": "3", "bar": "4"}\n'

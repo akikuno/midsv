@@ -1,5 +1,6 @@
 from __future__ import annotations
 import re
+import json
 from pathlib import Path
 from typing import Union
 from itertools import groupby
@@ -193,3 +194,23 @@ def remove_overlapped(samdict: list[list]) -> list[list]:
         if not is_overraped:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped
+
+
+###########################################################
+# Read / Write jsonl
+###########################################################
+
+
+def read_jsonl(filepath: Union[str, Path]) -> list[dict]:
+    dicts = []
+    with open(filepath, "r") as f:
+        for line in f:
+            dicts.append(json.JSONDecoder().decode(line))
+    return dicts
+
+
+def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
+    with open(filepath, "w") as output:
+        for d in dicts:
+            json.dump(d, output)
+            output.write("\n")
