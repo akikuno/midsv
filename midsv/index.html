@@ -232,6 +232,7 @@ midsv.transform(sam)
 <p><code>QSCORE</code> uses <code>-1</code> at deletion sites.</p>
 <p>As with <code>CSSPLIT</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
 <h2 id="miscellaneous-functions">Miscellaneous functions</h2>
+<h3 id="readcheck-sam-file">Read/Check SAM file</h3>
 <pre><code class="language-python">midsv.read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]
 </code></pre>
 <p><code>midsv.read_sam</code> read SAM file into a list of lists.</p>
@@ -243,6 +244,13 @@ midsv.transform(sam)
 <li>CS tag (long form)</li>
 <li>No long-read spliced alignment</li>
 </ul>
+<h3 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h3>
+<pre><code class="language-python">midsv.write_jsonl(dicts: list[dict], path_of_jsonl: Union[str, Path])
+</code></pre>
+<pre><code class="language-python">midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -&gt; list[dict]
+</code></pre>
+<p>Since <code><a title="midsv" href="#midsv">midsv</a></code> returns a list of dictionaries, <code>midsv.write_jsonl</code> outputs it to file as JSONL format.</p>
+<p>Conversely, <code>midsv.read_jsonl</code> reads JSONL as a list of dictionaries.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -299,7 +307,11 @@ from .format import write_jsonl</code></pre>
 <li><a href="#qscore">QSCORE</a></li>
 </ul>
 </li>
-<li><a href="#miscellaneous-functions">Miscellaneous functions</a></li>
+<li><a href="#miscellaneous-functions">Miscellaneous functions</a><ul>
+<li><a href="#readcheck-sam-file">Read/Check SAM file</a></li>
+<li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
