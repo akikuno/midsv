@@ -40,14 +40,14 @@
 </ul>
 <p>MIDSV (formerly named MIDS) details are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009">our paper</a>.
 </p>
-<h2 id="installation">Installation</h2>
+<h1 id="installation">Installation</h1>
 <p>From <a href="https://pypi.org/project/midsv/">PyPI</a>:</p>
 <pre><code class="language-bash">pip install midsv
 </code></pre>
 <p>From <a href="https://anaconda.org/bioconda/midsv">Bioconda</a>:</p>
 <pre><code class="language-bash">conda install -c bioconda midsv
 </code></pre>
-<h2 id="usage">Usage</h2>
+<h1 id="usage">Usage</h1>
 <pre><code class="language-python">midsv.transform(sam: list[list]) -&gt; list[dict]
 </code></pre>
 <p><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
@@ -123,8 +123,8 @@ midsv.transform(sam)
 # ]
 
 </code></pre>
-<h2 id="operators">Operators</h2>
-<h3 id="midsv_1">MIDSV</h3>
+<h1 id="operators">Operators</h1>
+<h2 id="midsv_1">MIDSV</h2>
 <table>
 <thead>
 <tr>
@@ -161,7 +161,7 @@ midsv.transform(sam)
 </table>
 <p><code>MIDSV</code> represents insertion as an integer and appends the following operators.</p>
 <p>If five insertions follow three matches, MIDSV returns <code>5M,M,M</code> (not <code>5,M,M,M</code>) since <code>5M,M,M</code> keeps reference sequence length in a comma-separated field.</p>
-<h3 id="cssplit">CSSPLIT</h3>
+<h2 id="cssplit">CSSPLIT</h2>
 <table>
 <thead>
 <tr>
@@ -210,7 +210,7 @@ midsv.transform(sam)
 </table>
 <p><code>CSSPLIT</code> uses <code>|</code> to separate nucleotides in insertion sites.</p>
 <p>Therefore, <code>+A|+C|+G|+T|=A</code> can be easily splited to <code>[+A, +C, +G, +T, =A]</code> by <code>"+A|+C|+G|+T|=A".split("|")</code> in Python.</p>
-<h3 id="qscore">QSCORE</h3>
+<h2 id="qscore">QSCORE</h2>
 <table>
 <thead>
 <tr>
@@ -231,8 +231,8 @@ midsv.transform(sam)
 </table>
 <p><code>QSCORE</code> uses <code>-1</code> at deletion sites.</p>
 <p>As with <code>CSSPLIT</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
-<h2 id="miscellaneous-functions">Miscellaneous functions</h2>
-<h3 id="readcheck-sam-file">Read/Check SAM file</h3>
+<h1 id="miscellaneous-functions">Miscellaneous functions</h1>
+<h2 id="readcheck-sam-file">Read/Check SAM file</h2>
 <pre><code class="language-python">midsv.read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]
 </code></pre>
 <p><code>midsv.read_sam</code> read SAM file into a list of lists.</p>
@@ -244,7 +244,7 @@ midsv.transform(sam)
 <li>CS tag (long form)</li>
 <li>No long-read spliced alignment</li>
 </ul>
-<h3 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h3>
+<h2 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h2>
 <pre><code class="language-python">midsv.write_jsonl(dicts: list[dict], path_of_jsonl: Union[str, Path])
 </code></pre>
 <pre><code class="language-python">midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -&gt; list[dict]
@@ -298,7 +298,7 @@ from .format import write_jsonl</code></pre>
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#midsv">midsv</a><ul>
+<li><a href="#midsv">midsv</a></li>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#usage">Usage</a></li>
 <li><a href="#operators">Operators</a><ul>
@@ -310,8 +310,6 @@ from .format import write_jsonl</code></pre>
 <li><a href="#miscellaneous-functions">Miscellaneous functions</a><ul>
 <li><a href="#readcheck-sam-file">Read/Check SAM file</a></li>
 <li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
