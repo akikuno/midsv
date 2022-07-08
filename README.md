@@ -165,6 +165,8 @@ As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sit
 
 ## Miscellaneous functions
 
+### Read/Check SAM file
+
 ```python
 midsv.read_sam(path_of_sam: Union[str, Path]) -> list[list]
 ```
@@ -181,3 +183,17 @@ midsv.check_sam_format(sam: list[list])
 - SQ header
 - CS tag (long form)
 - No long-read spliced alignment
+
+### Read/Write JSON Line (JSONL)
+
+```python
+midsv.write_jsonl(dicts: list[dict], path_of_jsonl: Union[str, Path])
+```
+
+```python
+midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -> list[dict]
+```
+
+Since `midsv` returns a list of dictionaries, `midsv.write_jsonl` outputs it to file as JSONL format.
+
+Conversely, `midsv.read_jsonl` reads JSONL as a list of dictionaries.
