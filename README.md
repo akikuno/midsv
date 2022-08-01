@@ -157,7 +157,7 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 | Op  | Description                  |
 | --- | ---------------------------- |
 | -1  | Unknown                      |
-| \|  | Separater at insertion sites |
+| \|  | Separator at insertion sites |
 
 `QSCORE` uses `-1` at deletion sites.
 
@@ -187,7 +187,7 @@ midsv.check_sam_format(sam: list[list])
 ## Read/Write JSON Line (JSONL)
 
 ```python
-midsv.write_jsonl(dicts: list[dict], path_of_jsonl: Union[str, Path])
+midsv.write_jsonl(dict: list[dict], path_of_jsonl: Union[str, Path])
 ```
 
 ```python
