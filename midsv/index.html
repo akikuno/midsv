@@ -48,11 +48,12 @@
 <pre><code class="language-bash">conda install -c bioconda midsv
 </code></pre>
 <h1 id="usage">Usage</h1>
-<pre><code class="language-python">midsv.transform(sam: list[list]) -&gt; list[dict]
+<pre><code class="language-python">midsv.transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]
 </code></pre>
-<p><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
-<p>Notice <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code> are comma-separated and have the same reference sequence length.</p>
-<p>(*LN represents the length of a reference sequence).</p>
+<ul>
+<li><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</li>
+<li><code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code> are comma-separated and have the same reference sequence length.</li>
+</ul>
 <pre><code class="language-python">import midsv
 
 # Perfect match
@@ -150,12 +151,12 @@ midsv.transform(sam)
 <td>Substitution</td>
 </tr>
 <tr>
-<td>[mdsn]</td>
-<td>Inversion</td>
-</tr>
-<tr>
 <td>N</td>
 <td>Unknown</td>
+</tr>
+<tr>
+<td>[mdsn]</td>
+<td>Inversion</td>
 </tr>
 </tbody>
 </table>
@@ -197,14 +198,9 @@ midsv.transform(sam)
 <td>Inversion</td>
 </tr>
 <tr>
-<td>N</td>
-<td></td>
-<td>Unknown</td>
-</tr>
-<tr>
 <td>|</td>
 <td></td>
-<td>Separater at insertion sites</td>
+<td>Separater of insertion sites</td>
 </tr>
 </tbody>
 </table>
@@ -229,7 +225,7 @@ midsv.transform(sam)
 </tr>
 </tbody>
 </table>
-<p><code>QSCORE</code> uses <code>-1</code> at deletion sites.</p>
+<p><code>QSCORE</code> uses <code>-1</code> at deletion or unknown nucleotides.</p>
 <p>As with <code>CSSPLIT</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
 <h1 id="miscellaneous-functions">Miscellaneous functions</h1>
 <h2 id="readcheck-sam-file">Read/Check SAM file</h2>

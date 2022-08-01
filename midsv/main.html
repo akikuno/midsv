@@ -33,15 +33,24 @@ from . import format
 from . import proofread
 
 
-def transform(sam: list[list]) -&gt; list[dict]:
+def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
         sam (list[list]): Lists ot SAM format
+        midsv (bool, optional): Output MIDSV. Defaults to True.
+        cssplit (bool, optional): Output CSSPLIT. Defaults to False.
+        qscore (bool, optional): Output QSCORE. Defaults to False.
 
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     &#34;&#34;&#34;
+
+    if not (midsv or cssplit):
+        raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
+
+    if midsv == False and cssplit == True and qscore == True:
+        raise ValueError(&#34;midsv must be True to output QSCORE&#34;)
 
     format.check_sam_format(sam)
 
@@ -52,9 +61,12 @@ def transform(sam: list[list]) -&gt; list[dict]:
     samdict = format.remove_overlapped(samdict)
 
     for i, alignment in enumerate(samdict):
-        samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
-        samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
-        samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
+        if midsv:
+            samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
+        if cssplit:
+            samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
+        if midsv and qscore:
+            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
@@ -71,7 +83,7 @@ def transform(sam: list[list]) -&gt; list[dict]:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.main.transform"><code class="name flex">
-<span>def <span class="ident">transform</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
+<span>def <span class="ident">transform</span></span>(<span>sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Integrated function to perform MIDSV conversion</p>
@@ -79,6 +91,12 @@ def transform(sam: list[list]) -&gt; list[dict]:
 <dl>
 <dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
 <dd>Lists ot SAM format</dd>
+<dt><strong><code>midsv</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Output MIDSV. Defaults to True.</dd>
+<dt><strong><code>cssplit</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Output CSSPLIT. Defaults to False.</dd>
+<dt><strong><code>qscore</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Output QSCORE. Defaults to False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -89,15 +107,24 @@ def transform(sam: list[list]) -&gt; list[dict]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform(sam: list[list]) -&gt; list[dict]:
+<pre><code class="python">def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
         sam (list[list]): Lists ot SAM format
+        midsv (bool, optional): Output MIDSV. Defaults to True.
+        cssplit (bool, optional): Output CSSPLIT. Defaults to False.
+        qscore (bool, optional): Output QSCORE. Defaults to False.
 
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     &#34;&#34;&#34;
+
+    if not (midsv or cssplit):
+        raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
+
+    if midsv == False and cssplit == True and qscore == True:
+        raise ValueError(&#34;midsv must be True to output QSCORE&#34;)
 
     format.check_sam_format(sam)
 
@@ -108,9 +135,12 @@ def transform(sam: list[list]) -&gt; list[dict]:
     samdict = format.remove_overlapped(samdict)
 
     for i, alignment in enumerate(samdict):
-        samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
-        samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
-        samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
+        if midsv:
+            samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
+        if cssplit:
+            samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
+        if midsv and qscore:
+            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
