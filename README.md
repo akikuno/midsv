@@ -37,14 +37,11 @@ conda install -c bioconda midsv
 # Usage
 
 ```python
-midsv.transform(sam: list[list]) -> list[dict]
+midsv.transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -> list[dict]
 ```
 
-`midsv.transform()` returns a list of dictionaries incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
-
-Notice `MIDSV`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same reference sequence length.
-
-(*LN represents the length of a reference sequence).
+- `midsv.transform()` returns a list of dictionaries incuding `QNAME`, `RNAME`, `MIDSV`, `CSSPLIT`, and `QSCORE`.
+- `MIDSV`, `CSSPLIT`, and `QSCORE` are comma-separated and have the same reference sequence length.
 
 ```python
 import midsv
@@ -128,8 +125,8 @@ midsv.transform(sam)
 | [1-9][0-9]+ | Insertion to the reference  |
 | D           | Deletion from the reference |
 | S           | Substitution                |
-| [mdsn]      | Inversion                   |
 | N           | Unknown                     |
+| [mdsn]      | Inversion                   |
 
 `MIDSV` represents insertion as an integer and appends the following operators.
 
@@ -144,8 +141,7 @@ If five insertions follow three matches, MIDSV returns `5M,M,M` (not `5,M,M,M`) 
 | -   | [ACGTN]        | Deletion from the reference  |
 | *   | [ACGTN][ACGTN] | Substitution                 |
 |     | [acgtn]        | Inversion                    |
-| N   |                | Unknown                      |
-| \|  |                | Separater at insertion sites |
+| \|  |                | Separater of insertion sites |
 
 `CSSPLIT` uses `|` to separate nucleotides in insertion sites.
 
@@ -159,7 +155,7 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 | -1  | Unknown                      |
 | \|  | Separator at insertion sites |
 
-`QSCORE` uses `-1` at deletion sites.
+`QSCORE` uses `-1` at deletion or unknown nucleotides.
 
 As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sites.
 

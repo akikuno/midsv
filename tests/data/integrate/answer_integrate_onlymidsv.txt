@@ -1,0 +1,10 @@
+[
+    {'QNAME': 'control', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,M,M,M,M,M'}, 
+    {'QNAME': 'deletion', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,D,D,D,M,M'}, 
+    {'QNAME': 'insertion', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,3M,M,M,M,M'}, 
+    {'QNAME': 'inversion', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,m,m,m,M,M'}, 
+    {'QNAME': 'inversion-3nt-ins', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,m,m,3m,M,M'}, 
+    {'QNAME': 'large-deletion', 'RNAME': 'example', 'MIDSV': 'M,M,D,D,D,D,D,D,M,M'}, 
+    {'QNAME': 'softclip', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,M,M,M,M,M'}, 
+    {'QNAME': 'substitution', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,S,M,M,M,M,M'}
+]        

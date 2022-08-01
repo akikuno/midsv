@@ -8,18 +8,36 @@ from src.midsv import proofread
 def test_integration_subindelinv():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = format.read_sam(str(sampath))
-    test = transform(sam)
+    test = transform(sam, midsv=True, cssplit=True, qscore=True)
     answer = Path("tests", "data", "integrate", "answer_integrate.txt").read_text()
     answer = eval(answer)
     assert test == answer
 
 
-def test_integration_integrate():
+def test_integration_onlymidsv():
+    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+    sam = format.read_sam(str(sampath))
+    test = transform(sam, midsv=True, cssplit=False, qscore=False)
+    answer = Path("tests", "data", "integrate", "answer_integrate_onlymidsv.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
+def test_integration_onlycssplit():
+    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+    sam = format.read_sam(str(sampath))
+    test = transform(sam, midsv=False, cssplit=True, qscore=False)
+    answer = Path("tests", "data", "integrate", "answer_integrate_onlycssplit.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
+def test_integration_real_sam():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = format.read_sam(str(sampath))
 
     sqheaders = format.extract_sqheaders(sam)
-    samdict_polished = transform(sam)
+    samdict_polished = transform(sam, midsv=True, cssplit=True, qscore=True)
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
