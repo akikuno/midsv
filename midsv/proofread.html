@@ -136,7 +136,7 @@ def filter_length(samdict: list[dict]) -&gt; list[dict]:
     if &#34;MIDSV&#34; in samdict[0]:
         reflength = len(samdict[0][&#34;MIDSV&#34;].split(&#34;,&#34;))
     else:
-        reflength = len(samdict[0][&#34;CSTAG&#34;].split(&#34;,&#34;))
+        reflength = len(samdict[0][&#34;CSSPLIT&#34;].split(&#34;,&#34;))
     if reflength &lt; 100:
         return samdict
     samdict_filtered = []
@@ -215,7 +215,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
     if &#34;MIDSV&#34; in samdict[0]:
         reflength = len(samdict[0][&#34;MIDSV&#34;].split(&#34;,&#34;))
     else:
-        reflength = len(samdict[0][&#34;CSTAG&#34;].split(&#34;,&#34;))
+        reflength = len(samdict[0][&#34;CSSPLIT&#34;].split(&#34;,&#34;))
     if reflength &lt; 100:
         return samdict
     samdict_filtered = []
