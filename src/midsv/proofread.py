@@ -108,7 +108,7 @@ def filter_length(samdict: list[dict]) -> list[dict]:
     if "MIDSV" in samdict[0]:
         reflength = len(samdict[0]["MIDSV"].split(","))
     else:
-        reflength = len(samdict[0]["CSTAG"].split(","))
+        reflength = len(samdict[0]["CSSPLIT"].split(","))
     if reflength < 100:
         return samdict
     samdict_filtered = []
