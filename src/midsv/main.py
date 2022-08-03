@@ -11,8 +11,8 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     Args:
         sam (list[list]): Lists ot SAM format
         midsv (bool, optional): Output MIDSV. Defaults to True.
-        cssplit (bool, optional): Output CSSPLIT. Defaults to False.
-        qscore (bool, optional): Output QSCORE. Defaults to False.
+        cssplit (bool, optional): Output CSSPLIT. Defaults to True.
+        qscore (bool, optional): Output QSCORE. Require `midsv == True`. Defaults to True.
 
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
@@ -21,7 +21,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     if not (midsv or cssplit):
         raise ValueError("Either midsv or cssplit must be True")
 
-    if midsv == False and cssplit == True and qscore == True:
+    if midsv == False and qscore == True:
         raise ValueError("midsv must be True to output QSCORE")
 
     format.check_sam_format(sam)
