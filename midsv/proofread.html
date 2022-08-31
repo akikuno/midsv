@@ -49,7 +49,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
-            # 1. Determine the strand (strand_first) of the first read
+            # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_dict = deepcopy(alignment)
                 if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
@@ -57,7 +57,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
             if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
                 strand = 0
             else:
@@ -67,13 +67,34 @@ def join(sam: list[dict]) -&gt; list[dict]:
                     alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
                 if &#34;CSSPLIT&#34; in alignment:
                     alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
-            # 3. Fill in the gap between the first read and the next read with a D (deletion)
-            previous_end = alignments[i - 1][&#34;POS&#34;] - 1
+            previous_alignment = alignments[i - 1]
+            previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
-                previous_end += len(alignments[i - 1][&#34;MIDSV&#34;].split(&#34;,&#34;))
+                previous_end += len(previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;))
             else:
-                previous_end += len(alignments[i - 1][&#34;CSSPLIT&#34;].split(&#34;,&#34;))
+                previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
             current_start = alignments[i][&#34;POS&#34;] - 1
+            # Remove microhomology
+            if &#34;CSSPLIT&#34; in alignment:
+                previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
+                current_cssplit = alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
+                if &#34;QSCORE&#34; in alignment:
+                    previous_qscore = previous_alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+                    current_qscore = alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+                num_microhomology = 0
+                for i in range(min(len(previous_cssplit), len(current_cssplit))):
+                    if previous_cssplit[-i:] == current_cssplit[:i]:
+                        if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                            num_microhomology = i
+                # Update
+                alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
+                if &#34;QSCORE&#34; in alignment:
+                    alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
+                if &#34;MIDSV&#34; in alignment:
+                    current_midsv = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
+                    alignment[&#34;MIDSV&#34;] = &#34;,&#34;.join(current_midsv[num_microhomology:])
+                current_start += num_microhomology
+            # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
             if &#34;MIDSV&#34; in sam_dict:
                 sam_dict[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
@@ -81,7 +102,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
                 sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
             if &#34;QSCORE&#34; in sam_dict:
                 sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
-            # 4. Update sam_dict
+            # Update sam_dict
             if &#34;MIDSV&#34; in sam_dict:
                 sam_dict[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
             if &#34;CSSPLIT&#34; in sam_dict:
@@ -276,7 +297,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
-            # 1. Determine the strand (strand_first) of the first read
+            # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_dict = deepcopy(alignment)
                 if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
@@ -284,7 +305,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
             if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
                 strand = 0
             else:
@@ -294,13 +315,34 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                     alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
                 if &#34;CSSPLIT&#34; in alignment:
                     alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
-            # 3. Fill in the gap between the first read and the next read with a D (deletion)
-            previous_end = alignments[i - 1][&#34;POS&#34;] - 1
+            previous_alignment = alignments[i - 1]
+            previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
-                previous_end += len(alignments[i - 1][&#34;MIDSV&#34;].split(&#34;,&#34;))
+                previous_end += len(previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;))
             else:
-                previous_end += len(alignments[i - 1][&#34;CSSPLIT&#34;].split(&#34;,&#34;))
+                previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
             current_start = alignments[i][&#34;POS&#34;] - 1
+            # Remove microhomology
+            if &#34;CSSPLIT&#34; in alignment:
+                previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
+                current_cssplit = alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
+                if &#34;QSCORE&#34; in alignment:
+                    previous_qscore = previous_alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+                    current_qscore = alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+                num_microhomology = 0
+                for i in range(min(len(previous_cssplit), len(current_cssplit))):
+                    if previous_cssplit[-i:] == current_cssplit[:i]:
+                        if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                            num_microhomology = i
+                # Update
+                alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
+                if &#34;QSCORE&#34; in alignment:
+                    alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
+                if &#34;MIDSV&#34; in alignment:
+                    current_midsv = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
+                    alignment[&#34;MIDSV&#34;] = &#34;,&#34;.join(current_midsv[num_microhomology:])
+                current_start += num_microhomology
+            # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
             if &#34;MIDSV&#34; in sam_dict:
                 sam_dict[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
@@ -308,7 +350,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
             if &#34;QSCORE&#34; in sam_dict:
                 sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
-            # 4. Update sam_dict
+            # Update sam_dict
             if &#34;MIDSV&#34; in sam_dict:
                 sam_dict[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
             if &#34;CSSPLIT&#34; in sam_dict:
