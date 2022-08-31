@@ -35,6 +35,15 @@ def test_join_deletion():
     assert test == answer
 
 
+def test_join_deletion_microhomology():
+    sam = Path("tests", "data", "join", "test_del_microhomology.txt").read_text()
+    sam = eval(sam)
+    test = proofread.join(sam)
+    answer = Path("tests", "data", "join", "answer_del_microhomology.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
 def test_filter_length():
     samdict = Path("tests", "data", "filter_length", "test_filter_length.txt").read_text()
     samdict = eval(samdict)

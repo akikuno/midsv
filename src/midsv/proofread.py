@@ -21,7 +21,7 @@ def join(sam: list[dict]) -> list[dict]:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
-            # 1. Determine the strand (strand_first) of the first read
+            # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_dict = deepcopy(alignment)
                 if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
@@ -29,7 +29,7 @@ def join(sam: list[dict]) -> list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # 2. If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
             if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
                 strand = 0
             else:
@@ -39,13 +39,34 @@ def join(sam: list[dict]) -> list[dict]:
                     alignment["MIDSV"] = alignment["MIDSV"].lower()
                 if "CSSPLIT" in alignment:
                     alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
-            # 3. Fill in the gap between the first read and the next read with a D (deletion)
-            previous_end = alignments[i - 1]["POS"] - 1
+            previous_alignment = alignments[i - 1]
+            previous_end = previous_alignment["POS"] - 1
             if "MIDSV" in alignment:
-                previous_end += len(alignments[i - 1]["MIDSV"].split(","))
+                previous_end += len(previous_alignment["MIDSV"].split(","))
             else:
-                previous_end += len(alignments[i - 1]["CSSPLIT"].split(","))
+                previous_end += len(previous_alignment["CSSPLIT"].split(","))
             current_start = alignments[i]["POS"] - 1
+            # Remove microhomology
+            if "CSSPLIT" in alignment:
+                previous_cssplit = previous_alignment["CSSPLIT"].split(",")
+                current_cssplit = alignment["CSSPLIT"].split(",")
+                if "QSCORE" in alignment:
+                    previous_qscore = previous_alignment["QSCORE"].split(",")
+                    current_qscore = alignment["QSCORE"].split(",")
+                num_microhomology = 0
+                for i in range(min(len(previous_cssplit), len(current_cssplit))):
+                    if previous_cssplit[-i:] == current_cssplit[:i]:
+                        if "QSCORE" in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                            num_microhomology = i
+                # Update
+                alignment["CSSPLIT"] = ",".join(current_cssplit[num_microhomology:])
+                if "QSCORE" in alignment:
+                    alignment["QSCORE"] = ",".join(current_qscore[num_microhomology:])
+                if "MIDSV" in alignment:
+                    current_midsv = alignment["MIDSV"].split(",")
+                    alignment["MIDSV"] = ",".join(current_midsv[num_microhomology:])
+                current_start += num_microhomology
+            # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
             if "MIDSV" in sam_dict:
                 sam_dict["MIDSV"] += ",D" * gap
@@ -53,7 +74,7 @@ def join(sam: list[dict]) -> list[dict]:
                 sam_dict["CSSPLIT"] += ",N" * gap
             if "QSCORE" in sam_dict:
                 sam_dict["QSCORE"] += ",-1" * gap
-            # 4. Update sam_dict
+            # Update sam_dict
             if "MIDSV" in sam_dict:
                 sam_dict["MIDSV"] += "," + alignment["MIDSV"]
             if "CSSPLIT" in sam_dict:
