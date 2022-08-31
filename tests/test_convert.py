@@ -95,56 +95,101 @@ def test_cstag_to_cssplit_insertion_at_last():
 # Phred score
 ###########################################################
 
-
-def test_cstag_to_qscore_insertion():
+# ----------------------------------------------------------
+# qual_to_qscore_midsv
+# ----------------------------------------------------------
+def test_qual_to_qscore_midsv_insertion():
     qual = "@!!!@@"
     midsv = "M,3M,D,M"
-    test = convert.qual_to_qscore(qual, midsv)
+    test = convert.qual_to_qscore_midsv(qual, midsv)
     answer = "31,0|0|0|31,-1,31"
     assert test == answer
 
 
-def test_cstag_to_qscore_deletion():
+def test_qual_to_qscore_midsv_deletion():
     qual = "@0"
     midsv = "M,D,D,D,D,D,M"
-    test = convert.qual_to_qscore(qual, midsv)
+    test = convert.qual_to_qscore_midsv(qual, midsv)
     answer = "31,-1,-1,-1,-1,-1,15"
     assert test == answer
 
 
-def test_cstag_to_qscore_substitution():
+def test_qual_to_qscore_midsv_substitution():
     qual = "@012@"
     midsv = "M,S,S,S,M"
-    test = convert.qual_to_qscore(qual, midsv)
+    test = convert.qual_to_qscore_midsv(qual, midsv)
     answer = "31,15,16,17,31"
     assert test == answer
 
 
-def test_cstag_to_qscore_indel():
+def test_qual_to_qscore_midsv_indel():
     qual = "@0@"
     midsv = "M,1D,D,M"
-    test = convert.qual_to_qscore(qual, midsv)
+    test = convert.qual_to_qscore_midsv(qual, midsv)
     answer = "31,15|-1,-1,31"
     assert test == answer
 
 
-def test_cstag_to_qscore_ins_sub():
+def test_qual_to_qscore_midsv_ins_sub():
     qual = "@012!"
     midsv = "M,3S"
-    test = convert.qual_to_qscore(qual, midsv)
+    test = convert.qual_to_qscore_midsv(qual, midsv)
     answer = "31,15|16|17|0"
     assert test == answer
 
 
-def test_qual_to_qscore_real():
+def test_qual_to_qscore_midsv_real():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
     sam = format.read_sam(str(sampath))
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
     test = samdict
     answer = Path("tests", "data", "phredscore", "answer.txt").read_text()
     answer = eval(answer)
+    assert test == answer
+
+
+# ----------------------------------------------------------
+# qual_to_qscore_cssplit
+# ----------------------------------------------------------
+def test_qual_to_qscore_cssplit_insertion():
+    qual = "@!!!@@"
+    cssplit = "=A,+T|+T|+T|=A,-A,=A"
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = "31,0|0|0|31,-1,31"
+    assert test == answer
+
+
+def test_qual_to_qscore_cssplit_deletion():
+    qual = "@0"
+    cssplit = "=A,-A,-A,-A,-A,-A,=A"
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = "31,-1,-1,-1,-1,-1,15"
+    assert test == answer
+
+
+def test_qual_to_qscore_cssplit_substitution():
+    qual = "@012@"
+    cssplit = "=A,*AG,*AG,*AG,=A"
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = "31,15,16,17,31"
+    assert test == answer
+
+
+def test_qual_to_qscore_cssplit_indel():
+    qual = "@0@"
+    cssplit = "=A,+T|-A,-A,=A"
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = "31,15|-1,-1,31"
+    assert test == answer
+
+
+def test_qual_to_qscore_cssplit_ins_sub():
+    qual = "@012!"
+    cssplit = "=A,+T|+T|+T|*AG"
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = "31,15|16|17|0"
     assert test == answer
 

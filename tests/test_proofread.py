@@ -59,7 +59,7 @@ def test_pad():
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
         samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+        samdict[i]["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
     test = proofread.pad(samdict, sqheaders)
     for t in test:
         mlen = len(t["MIDSV"].split(","))

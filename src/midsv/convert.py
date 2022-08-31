@@ -195,7 +195,7 @@ def ascii_to_phred(ascii: str) -> str:
     return str(ord(ascii) - 33)
 
 
-def qual_to_qscore(qual: str, midsv: str) -> str:
+def qual_to_qscore_midsv(qual: str, midsv: str) -> str:
     """Convert ascii quality to phred score.
     To adjust the same length as MIDSV, insertion is discarded and deletion is interpolated as -1.
 
@@ -204,13 +204,13 @@ def qual_to_qscore(qual: str, midsv: str) -> str:
         midsv (str): MIDSV
 
     Returns:
-        str: Phred quality score with indel compensation
+        str: Phred quality score with indel compensation ('-1' is assigned to the deletion loci.)
     """
     qscore = []
     idx = 0
     for m in midsv.split(","):
         if m == "D":
-            qscore.append(str(-1))
+            qscore.append("-1")
             idx -= 1
         elif m[0].isdigit():
             num_insertion = int(m[:-1])
@@ -229,3 +229,37 @@ def qual_to_qscore(qual: str, midsv: str) -> str:
         idx += 1
     return ",".join(qscore)
 
+
+def qual_to_qscore_cssplit(qual: str, cssplit: str) -> str:
+    """Convert ascii quality to phred score.
+    To adjust the same length as cssplit, insertion is discarded and deletion is interpolated as -1.
+
+    Args:
+        qual (str): QUAL in SAM format
+        cssplit (str): CSSPLIT
+
+    Returns:
+        str: Phred quality score with indel compensation ('-1' is assigned to the deletion loci.)
+    """
+    qscore = []
+    idx = 0
+    for cs in cssplit.split(","):
+        if cs.startswith("-"):
+            qscore.append("-1")
+            idx -= 1
+        elif cs.startswith("+"):
+            num_insertion = len(cs.split("|")) - 1
+            insertion = []
+            for j in range(idx, idx + num_insertion):
+                insertion.append(ascii_to_phred(qual[j]) + "|")
+            if cs.split("|")[-1].startswith("-"):
+                insertion.append("-1")
+                idx -= 1
+            else:
+                insertion.append(ascii_to_phred(qual[j + 1]))
+            qscore.append("".join(insertion))
+            idx += num_insertion
+        else:
+            qscore.append(ascii_to_phred(qual[idx]))
+        idx += 1
+    return ",".join(qscore)

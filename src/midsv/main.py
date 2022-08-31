@@ -12,17 +12,16 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
         sam (list[list]): Lists ot SAM format
         midsv (bool, optional): Output MIDSV. Defaults to True.
         cssplit (bool, optional): Output CSSPLIT. Defaults to True.
-        qscore (bool, optional): Output QSCORE. Require `midsv == True`. Defaults to True.
+        qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
 
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     """
 
-    if not (midsv or cssplit):
+    if midsv or cssplit:
+        pass
+    else:
         raise ValueError("Either midsv or cssplit must be True")
-
-    if midsv == False and qscore == True:
-        raise ValueError("midsv must be True to output QSCORE")
 
     format.check_sam_format(sam)
 
@@ -38,7 +37,9 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
         if cssplit:
             samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
         if midsv and qscore:
-            samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+            samdict[i]["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
+        elif cssplit and qscore:
+            samdict[i]["QSCORE"] = convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)

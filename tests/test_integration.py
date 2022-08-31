@@ -1,43 +1,61 @@
 from pathlib import Path
-from src.midsv import transform
-from src.midsv import format
-from src.midsv import convert
-from src.midsv import proofread
+from src import midsv
+import pytest
+from importlib import reload
+
+reload(midsv)
 
 
-def test_integration_subindelinv():
+def test_valueerror():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
-    sam = format.read_sam(str(sampath))
-    test = transform(sam, midsv=True, cssplit=True, qscore=True)
-    answer = Path("tests", "data", "integrate", "answer_integrate.txt").read_text()
-    answer = eval(answer)
-    assert test == answer
+    sam = midsv.format.read_sam(str(sampath))
+    with pytest.raises(ValueError) as e:
+        _ = midsv.transform(sam, midsv=False, cssplit=False, qscore=False)
+    assert str(e.value) == "Either midsv or cssplit must be True"
 
 
-def test_integration_onlymidsv():
+def test_integration_midsv():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
-    sam = format.read_sam(str(sampath))
-    test = transform(sam, midsv=True, cssplit=False, qscore=False)
+    sam = midsv.format.read_sam(str(sampath))
+    test = midsv.transform(sam, midsv=True, cssplit=False, qscore=False)
     answer = Path("tests", "data", "integrate", "answer_integrate_onlymidsv.txt").read_text()
     answer = eval(answer)
     assert test == answer
 
 
-def test_integration_onlycssplit():
+def test_integration_cssplit():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
-    sam = format.read_sam(str(sampath))
-    test = transform(sam, midsv=False, cssplit=True, qscore=False)
+    sam = midsv.format.read_sam(str(sampath))
+    test = midsv.transform(sam, midsv=False, cssplit=True, qscore=False)
     answer = Path("tests", "data", "integrate", "answer_integrate_onlycssplit.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
+def test_integration_all_true():
+    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+    sam = midsv.format.read_sam(str(sampath))
+    test = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
+    answer = Path("tests", "data", "integrate", "answer_integrate_all_true.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
+def test_integration_cssplit_and_qual():
+    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+    sam = midsv.format.read_sam(str(sampath))
+    test = midsv.transform(sam, midsv=False, cssplit=True, qscore=True)
+    answer = Path("tests", "data", "integrate", "answer_integrate_cssplit_and_qual.txt").read_text()
     answer = eval(answer)
     assert test == answer
 
 
 def test_integration_real_sam():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
-    sam = format.read_sam(str(sampath))
+    sam = midsv.format.read_sam(str(sampath))
 
-    sqheaders = format.extract_sqheaders(sam)
-    samdict_polished = transform(sam, midsv=True, cssplit=True, qscore=True)
+    sqheaders = midsv.format.extract_sqheaders(sam)
+    samdict_polished = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
@@ -51,28 +69,28 @@ def test_integration_real_sam():
 
 def test_integration_eachcomponent():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
-    sam = format.read_sam(str(sampath))
+    sam = midsv.format.read_sam(str(sampath))
 
-    format.check_sam_format(sam)
+    midsv.format.check_sam_format(sam)
 
-    sqheaders = format.extract_sqheaders(sam)
-    samdict = format.dictionarize_sam(sam)
+    sqheaders = midsv.format.extract_sqheaders(sam)
+    samdict = midsv.format.dictionarize_sam(sam)
 
-    samdict = format.remove_softclips(samdict)
-    samdict = format.remove_overlapped(samdict)
-
-    for i, alignment in enumerate(samdict):
-        samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
+    samdict = midsv.format.remove_softclips(samdict)
+    samdict = midsv.format.remove_overlapped(samdict)
 
     for i, alignment in enumerate(samdict):
-        samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
+        samdict[i]["MIDSV"] = midsv.convert.cstag_to_midsv(alignment["CSTAG"])
 
     for i, alignment in enumerate(samdict):
-        samdict[i]["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+        samdict[i]["CSSPLIT"] = midsv.convert.cstag_to_cssplit(alignment["CSTAG"])
 
-    samdict_polished = proofread.join(samdict)
-    samdict_polished = proofread.pad(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished)
+    for i, alignment in enumerate(samdict):
+        samdict[i]["QSCORE"] = midsv.convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
+
+    samdict_polished = midsv.proofread.join(samdict)
+    samdict_polished = midsv.proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = midsv.proofread.select(samdict_polished)
 
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
