@@ -134,7 +134,7 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
             continue
         if alignment[2] == &#34;*&#34;:
             continue
-        if alignment[10] == &#34;*&#34;:
+        if alignment[9] == &#34;*&#34;:
             continue
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
@@ -367,7 +367,7 @@ def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
             continue
         if alignment[2] == &#34;*&#34;:
             continue
-        if alignment[10] == &#34;*&#34;:
+        if alignment[9] == &#34;*&#34;:
             continue
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
