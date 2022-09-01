@@ -28,6 +28,9 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     sqheaders = format.extract_sqheaders(sam)
     samdict = format.dictionarize_sam(sam)
 
+    if qscore and any(s["QUAL"] == "*" for s in samdict):
+        raise ValueError("qscore must be False because the input does not contain QUAL")
+
     samdict = format.remove_softclips(samdict)
     samdict = format.remove_overlapped(samdict)
 

@@ -106,7 +106,7 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
             continue
         if alignment[2] == "*":
             continue
-        if alignment[10] == "*":
+        if alignment[9] == "*":
             continue
         for i, a in enumerate(alignment):
             if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):

@@ -6,12 +6,20 @@ from importlib import reload
 reload(midsv)
 
 
-def test_valueerror():
+def test_valueerror_midsv_cssplit():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = midsv.format.read_sam(str(sampath))
     with pytest.raises(ValueError) as e:
         _ = midsv.transform(sam, midsv=False, cssplit=False, qscore=False)
     assert str(e.value) == "Either midsv or cssplit must be True"
+
+
+def test_valueerror_qscore():
+    sampath = Path("tests", "data", "sam_from_fasta", "control.sam")
+    sam = midsv.format.read_sam(str(sampath))
+    with pytest.raises(ValueError) as e:
+        _ = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
+    assert str(e.value) == "qsucore must be False because the input does not contain QUAL"
 
 
 def test_integration_midsv():
