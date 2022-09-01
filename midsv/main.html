@@ -62,15 +62,15 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     samdict = format.remove_softclips(samdict)
     samdict = format.remove_overlapped(samdict)
 
-    for i, alignment in enumerate(samdict):
+    for alignment in samdict:
         if midsv:
-            samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
+            alignment[&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
         if cssplit:
-            samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
+            alignment[&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
         if midsv and qscore:
-            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore_midsv(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
+            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_midsv(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
         elif cssplit and qscore:
-            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore_cssplit(alignment[&#34;QUAL&#34;], alignment[&#34;CSSPLIT&#34;])
+            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_cssplit(alignment[&#34;QUAL&#34;], alignment[&#34;CSSPLIT&#34;])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
@@ -140,15 +140,15 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     samdict = format.remove_softclips(samdict)
     samdict = format.remove_overlapped(samdict)
 
-    for i, alignment in enumerate(samdict):
+    for alignment in samdict:
         if midsv:
-            samdict[i][&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
+            alignment[&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
         if cssplit:
-            samdict[i][&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
+            alignment[&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
         if midsv and qscore:
-            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore_midsv(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
+            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_midsv(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
         elif cssplit and qscore:
-            samdict[i][&#34;QSCORE&#34;] = convert.qual_to_qscore_cssplit(alignment[&#34;QUAL&#34;], alignment[&#34;CSSPLIT&#34;])
+            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_cssplit(alignment[&#34;QUAL&#34;], alignment[&#34;CSSPLIT&#34;])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)

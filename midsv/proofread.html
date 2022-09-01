@@ -31,16 +31,16 @@ from itertools import groupby
 from copy import deepcopy
 
 
-def join(sam: list[dict]) -&gt; list[dict]:
+def join(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;Join splitted reads including large deletion or inversion.
 
     Args:
-        sam (list[dict]): dictionarized SAM
+        samdict (list[dict]): dictionarized SAM
 
     Returns:
         list[dict]: SAM with joined splitted reads to single read
     &#34;&#34;&#34;
-    sam_sorted = sorted(sam, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
+    sam_sorted = sorted(samdict, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
     sam_joined = []
     for _, alignments in sam_groupby:
@@ -51,7 +51,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
         for i, alignment in enumerate(alignments):
             # Determine the strand (strand_first) of the first read
             if i == 0:
-                sam_dict = deepcopy(alignment)
+                sam_template = deepcopy(alignment)
                 if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
                     strand_first = 0
                 else:
@@ -73,7 +73,7 @@ def join(sam: list[dict]) -&gt; list[dict]:
                 previous_end += len(previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;))
             else:
                 previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
-            current_start = alignments[i][&#34;POS&#34;] - 1
+            current_start = alignment[&#34;POS&#34;] - 1
             # Remove microhomology
             if &#34;CSSPLIT&#34; in alignment:
                 previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
@@ -94,22 +94,23 @@ def join(sam: list[dict]) -&gt; list[dict]:
                     current_midsv = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
                     alignment[&#34;MIDSV&#34;] = &#34;,&#34;.join(current_midsv[num_microhomology:])
                 current_start += num_microhomology
+                alignment[&#34;POS&#34;] = current_start + 1
             # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
-            if &#34;MIDSV&#34; in sam_dict:
-                sam_dict[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
-            if &#34;CSSPLIT&#34; in sam_dict:
-                sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
-            if &#34;QSCORE&#34; in sam_dict:
-                sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
-            # Update sam_dict
-            if &#34;MIDSV&#34; in sam_dict:
-                sam_dict[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
-            if &#34;CSSPLIT&#34; in sam_dict:
-                sam_dict[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
-            if &#34;QSCORE&#34; in sam_dict:
-                sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
-        sam_joined.append(sam_dict)
+            if &#34;MIDSV&#34; in sam_template:
+                sam_template[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
+            if &#34;CSSPLIT&#34; in sam_template:
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
+            if &#34;QSCORE&#34; in sam_template:
+                sam_template[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
+            # Update sam_template
+            if &#34;MIDSV&#34; in sam_template:
+                sam_template[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
+            if &#34;CSSPLIT&#34; in sam_template:
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
+            if &#34;QSCORE&#34; in sam_template:
+                sam_template[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+        sam_joined.append(sam_template)
     return sam_joined
 
 
@@ -261,13 +262,13 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 </details>
 </dd>
 <dt id="midsv.proofread.join"><code class="name flex">
-<span>def <span class="ident">join</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
+<span>def <span class="ident">join</span></span>(<span>samdict: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Join splitted reads including large deletion or inversion.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dt><strong><code>samdict</code></strong> :&ensp;<code>list[dict]</code></dt>
 <dd>dictionarized SAM</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -279,16 +280,16 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def join(sam: list[dict]) -&gt; list[dict]:
+<pre><code class="python">def join(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;Join splitted reads including large deletion or inversion.
 
     Args:
-        sam (list[dict]): dictionarized SAM
+        samdict (list[dict]): dictionarized SAM
 
     Returns:
         list[dict]: SAM with joined splitted reads to single read
     &#34;&#34;&#34;
-    sam_sorted = sorted(sam, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
+    sam_sorted = sorted(samdict, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
     sam_joined = []
     for _, alignments in sam_groupby:
@@ -299,7 +300,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
         for i, alignment in enumerate(alignments):
             # Determine the strand (strand_first) of the first read
             if i == 0:
-                sam_dict = deepcopy(alignment)
+                sam_template = deepcopy(alignment)
                 if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
                     strand_first = 0
                 else:
@@ -321,7 +322,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 previous_end += len(previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;))
             else:
                 previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
-            current_start = alignments[i][&#34;POS&#34;] - 1
+            current_start = alignment[&#34;POS&#34;] - 1
             # Remove microhomology
             if &#34;CSSPLIT&#34; in alignment:
                 previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
@@ -342,22 +343,23 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                     current_midsv = alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
                     alignment[&#34;MIDSV&#34;] = &#34;,&#34;.join(current_midsv[num_microhomology:])
                 current_start += num_microhomology
+                alignment[&#34;POS&#34;] = current_start + 1
             # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
-            if &#34;MIDSV&#34; in sam_dict:
-                sam_dict[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
-            if &#34;CSSPLIT&#34; in sam_dict:
-                sam_dict[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
-            if &#34;QSCORE&#34; in sam_dict:
-                sam_dict[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
-            # Update sam_dict
-            if &#34;MIDSV&#34; in sam_dict:
-                sam_dict[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
-            if &#34;CSSPLIT&#34; in sam_dict:
-                sam_dict[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
-            if &#34;QSCORE&#34; in sam_dict:
-                sam_dict[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
-        sam_joined.append(sam_dict)
+            if &#34;MIDSV&#34; in sam_template:
+                sam_template[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
+            if &#34;CSSPLIT&#34; in sam_template:
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
+            if &#34;QSCORE&#34; in sam_template:
+                sam_template[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
+            # Update sam_template
+            if &#34;MIDSV&#34; in sam_template:
+                sam_template[&#34;MIDSV&#34;] += &#34;,&#34; + alignment[&#34;MIDSV&#34;]
+            if &#34;CSSPLIT&#34; in sam_template:
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
+            if &#34;QSCORE&#34; in sam_template:
+                sam_template[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+        sam_joined.append(sam_template)
     return sam_joined</code></pre>
 </details>
 </dd>
