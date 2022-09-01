@@ -19,7 +19,7 @@ def test_valueerror_qscore():
     sam = midsv.format.read_sam(str(sampath))
     with pytest.raises(ValueError) as e:
         _ = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
-    assert str(e.value) == "qsucore must be False because the input does not contain QUAL"
+    assert str(e.value) == "qscore must be False because the input does not contain QUAL"
 
 
 def test_integration_midsv():
@@ -87,14 +87,14 @@ def test_integration_eachcomponent():
     samdict = midsv.format.remove_softclips(samdict)
     samdict = midsv.format.remove_overlapped(samdict)
 
-    for i, alignment in enumerate(samdict):
-        samdict[i]["MIDSV"] = midsv.convert.cstag_to_midsv(alignment["CSTAG"])
+    for alignment in samdict:
+        alignment["MIDSV"] = midsv.convert.cstag_to_midsv(alignment["CSTAG"])
 
-    for i, alignment in enumerate(samdict):
-        samdict[i]["CSSPLIT"] = midsv.convert.cstag_to_cssplit(alignment["CSTAG"])
+    for alignment in samdict:
+        alignment["CSSPLIT"] = midsv.convert.cstag_to_cssplit(alignment["CSTAG"])
 
-    for i, alignment in enumerate(samdict):
-        samdict[i]["QSCORE"] = midsv.convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
+    for alignment in samdict:
+        alignment["QSCORE"] = midsv.convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
 
     samdict_polished = midsv.proofread.join(samdict)
     samdict_polished = midsv.proofread.pad(samdict_polished, sqheaders)

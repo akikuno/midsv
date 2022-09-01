@@ -34,15 +34,15 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     samdict = format.remove_softclips(samdict)
     samdict = format.remove_overlapped(samdict)
 
-    for i, alignment in enumerate(samdict):
+    for alignment in samdict:
         if midsv:
-            samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
+            alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
         if cssplit:
-            samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
+            alignment["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
         if midsv and qscore:
-            samdict[i]["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
+            alignment["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
         elif cssplit and qscore:
-            samdict[i]["QSCORE"] = convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
+            alignment["QSCORE"] = convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)

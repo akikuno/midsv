@@ -36,10 +36,20 @@ def test_join_deletion():
 
 
 def test_join_deletion_microhomology():
-    sam = Path("tests", "data", "join", "test_del_microhomology.txt").read_text()
-    sam = eval(sam)
-    test = proofread.join(sam)
+    samdict = Path("tests", "data", "join", "test_del_microhomology.txt").read_text()
+    samdict = eval(samdict)
+    test = proofread.join(samdict)
     answer = Path("tests", "data", "join", "answer_del_microhomology.txt").read_text()
+    answer = eval(answer)
+    assert test == answer
+
+
+def test_join_real_microhomology():
+    samdict = Path("tests", "data", "join", "test_real_microhomology.txt").read_text()
+    samdict = eval(samdict)
+    test = proofread.join(samdict)
+    test = test[0]["CSSPLIT"]
+    answer = Path("tests", "data", "join", "answer_real_microhomology.txt").read_text()
     answer = eval(answer)
     assert test == answer
 

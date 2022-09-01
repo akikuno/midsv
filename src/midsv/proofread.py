@@ -3,16 +3,16 @@ from itertools import groupby
 from copy import deepcopy
 
 
-def join(sam: list[dict]) -> list[dict]:
+def join(samdict: list[dict]) -> list[dict]:
     """Join splitted reads including large deletion or inversion.
 
     Args:
-        sam (list[dict]): dictionarized SAM
+        samdict (list[dict]): dictionarized SAM
 
     Returns:
         list[dict]: SAM with joined splitted reads to single read
     """
-    sam_sorted = sorted(sam, key=lambda x: [x["QNAME"], x["POS"]])
+    sam_sorted = sorted(samdict, key=lambda x: [x["QNAME"], x["POS"]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x["QNAME"])
     sam_joined = []
     for _, alignments in sam_groupby:
@@ -23,7 +23,7 @@ def join(sam: list[dict]) -> list[dict]:
         for i, alignment in enumerate(alignments):
             # Determine the strand (strand_first) of the first read
             if i == 0:
-                sam_dict = deepcopy(alignment)
+                sam_template = deepcopy(alignment)
                 if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
                     strand_first = 0
                 else:
@@ -45,7 +45,7 @@ def join(sam: list[dict]) -> list[dict]:
                 previous_end += len(previous_alignment["MIDSV"].split(","))
             else:
                 previous_end += len(previous_alignment["CSSPLIT"].split(","))
-            current_start = alignments[i]["POS"] - 1
+            current_start = alignment["POS"] - 1
             # Remove microhomology
             if "CSSPLIT" in alignment:
                 previous_cssplit = previous_alignment["CSSPLIT"].split(",")
@@ -66,22 +66,23 @@ def join(sam: list[dict]) -> list[dict]:
                     current_midsv = alignment["MIDSV"].split(",")
                     alignment["MIDSV"] = ",".join(current_midsv[num_microhomology:])
                 current_start += num_microhomology
+                alignment["POS"] = current_start + 1
             # Fill in the gap between the first read and the next read with a D (deletion)
             gap = current_start - previous_end
-            if "MIDSV" in sam_dict:
-                sam_dict["MIDSV"] += ",D" * gap
-            if "CSSPLIT" in sam_dict:
-                sam_dict["CSSPLIT"] += ",N" * gap
-            if "QSCORE" in sam_dict:
-                sam_dict["QSCORE"] += ",-1" * gap
-            # Update sam_dict
-            if "MIDSV" in sam_dict:
-                sam_dict["MIDSV"] += "," + alignment["MIDSV"]
-            if "CSSPLIT" in sam_dict:
-                sam_dict["CSSPLIT"] += "," + alignment["CSSPLIT"]
-            if "QSCORE" in sam_dict:
-                sam_dict["QSCORE"] += "," + alignment["QSCORE"]
-        sam_joined.append(sam_dict)
+            if "MIDSV" in sam_template:
+                sam_template["MIDSV"] += ",D" * gap
+            if "CSSPLIT" in sam_template:
+                sam_template["CSSPLIT"] += ",N" * gap
+            if "QSCORE" in sam_template:
+                sam_template["QSCORE"] += ",-1" * gap
+            # Update sam_template
+            if "MIDSV" in sam_template:
+                sam_template["MIDSV"] += "," + alignment["MIDSV"]
+            if "CSSPLIT" in sam_template:
+                sam_template["CSSPLIT"] += "," + alignment["CSSPLIT"]
+            if "QSCORE" in sam_template:
+                sam_template["QSCORE"] += "," + alignment["QSCORE"]
+        sam_joined.append(sam_template)
     return sam_joined
 
 
