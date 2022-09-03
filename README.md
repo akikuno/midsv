@@ -12,6 +12,8 @@
 
 MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.
 
+> ⚠️ MIDSV is for target amplicon sequence. It may crash when chromosomes are used as references due to a lack of memory .
+
 MIDSV provides `MIDSV`, `CSSPLIT`, and `QSCORE`.
 
 - `MIDSV` is a simple representation focusing on mutations
