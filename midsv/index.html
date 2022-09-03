@@ -51,7 +51,11 @@
 <pre><code class="language-bash">conda install -c bioconda midsv
 </code></pre>
 <h1 id="usage">Usage</h1>
-<pre><code class="language-python">midsv.transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]
+<pre><code class="language-python">midsv.transform(
+    sam: list[list],
+    midsv: bool = True,
+    cssplit: bool = True,
+    qscore: bool = True) -&gt; list[dict]
 </code></pre>
 <ul>
 <li><code>midsv.transform()</code> returns a list of dictionaries incuding <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</li>
