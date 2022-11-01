@@ -54,22 +54,6 @@ def test_join_real_microhomology():
     assert test == answer
 
 
-def test_filter_length():
-    samdict = Path("tests", "data", "filter_length", "test_filter_length.txt").read_text()
-    samdict = eval(samdict)
-    test = proofread.filter_length(samdict)
-    answer = []
-    assert test == answer
-
-
-def test_filter_length_cssplit():
-    samdict = Path("tests", "data", "filter_length", "test_filter_length_cssplit.txt").read_text()
-    samdict = eval(samdict)
-    test = proofread.filter_length(samdict)
-    answer = []
-    assert test == answer
-
-
 def test_pad():
     sam = Path("tests", "data", "pad", "padding.sam")
     sam = format.read_sam(str(sam))
