@@ -100,7 +100,7 @@ def join(samdict: list[dict]) -&gt; list[dict]:
             if &#34;MIDSV&#34; in sam_template:
                 sam_template[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
             if &#34;CSSPLIT&#34; in sam_template:
-                sam_template[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,D&#34; * gap
             if &#34;QSCORE&#34; in sam_template:
                 sam_template[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # Update sam_template
@@ -258,7 +258,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
             if &#34;MIDSV&#34; in sam_template:
                 sam_template[&#34;MIDSV&#34;] += &#34;,D&#34; * gap
             if &#34;CSSPLIT&#34; in sam_template:
-                sam_template[&#34;CSSPLIT&#34;] += &#34;,N&#34; * gap
+                sam_template[&#34;CSSPLIT&#34;] += &#34;,D&#34; * gap
             if &#34;QSCORE&#34; in sam_template:
                 sam_template[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap
             # Update sam_template
