@@ -72,7 +72,7 @@ def join(samdict: list[dict]) -> list[dict]:
             if "MIDSV" in sam_template:
                 sam_template["MIDSV"] += ",D" * gap
             if "CSSPLIT" in sam_template:
-                sam_template["CSSPLIT"] += ",N" * gap
+                sam_template["CSSPLIT"] += ",D" * gap
             if "QSCORE" in sam_template:
                 sam_template["QSCORE"] += ",-1" * gap
             # Update sam_template

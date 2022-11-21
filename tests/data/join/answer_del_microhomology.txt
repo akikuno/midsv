@@ -1,7 +1,1 @@
-[{'CSSPLIT': '=A,=C,=G,=T,=A,N,N,N,N,N,N,N,N,=C,=G',
-  'FLAG': 2048,
-  'MIDSV': 'M,M,M,M,M,D,D,D,D,D,D,D,D,M,M',
-  'POS': 1,
-  'QNAME': 'deletion-5bp-microhomology-3bp',
-  'QSCORE': '0,0,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,0,0',
-  'RNAME': 'random_15bp'}]
+[{'CSSPLIT': '=A,=C,=G,=T,=A,D,D,D,D,D,D,D,D,=C,=G', 'FLAG': 2048, 'MIDSV': 'M,M,M,M,M,D,D,D,D,D,D,D,D,M,M', 'POS': 1, 'QNAME': 'deletion-5bp-microhomology-3bp', 'QSCORE': '0,0,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,0,0', 'RNAME': 'random_15bp'}]
