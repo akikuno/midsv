@@ -157,7 +157,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;
     selected = []
     for m in samdict:
-        for delkeys in [&#34;FLAG&#34;, &#34;POS&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;]:
+        for delkeys in [&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;]:
             m.pop(delkeys)
         selected.append(m)
     return selected</code></pre>
@@ -355,7 +355,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;
     selected = []
     for m in samdict:
-        for delkeys in [&#34;FLAG&#34;, &#34;POS&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;]:
+        for delkeys in [&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;]:
             m.pop(delkeys)
         selected.append(m)
     return selected</code></pre>

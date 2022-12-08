@@ -69,8 +69,8 @@ def sam_alignments(sam: list[list]) -&gt; None:
                 break
         if idx_cstag == -1:
             raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
-        if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
+        # if &#34;~&#34; in alignment[idx_cstag]:
+        #     raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
     if not is_alignment:
         raise AttributeError(&#34;No alignment information&#34;)</code></pre>
 </details>
@@ -118,8 +118,8 @@ def sam_alignments(sam: list[list]) -&gt; None:
                 break
         if idx_cstag == -1:
             raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
-        if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
+        # if &#34;~&#34; in alignment[idx_cstag]:
+        #     raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
     if not is_alignment:
         raise AttributeError(&#34;No alignment information&#34;)</code></pre>
 </details>

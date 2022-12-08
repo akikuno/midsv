@@ -29,7 +29,7 @@
 <pre><code class="python">from __future__ import annotations
 import re
 from itertools import groupby
-
+from copy import deepcopy
 
 ###########################################################
 # Format headers and alignments
@@ -81,6 +81,7 @@ def dictionarize_sam(sam: list[list]) -&gt; list[dict]:
             RNAME=alignment[2],
             POS=int(alignment[3]),
             CIGAR=alignment[5],
+            SEQ=alignment[9],
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
@@ -101,7 +102,7 @@ def split_cigar(cigar: str) -&gt; list[str]:
 
 
 def remove_softclips(sam: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;Remove softclip quality score from QUAL.
+    &#34;&#34;&#34;Remove softclip information from SEQ and QUAL.
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -119,16 +120,56 @@ def remove_softclips(sam: list[dict]) -&gt; list[dict]:
         left, right = cigar_split[0], cigar_split[-1]
         if &#34;S&#34; in left:
             left = int(left[:-1])
+            alignment[&#34;SEQ&#34;] = alignment[&#34;SEQ&#34;][left:]
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
         if &#34;S&#34; in right:
             right = int(right[:-1])
+            alignment[&#34;SEQ&#34;] = alignment[&#34;SEQ&#34;][:-right]
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
         sam_list.append(alignment)
     return sam_list
 
 
-def remove_overlapped(samdict: list[list]) -&gt; list[list]:
-    &#34;&#34;&#34;Remove overlapped reads within the same QNAME.
+def return_end_of_current_read(alignment:dict) -&gt; int:
+    start_of_current_read = alignment[&#34;POS&#34;]
+    cigar = alignment[&#34;CIGAR&#34;]
+    cigar_split = split_cigar(cigar)
+    alignment_length = 0
+    for cig in cigar_split:
+        if &#34;M&#34; in cig or &#34;D&#34; in cig:
+            alignment_length += int(cig[:-1])
+    return start_of_current_read + alignment_length - 1
+
+
+def realign_sequence(alignment: dict) -&gt; dict:
+    &#34;&#34;&#34;Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    &#34;&#34;&#34;
+    cigar = alignment[&#34;CIGAR&#34;]
+    cigar_split = split_cigar(cigar)
+    sequence = alignment[&#34;SEQ&#34;]
+    sequence_ignored = [&#34;N&#34;] * alignment[&#34;POS&#34;]
+    start = 0
+    for cig in cigar_split:
+        if &#34;M&#34; in cig:
+            end = start + int(cig[:-1])
+            sequence_ignored.append(sequence[start: end])
+            start = end
+        elif &#34;I&#34; in cig:
+            start += int(cig[:-1])
+        elif any(x in cig for x in [&#34;D&#34;, &#34;N&#34;]):
+            sequence_ignored.append(&#34;N&#34; * int(cig[:-1]))
+    realignment = deepcopy(alignment)
+    realignment[&#34;SEQ&#34;] = &#34;&#34;.join(sequence_ignored)
+    return realignment
+
+
+
+def remove_resequence(samdict: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;Remove non-microhomologic overlapped reads within the same QNAME.
+    The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
+    The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
+    Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -140,21 +181,26 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
     sam_nonoverlapped = []
     for _, alignments in sam_groupby:
-        alignments = sorted(alignments, key=lambda x: x[&#34;POS&#34;])
+        alignments = list(alignments)
+        if len(alignments) == 1:
+            sam_nonoverlapped += alignments
+            continue
+        alignments = [realign_sequence(alignment) for alignment in alignments]
+        alignments = sorted(alignments, key=lambda x: [x[&#34;POS&#34;], len(x[&#34;SEQ&#34;])]) # real_overlap2 needs comparisons in the following order: (1) shortest read (2) longest read ,(3) middle read
         is_overraped = False
         end_of_previous_read = -1
+        previous_read = alignments[0][&#34;SEQ&#34;]
         for alignment in alignments:
             start_of_current_read = alignment[&#34;POS&#34;]
             if end_of_previous_read &gt; start_of_current_read:
-                is_overraped = True
-                break
-            alignment_length = 0
-            cigar = alignment[&#34;CIGAR&#34;]
-            cigar_split = split_cigar(cigar)
-            for cig in cigar_split:
-                if &#34;M&#34; in cig or &#34;D&#34; in cig:
-                    alignment_length += int(cig[:-1])
-            end_of_previous_read = start_of_current_read + alignment_length - 1
+                end_of_current_read = return_end_of_current_read(alignment)
+                start_overlap = max(start_of_previous_read, start_of_current_read)
+                end_overlap = min(end_of_previous_read, end_of_current_read)
+                if previous_read[start_overlap: end_overlap] != alignment[&#34;SEQ&#34;][start_overlap: end_overlap]:
+                    is_overraped = True
+                    break
+            end_of_previous_read = return_end_of_current_read(alignment)
+            start_of_previous_read = start_of_current_read
         if not is_overraped:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped</code></pre>
@@ -212,6 +258,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
             RNAME=alignment[2],
             POS=int(alignment[3]),
             CIGAR=alignment[5],
+            SEQ=alignment[9],
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
@@ -258,11 +305,46 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     return SNLN</code></pre>
 </details>
 </dd>
-<dt id="midsv.format.remove_overlapped"><code class="name flex">
-<span>def <span class="ident">remove_overlapped</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
+<dt id="midsv.format.realign_sequence"><code class="name flex">
+<span>def <span class="ident">realign_sequence</span></span>(<span>alignment: dict) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Remove overlapped reads within the same QNAME.</p>
+<div class="desc"><p>Discard insertion and add deletion and spliced nucreotide to unify sequence length</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def realign_sequence(alignment: dict) -&gt; dict:
+    &#34;&#34;&#34;Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    &#34;&#34;&#34;
+    cigar = alignment[&#34;CIGAR&#34;]
+    cigar_split = split_cigar(cigar)
+    sequence = alignment[&#34;SEQ&#34;]
+    sequence_ignored = [&#34;N&#34;] * alignment[&#34;POS&#34;]
+    start = 0
+    for cig in cigar_split:
+        if &#34;M&#34; in cig:
+            end = start + int(cig[:-1])
+            sequence_ignored.append(sequence[start: end])
+            start = end
+        elif &#34;I&#34; in cig:
+            start += int(cig[:-1])
+        elif any(x in cig for x in [&#34;D&#34;, &#34;N&#34;]):
+            sequence_ignored.append(&#34;N&#34; * int(cig[:-1]))
+    realignment = deepcopy(alignment)
+    realignment[&#34;SEQ&#34;] = &#34;&#34;.join(sequence_ignored)
+    return realignment</code></pre>
+</details>
+</dd>
+<dt id="midsv.format.remove_resequence"><code class="name flex">
+<span>def <span class="ident">remove_resequence</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove non-microhomologic overlapped reads within the same QNAME.
+The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
+The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
+Since resequence is a Nanopore sequencing error, the reads should be discarded.
+Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>tests/data/overlap/real_overlap2.sam</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
@@ -277,8 +359,12 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_overlapped(samdict: list[list]) -&gt; list[list]:
-    &#34;&#34;&#34;Remove overlapped reads within the same QNAME.
+<pre><code class="python">def remove_resequence(samdict: list[list]) -&gt; list[list]:
+    &#34;&#34;&#34;Remove non-microhomologic overlapped reads within the same QNAME.
+    The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
+    The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
+    Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -290,21 +376,26 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
     sam_groupby = groupby(samdict, lambda x: x[&#34;QNAME&#34;])
     sam_nonoverlapped = []
     for _, alignments in sam_groupby:
-        alignments = sorted(alignments, key=lambda x: x[&#34;POS&#34;])
+        alignments = list(alignments)
+        if len(alignments) == 1:
+            sam_nonoverlapped += alignments
+            continue
+        alignments = [realign_sequence(alignment) for alignment in alignments]
+        alignments = sorted(alignments, key=lambda x: [x[&#34;POS&#34;], len(x[&#34;SEQ&#34;])]) # real_overlap2 needs comparisons in the following order: (1) shortest read (2) longest read ,(3) middle read
         is_overraped = False
         end_of_previous_read = -1
+        previous_read = alignments[0][&#34;SEQ&#34;]
         for alignment in alignments:
             start_of_current_read = alignment[&#34;POS&#34;]
             if end_of_previous_read &gt; start_of_current_read:
-                is_overraped = True
-                break
-            alignment_length = 0
-            cigar = alignment[&#34;CIGAR&#34;]
-            cigar_split = split_cigar(cigar)
-            for cig in cigar_split:
-                if &#34;M&#34; in cig or &#34;D&#34; in cig:
-                    alignment_length += int(cig[:-1])
-            end_of_previous_read = start_of_current_read + alignment_length - 1
+                end_of_current_read = return_end_of_current_read(alignment)
+                start_overlap = max(start_of_previous_read, start_of_current_read)
+                end_overlap = min(end_of_previous_read, end_of_current_read)
+                if previous_read[start_overlap: end_overlap] != alignment[&#34;SEQ&#34;][start_overlap: end_overlap]:
+                    is_overraped = True
+                    break
+            end_of_previous_read = return_end_of_current_read(alignment)
+            start_of_previous_read = start_of_current_read
         if not is_overraped:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped</code></pre>
@@ -314,7 +405,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <span>def <span class="ident">remove_softclips</span></span>(<span>sam: list[dict]) ‑> list[dict]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Remove softclip quality score from QUAL.</p>
+<div class="desc"><p>Remove softclip information from SEQ and QUAL.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
@@ -330,7 +421,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def remove_softclips(sam: list[dict]) -&gt; list[dict]:
-    &#34;&#34;&#34;Remove softclip quality score from QUAL.
+    &#34;&#34;&#34;Remove softclip information from SEQ and QUAL.
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -348,12 +439,34 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
         left, right = cigar_split[0], cigar_split[-1]
         if &#34;S&#34; in left:
             left = int(left[:-1])
+            alignment[&#34;SEQ&#34;] = alignment[&#34;SEQ&#34;][left:]
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][left:]
         if &#34;S&#34; in right:
             right = int(right[:-1])
+            alignment[&#34;SEQ&#34;] = alignment[&#34;SEQ&#34;][:-right]
             alignment[&#34;QUAL&#34;] = alignment[&#34;QUAL&#34;][:-right]
         sam_list.append(alignment)
     return sam_list</code></pre>
+</details>
+</dd>
+<dt id="midsv.format.return_end_of_current_read"><code class="name flex">
+<span>def <span class="ident">return_end_of_current_read</span></span>(<span>alignment: dict) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def return_end_of_current_read(alignment:dict) -&gt; int:
+    start_of_current_read = alignment[&#34;POS&#34;]
+    cigar = alignment[&#34;CIGAR&#34;]
+    cigar_split = split_cigar(cigar)
+    alignment_length = 0
+    for cig in cigar_split:
+        if &#34;M&#34; in cig or &#34;D&#34; in cig:
+            alignment_length += int(cig[:-1])
+    return start_of_current_read + alignment_length - 1</code></pre>
 </details>
 </dd>
 <dt id="midsv.format.split_cigar"><code class="name flex">
@@ -391,8 +504,10 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <ul class="">
 <li><code><a title="midsv.format.dictionarize_sam" href="#midsv.format.dictionarize_sam">dictionarize_sam</a></code></li>
 <li><code><a title="midsv.format.extract_sqheaders" href="#midsv.format.extract_sqheaders">extract_sqheaders</a></code></li>
-<li><code><a title="midsv.format.remove_overlapped" href="#midsv.format.remove_overlapped">remove_overlapped</a></code></li>
+<li><code><a title="midsv.format.realign_sequence" href="#midsv.format.realign_sequence">realign_sequence</a></code></li>
+<li><code><a title="midsv.format.remove_resequence" href="#midsv.format.remove_resequence">remove_resequence</a></code></li>
 <li><code><a title="midsv.format.remove_softclips" href="#midsv.format.remove_softclips">remove_softclips</a></code></li>
+<li><code><a title="midsv.format.return_end_of_current_read" href="#midsv.format.return_end_of_current_read">return_end_of_current_read</a></code></li>
 <li><code><a title="midsv.format.split_cigar" href="#midsv.format.split_cigar">split_cigar</a></code></li>
 </ul>
 </li>
