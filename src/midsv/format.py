@@ -1,20 +1,6 @@
 from __future__ import annotations
 import re
-import json
-from pathlib import Path
-from typing import Union
 from itertools import groupby
-
-###########################################################
-# Read sam
-###########################################################
-
-
-def read_sam(path_of_sam: Union[str, Path]) -> list[list]:
-    if "str" in str(type(path_of_sam)):
-        path_of_sam = Path(path_of_sam)
-    sam = Path(path_of_sam).read_text().strip().split("\n")
-    return [s.split("\t") for s in sam]
 
 
 ###########################################################
@@ -195,22 +181,3 @@ def remove_overlapped(samdict: list[list]) -> list[list]:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped
 
-
-###########################################################
-# Read / Write jsonl
-###########################################################
-
-
-def read_jsonl(filepath: Union[str, Path]) -> list[dict]:
-    dicts = []
-    with open(filepath, "r") as f:
-        for line in f:
-            dicts.append(json.JSONDecoder().decode(line))
-    return dicts
-
-
-def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
-    with open(filepath, "w") as output:
-        for d in dicts:
-            json.dump(d, output)
-            output.write("\n")

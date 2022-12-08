@@ -1,4 +1,5 @@
 from pathlib import Path
+from src.midsv import io
 from src.midsv import format
 from src.midsv import convert
 from src.midsv import proofread
@@ -56,7 +57,7 @@ def test_join_real_microhomology():
 
 def test_pad():
     sam = Path("tests", "data", "pad", "padding.sam")
-    sam = format.read_sam(str(sam))
+    sam = io.read_sam(str(sam))
     sqheaders = format.extract_sqheaders(sam)
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):

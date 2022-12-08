@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.midsv import convert, format
+from src.midsv import io, convert, format
 from importlib import reload
 
 reload(convert)
@@ -140,7 +140,7 @@ def test_qual_to_qscore_midsv_ins_sub():
 
 def test_qual_to_qscore_midsv_real():
     sampath = Path("tests", "data", "phredscore", "subindel_cslong.sam")
-    sam = format.read_sam(str(sampath))
+    sam = io.read_sam(str(sampath))
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):
         samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])

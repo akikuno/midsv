@@ -3,7 +3,7 @@
 """
 
 from .main import transform
-from .format import read_sam
+from .io import read_sam
+from .io import read_jsonl
+from .io import write_jsonl
 from .format import check_sam_format
-from .format import read_jsonl
-from .format import write_jsonl
