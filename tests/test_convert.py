@@ -23,6 +23,13 @@ def test_to_midsv():
     assert test == answer
 
 
+def test_to_midsv_splice():
+    cstag_splitted = ['=ACGT', '~tg5ca', '=ACGT']
+    test = convert.to_midsv(cstag_splitted)
+    answer = ['MMMM', 'DDDDD', 'MMMM']
+    assert test == answer
+
+
 def test_numerize_insertion():
     midsv = ["MMM", "III", "D", "S"]
     test = convert.numerize_insertion(midsv)
@@ -91,6 +98,13 @@ def test_cstag_to_cssplit_insertion_at_last():
     assert test == answer
 
 
+def test_cstag_to_cssplit_splice():
+    cstag = "cs:Z:=A~ta10cg=T"
+    test = convert.cstag_to_cssplit(cstag)
+    answer = "=A,N,N,N,N,N,N,N,N,N,N,=T"
+    assert test == answer
+
+
 ###########################################################
 # Phred score
 ###########################################################
@@ -154,6 +168,7 @@ def test_qual_to_qscore_midsv_real():
 # ----------------------------------------------------------
 # qual_to_qscore_cssplit
 # ----------------------------------------------------------
+
 def test_qual_to_qscore_cssplit_insertion():
     qual = "@!!!@@"
     cssplit = "=A,+T|+T|+T|=A,-A,=A"
@@ -193,3 +208,9 @@ def test_qual_to_qscore_cssplit_ins_sub():
     answer = "31,15|16|17|0"
     assert test == answer
 
+def test_qual_to_qscore_cssplit_splicing():
+    qual = "!@"
+    cssplit = '=A,N,N,N,N,N,N,N,N,N,N,=T'
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = '0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31'
+    assert test == answer
