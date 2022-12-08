@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from . import convert
+from . import validate
 from . import format
+from . import convert
 from . import proofread
 
 
@@ -23,7 +24,8 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     else:
         raise ValueError("Either midsv or cssplit must be True")
 
-    format.check_sam_format(sam)
+    validate.sam_headers(sam)
+    validate.sam_alignments(sam)
 
     sqheaders = format.extract_sqheaders(sam)
     samdict = format.dictionarize_sam(sam)

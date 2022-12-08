@@ -79,7 +79,8 @@ def test_integration_eachcomponent():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = midsv.io.read_sam(str(sampath))
 
-    midsv.format.check_sam_format(sam)
+    midsv.validate.sam_headers(sam)
+    midsv.validate.sam_alignments(sam)
 
     sqheaders = midsv.format.extract_sqheaders(sam)
     samdict = midsv.format.dictionarize_sam(sam)
