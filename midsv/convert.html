@@ -47,10 +47,10 @@ def split_cstag(cstag: str) -&gt; list[str]:
         &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
     &#34;&#34;&#34;
     cstag_splitted = []
-    for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
+    for cs in re.split(r&#34;(=|\*|\-|\+|\~)&#34;, cstag):
         if not cs or cs == &#34;cs:Z:&#34;:
             continue
-        if re.match(r&#34;(=|\*|\-|\+)&#34;, cs):
+        if re.match(r&#34;(=|\*|\-|\+|\~)&#34;, cs):
             cstag_splitted.append(cs)
         else:
             cstag_splitted[-1] += cs
@@ -63,25 +63,32 @@ def to_midsv(cstag_splitted: list[str]) -&gt; list[str]:
         cstag_splitted (list[str]): splitted CS tags
     Returns:
         list[str]: splitted MIDSV
-    Example:
+    Examples:
         &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
         &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
+
+        &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;~tg5ca&#39;, &#39;=ACGT&#39;]
+        &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
+        &#34;[&#39;MMMM&#39;, &#39;DDDDD&#39;, &#39;MMMM&#39;]&#34;
     &#34;&#34;&#34;
-    midsv = []
+    midsv_splitted = []
     for cs in cstag_splitted:
         num = len(cs) - 1
         if cs.startswith(&#34;=&#34;):
-            midsv.append(&#34;M&#34; * num)
+            midsv_splitted.append(&#34;M&#34; * num)
         elif cs.startswith(&#34;+&#34;):
-            midsv.append(&#34;I&#34; * num)
+            midsv_splitted.append(&#34;I&#34; * num)
         elif cs.startswith(&#34;-&#34;):
-            midsv.append(&#34;D&#34; * num)
+            midsv_splitted.append(&#34;D&#34; * num)
+        elif cs.startswith(&#34;~&#34;):
+            match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
+            _, splice, _ = match.groups()
+            midsv_splitted.append(&#34;D&#34; * int(splice))
         else:
-            midsv.append(&#34;S&#34;)
-    return midsv
-
+            midsv_splitted.append(&#34;S&#34;)
+    return midsv_splitted
 
 def numerize_insertion(midsv: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Convert insertion to numeric numbers
@@ -181,37 +188,45 @@ def cstag_to_cssplit(cstag: str) -&gt; str:
 
     Examples:
         &gt;&gt;&gt; cstag = &#34;cs:Z:=A+ttt=CC-aa=T*ag=TT&#34;
-        &gt;&gt;&gt; test = convert.cstag_to_cssplit(cstag)
+        &gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
         &#34;=A,+T|+T|+T|=C,=C,-A,-A,=T,*AG,=T,=T&#34;
+
+        &gt;&gt;&gt; cstag = &#34;cs:Z:=A~ta10cg=T&#34;
+        &gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
+        &#34;=A,N,N,N,N,N,N,N,N,N,N,=T&#34;
     &#34;&#34;&#34;
-    cstag_list = split_cstag(cstag)
-    cssplit = []
-    for i, cs in enumerate(cstag_list):
-        op = cs[0]
+    cstag_splitted = split_cstag(cstag)
+    cssplits = []
+    for i, cs in enumerate(cstag_splitted):
         if len(cs) == 1:
             continue
+        op = cs[0]
         if op == &#34;+&#34;:
             insertion = list(cs[1:])
             insertion = &#34;+&#34; + &#34;|+&#34;.join(insertion)
-            if i + 1 == len(cstag_list):
-                cssplit.append(insertion)
+            if i + 1 == len(cstag_splitted):
+                cssplits.append(insertion)
                 break
-            next_cstag = cstag_list[i + 1]
+            next_cstag = cstag_splitted[i + 1]
             next_op = next_cstag[0]
             if next_op == &#34;*&#34;:
-                cssplit.append(insertion + &#34;|&#34; + next_cstag)
-                cstag_list[i + 1] = &#34;*&#34;
+                cssplits.append(insertion + &#34;|&#34; + next_cstag)
+                cstag_splitted[i + 1] = &#34;*&#34;
             else:
-                cstag_list[i + 1] = next_op + next_cstag[2:]
+                cstag_splitted[i + 1] = next_op + next_cstag[2:]
                 insertion = insertion + &#34;|&#34; + next_cstag[:2]
-                cssplit.append(insertion)
+                cssplits.append(insertion)
         elif op == &#34;*&#34;:
-            cssplit.append(cs)
+            cssplits.append(cs)
+        elif op == &#34;~&#34;:
+            match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
+            _, splice, _ = match.groups()
+            cssplits.extend([&#34;N&#34;] * int(splice))
         else:
             cs = list(cs[1:])
             cs = op + f&#34;,{op}&#34;.join(cs)
-            cssplit.append(cs)
-    return &#34;,&#34;.join([cs.upper() for cs in cssplit])
+            cssplits.append(cs)
+    return &#34;,&#34;.join([cs.upper() for cs in cssplits])
 
 
 ###########################################################
@@ -272,7 +287,7 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
     qscore = []
     idx = 0
     for cs in cssplit.split(&#34;,&#34;):
-        if cs.startswith(&#34;-&#34;):
+        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;: # N = spliced loci
             qscore.append(&#34;-1&#34;)
             idx -= 1
         elif cs.startswith(&#34;+&#34;):
@@ -330,8 +345,12 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
 </dl>
 <h2 id="examples">Examples</h2>
 <pre><code class="language-python-repl">&gt;&gt;&gt; cstag = &quot;cs:Z:=A+ttt=CC-aa=T*ag=TT&quot;
-&gt;&gt;&gt; test = convert.cstag_to_cssplit(cstag)
+&gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
 &quot;=A,+T|+T|+T|=C,=C,-A,-A,=T,*AG,=T,=T&quot;
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; cstag = &quot;cs:Z:=A~ta10cg=T&quot;
+&gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
+&quot;=A,N,N,N,N,N,N,N,N,N,N,=T&quot;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -348,37 +367,45 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
 
     Examples:
         &gt;&gt;&gt; cstag = &#34;cs:Z:=A+ttt=CC-aa=T*ag=TT&#34;
-        &gt;&gt;&gt; test = convert.cstag_to_cssplit(cstag)
+        &gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
         &#34;=A,+T|+T|+T|=C,=C,-A,-A,=T,*AG,=T,=T&#34;
+
+        &gt;&gt;&gt; cstag = &#34;cs:Z:=A~ta10cg=T&#34;
+        &gt;&gt;&gt; convert.cstag_to_cssplit(cstag)
+        &#34;=A,N,N,N,N,N,N,N,N,N,N,=T&#34;
     &#34;&#34;&#34;
-    cstag_list = split_cstag(cstag)
-    cssplit = []
-    for i, cs in enumerate(cstag_list):
-        op = cs[0]
+    cstag_splitted = split_cstag(cstag)
+    cssplits = []
+    for i, cs in enumerate(cstag_splitted):
         if len(cs) == 1:
             continue
+        op = cs[0]
         if op == &#34;+&#34;:
             insertion = list(cs[1:])
             insertion = &#34;+&#34; + &#34;|+&#34;.join(insertion)
-            if i + 1 == len(cstag_list):
-                cssplit.append(insertion)
+            if i + 1 == len(cstag_splitted):
+                cssplits.append(insertion)
                 break
-            next_cstag = cstag_list[i + 1]
+            next_cstag = cstag_splitted[i + 1]
             next_op = next_cstag[0]
             if next_op == &#34;*&#34;:
-                cssplit.append(insertion + &#34;|&#34; + next_cstag)
-                cstag_list[i + 1] = &#34;*&#34;
+                cssplits.append(insertion + &#34;|&#34; + next_cstag)
+                cstag_splitted[i + 1] = &#34;*&#34;
             else:
-                cstag_list[i + 1] = next_op + next_cstag[2:]
+                cstag_splitted[i + 1] = next_op + next_cstag[2:]
                 insertion = insertion + &#34;|&#34; + next_cstag[:2]
-                cssplit.append(insertion)
+                cssplits.append(insertion)
         elif op == &#34;*&#34;:
-            cssplit.append(cs)
+            cssplits.append(cs)
+        elif op == &#34;~&#34;:
+            match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
+            _, splice, _ = match.groups()
+            cssplits.extend([&#34;N&#34;] * int(splice))
         else:
             cs = list(cs[1:])
             cs = op + f&#34;,{op}&#34;.join(cs)
-            cssplit.append(cs)
-    return &#34;,&#34;.join([cs.upper() for cs in cssplit])</code></pre>
+            cssplits.append(cs)
+    return &#34;,&#34;.join([cs.upper() for cs in cssplits])</code></pre>
 </details>
 </dd>
 <dt id="midsv.convert.cstag_to_midsv"><code class="name flex">
@@ -481,7 +508,7 @@ To adjust the same length as cssplit, insertion is discarded and deletion is int
     qscore = []
     idx = 0
     for cs in cssplit.split(&#34;,&#34;):
-        if cs.startswith(&#34;-&#34;):
+        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;: # N = spliced loci
             qscore.append(&#34;-1&#34;)
             idx -= 1
         elif cs.startswith(&#34;+&#34;):
@@ -649,10 +676,10 @@ To adjust the same length as MIDSV, insertion is discarded and deletion is inter
         &#34;[&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-g&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]&#34;
     &#34;&#34;&#34;
     cstag_splitted = []
-    for cs in re.split(r&#34;(=|\*|\-|\+)&#34;, cstag):
+    for cs in re.split(r&#34;(=|\*|\-|\+|\~)&#34;, cstag):
         if not cs or cs == &#34;cs:Z:&#34;:
             continue
-        if re.match(r&#34;(=|\*|\-|\+)&#34;, cs):
+        if re.match(r&#34;(=|\*|\-|\+|\~)&#34;, cs):
             cstag_splitted.append(cs)
         else:
             cstag_splitted[-1] += cs
@@ -674,11 +701,15 @@ To adjust the same length as MIDSV, insertion is discarded and deletion is inter
 <dt><code>list[str]</code></dt>
 <dd>splitted MIDSV</dd>
 </dl>
-<h2 id="example">Example</h2>
+<h2 id="examples">Examples</h2>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from midsv import convert
 &gt;&gt;&gt; cstag_splitted = ['=ACGT', '*ag', '=C', '-gg', '=T', '+t', '=ACGT']
 &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
 &quot;['MMMM', 'S', 'M', 'DD', 'M', 'I', 'MMMM']&quot;
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; cstag_splitted = ['=ACGT', '~tg5ca', '=ACGT']
+&gt;&gt;&gt; convert.to_midsv(cstag_splitted)
+&quot;['MMMM', 'DDDDD', 'MMMM']&quot;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -690,24 +721,32 @@ To adjust the same length as MIDSV, insertion is discarded and deletion is inter
         cstag_splitted (list[str]): splitted CS tags
     Returns:
         list[str]: splitted MIDSV
-    Example:
+    Examples:
         &gt;&gt;&gt; from midsv import convert
         &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;*ag&#39;, &#39;=C&#39;, &#39;-gg&#39;, &#39;=T&#39;, &#39;+t&#39;, &#39;=ACGT&#39;]
         &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
         &#34;[&#39;MMMM&#39;, &#39;S&#39;, &#39;M&#39;, &#39;DD&#39;, &#39;M&#39;, &#39;I&#39;, &#39;MMMM&#39;]&#34;
+
+        &gt;&gt;&gt; cstag_splitted = [&#39;=ACGT&#39;, &#39;~tg5ca&#39;, &#39;=ACGT&#39;]
+        &gt;&gt;&gt; convert.to_midsv(cstag_splitted)
+        &#34;[&#39;MMMM&#39;, &#39;DDDDD&#39;, &#39;MMMM&#39;]&#34;
     &#34;&#34;&#34;
-    midsv = []
+    midsv_splitted = []
     for cs in cstag_splitted:
         num = len(cs) - 1
         if cs.startswith(&#34;=&#34;):
-            midsv.append(&#34;M&#34; * num)
+            midsv_splitted.append(&#34;M&#34; * num)
         elif cs.startswith(&#34;+&#34;):
-            midsv.append(&#34;I&#34; * num)
+            midsv_splitted.append(&#34;I&#34; * num)
         elif cs.startswith(&#34;-&#34;):
-            midsv.append(&#34;D&#34; * num)
+            midsv_splitted.append(&#34;D&#34; * num)
+        elif cs.startswith(&#34;~&#34;):
+            match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
+            _, splice, _ = match.groups()
+            midsv_splitted.append(&#34;D&#34; * int(splice))
         else:
-            midsv.append(&#34;S&#34;)
-    return midsv</code></pre>
+            midsv_splitted.append(&#34;S&#34;)
+    return midsv_splitted</code></pre>
 </details>
 </dd>
 <dt id="midsv.convert.to_string"><code class="name flex">
