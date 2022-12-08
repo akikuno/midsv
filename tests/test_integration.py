@@ -67,10 +67,21 @@ def test_integration_real_sam():
         RNAME = alignment["RNAME"]
         MIDSV = alignment["MIDSV"]
         QSCORE = alignment["QSCORE"]
-        RLEN = sqheaders[RNAME]
         mlen = len(MIDSV.split(","))
         qlen = len(QSCORE.split(","))
-        assert mlen == qlen == RLEN
+        answer = sqheaders[RNAME]
+        assert mlen == qlen == answer
+
+
+def test_integration_real_splicing():
+    sam = midsv.io.read_sam("tests/data/splicing/real_splicing.sam")
+    sqheaders = midsv.format.extract_sqheaders(sam)
+    test = midsv.transform(sam)
+    mlen = len(test[0]["MIDSV"].split(","))
+    clen = len(test[0]["CSSPLIT"].split(","))
+    qlen = len(test[0]["QSCORE"].split(","))
+    answer = sqheaders["deletion"]
+    assert mlen == clen == qlen == answer
 
 
 def test_integration_eachcomponent():
