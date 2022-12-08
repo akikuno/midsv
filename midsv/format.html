@@ -32,56 +32,6 @@ from itertools import groupby
 
 
 ###########################################################
-# Check sam format
-###########################################################
-
-
-def check_headers(sam: list[list]):
-    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
-
-    Args:
-        sam (list[list]): a list of lists of SAM format
-
-    &#34;&#34;&#34;
-    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
-    if not sqheaders:
-        raise AttributeError(&#34;Input does not have @SQ header&#34;)
-
-
-def check_alignments(sam: list[list]):
-    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
-
-    Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
-    &#34;&#34;&#34;
-    is_alignment = False
-    for alignment in sam:
-        if alignment[0].startswith(&#34;@&#34;):
-            continue
-        if alignment[2] == &#34;*&#34;:
-            continue
-        is_alignment = True
-        if len(alignment) &lt; 10:
-            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
-        idx_cstag = -1
-        for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
-                idx_cstag = i
-                break
-        if idx_cstag == -1:
-            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
-        if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
-    if not is_alignment:
-        raise AttributeError(&#34;No alignment information&#34;)
-
-
-def check_sam_format(sam: list[list]):
-    check_headers(sam)
-    check_alignments(sam)
-
-
-###########################################################
 # Format headers and alignments
 ###########################################################
 
@@ -217,88 +167,6 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="midsv.format.check_alignments"><code class="name flex">
-<span>def <span class="ident">check_alignments</span></span>(<span>sam: list[list])</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Check alignments are mapped and have long-formatted cs tag</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
-<dd>a list of lists of SAM format including CS tag</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def check_alignments(sam: list[list]):
-    &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
-
-    Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
-    &#34;&#34;&#34;
-    is_alignment = False
-    for alignment in sam:
-        if alignment[0].startswith(&#34;@&#34;):
-            continue
-        if alignment[2] == &#34;*&#34;:
-            continue
-        is_alignment = True
-        if len(alignment) &lt; 10:
-            raise AttributeError(&#34;Alighment may not be SAM format&#34;)
-        idx_cstag = -1
-        for i, a in enumerate(alignment):
-            if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
-                idx_cstag = i
-                break
-        if idx_cstag == -1:
-            raise AttributeError(&#34;Input does not have long-formatted cs tag&#34;)
-        if &#34;~&#34; in alignment[idx_cstag]:
-            raise AttributeError(&#34;long-read spliced alignment are currently not supported&#34;)
-    if not is_alignment:
-        raise AttributeError(&#34;No alignment information&#34;)</code></pre>
-</details>
-</dd>
-<dt id="midsv.format.check_headers"><code class="name flex">
-<span>def <span class="ident">check_headers</span></span>(<span>sam: list[list])</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Check headers containing SN (Reference sequence name) and LN (Reference sequence length)</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
-<dd>a list of lists of SAM format</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def check_headers(sam: list[list]):
-    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
-
-    Args:
-        sam (list[list]): a list of lists of SAM format
-
-    &#34;&#34;&#34;
-    sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
-    if not sqheaders:
-        raise AttributeError(&#34;Input does not have @SQ header&#34;)</code></pre>
-</details>
-</dd>
-<dt id="midsv.format.check_sam_format"><code class="name flex">
-<span>def <span class="ident">check_sam_format</span></span>(<span>sam: list[list])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def check_sam_format(sam: list[list]):
-    check_headers(sam)
-    check_alignments(sam)</code></pre>
-</details>
-</dd>
 <dt id="midsv.format.dictionarize_sam"><code class="name flex">
 <span>def <span class="ident">dictionarize_sam</span></span>(<span>sam: list[list]) ‑> list[dict]</span>
 </code></dt>
@@ -520,10 +388,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="midsv.format.check_alignments" href="#midsv.format.check_alignments">check_alignments</a></code></li>
-<li><code><a title="midsv.format.check_headers" href="#midsv.format.check_headers">check_headers</a></code></li>
-<li><code><a title="midsv.format.check_sam_format" href="#midsv.format.check_sam_format">check_sam_format</a></code></li>
+<ul class="">
 <li><code><a title="midsv.format.dictionarize_sam" href="#midsv.format.dictionarize_sam">dictionarize_sam</a></code></li>
 <li><code><a title="midsv.format.extract_sqheaders" href="#midsv.format.extract_sqheaders">extract_sqheaders</a></code></li>
 <li><code><a title="midsv.format.remove_overlapped" href="#midsv.format.remove_overlapped">remove_overlapped</a></code></li>
