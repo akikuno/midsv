@@ -28,21 +28,7 @@
 </summary>
 <pre><code class="python">from __future__ import annotations
 import re
-import json
-from pathlib import Path
-from typing import Union
 from itertools import groupby
-
-###########################################################
-# Read sam
-###########################################################
-
-
-def read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]:
-    if &#34;str&#34; in str(type(path_of_sam)):
-        path_of_sam = Path(path_of_sam)
-    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
-    return [s.split(&#34;\t&#34;) for s in sam]
 
 
 ###########################################################
@@ -221,27 +207,7 @@ def remove_overlapped(samdict: list[list]) -&gt; list[list]:
             end_of_previous_read = start_of_current_read + alignment_length - 1
         if not is_overraped:
             sam_nonoverlapped += alignments
-    return sam_nonoverlapped
-
-
-###########################################################
-# Read / Write jsonl
-###########################################################
-
-
-def read_jsonl(filepath: Union[str, Path]) -&gt; list[dict]:
-    dicts = []
-    with open(filepath, &#34;r&#34;) as f:
-        for line in f:
-            dicts.append(json.JSONDecoder().decode(line))
-    return dicts
-
-
-def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
-    with open(filepath, &#34;w&#34;) as output:
-        for d in dicts:
-            json.dump(d, output)
-            output.write(&#34;\n&#34;)</code></pre>
+    return sam_nonoverlapped</code></pre>
 </details>
 </section>
 <section>
@@ -424,39 +390,6 @@ def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
     return SNLN</code></pre>
 </details>
 </dd>
-<dt id="midsv.format.read_jsonl"><code class="name flex">
-<span>def <span class="ident">read_jsonl</span></span>(<span>filepath: Union[str, Path]) ‑> list[dict]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def read_jsonl(filepath: Union[str, Path]) -&gt; list[dict]:
-    dicts = []
-    with open(filepath, &#34;r&#34;) as f:
-        for line in f:
-            dicts.append(json.JSONDecoder().decode(line))
-    return dicts</code></pre>
-</details>
-</dd>
-<dt id="midsv.format.read_sam"><code class="name flex">
-<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: Union[str, Path]) ‑> list[list]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]:
-    if &#34;str&#34; in str(type(path_of_sam)):
-        path_of_sam = Path(path_of_sam)
-    sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
-    return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
-</details>
-</dd>
 <dt id="midsv.format.remove_overlapped"><code class="name flex">
 <span>def <span class="ident">remove_overlapped</span></span>(<span>samdict: list[list]) ‑> list[list]</span>
 </code></dt>
@@ -570,22 +503,6 @@ def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
     return cigar_splitted</code></pre>
 </details>
 </dd>
-<dt id="midsv.format.write_jsonl"><code class="name flex">
-<span>def <span class="ident">write_jsonl</span></span>(<span>dicts: list[dict], filepath: Union[str, Path])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
-    with open(filepath, &#34;w&#34;) as output:
-        for d in dicts:
-            json.dump(d, output)
-            output.write(&#34;\n&#34;)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -609,12 +526,9 @@ def write_jsonl(dicts: list[dict], filepath: Union[str, Path]):
 <li><code><a title="midsv.format.check_sam_format" href="#midsv.format.check_sam_format">check_sam_format</a></code></li>
 <li><code><a title="midsv.format.dictionarize_sam" href="#midsv.format.dictionarize_sam">dictionarize_sam</a></code></li>
 <li><code><a title="midsv.format.extract_sqheaders" href="#midsv.format.extract_sqheaders">extract_sqheaders</a></code></li>
-<li><code><a title="midsv.format.read_jsonl" href="#midsv.format.read_jsonl">read_jsonl</a></code></li>
-<li><code><a title="midsv.format.read_sam" href="#midsv.format.read_sam">read_sam</a></code></li>
 <li><code><a title="midsv.format.remove_overlapped" href="#midsv.format.remove_overlapped">remove_overlapped</a></code></li>
 <li><code><a title="midsv.format.remove_softclips" href="#midsv.format.remove_softclips">remove_softclips</a></code></li>
 <li><code><a title="midsv.format.split_cigar" href="#midsv.format.split_cigar">split_cigar</a></code></li>
-<li><code><a title="midsv.format.write_jsonl" href="#midsv.format.write_jsonl">write_jsonl</a></code></li>
 </ul>
 </li>
 </ul>
