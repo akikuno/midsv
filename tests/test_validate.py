@@ -42,10 +42,3 @@ def test_validate_alignments_no_cslong():
         validate.sam_alignments(sam)
     assert str(excinfo.value) == "Input does not have long-formatted cs tag"
 
-
-def test_validate_alignments_splicing():
-    path = Path("tests", "data", "splicing", "splicing_cslong.sam")
-    sam = io.read_sam(path)
-    with pytest.raises(AttributeError) as excinfo:
-        validate.sam_alignments(sam)
-    assert str(excinfo.value) == "long-read spliced alignment are currently not supported"

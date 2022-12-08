@@ -129,7 +129,7 @@ def select(samdict: list[dict]) -> list[dict]:
     """
     selected = []
     for m in samdict:
-        for delkeys in ["FLAG", "POS", "QUAL", "CIGAR", "CSTAG"]:
+        for delkeys in ["FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"]:
             m.pop(delkeys)
         selected.append(m)
     return selected

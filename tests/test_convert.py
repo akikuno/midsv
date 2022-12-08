@@ -164,7 +164,6 @@ def test_qual_to_qscore_midsv_real():
     answer = eval(answer)
     assert test == answer
 
-
 # ----------------------------------------------------------
 # qual_to_qscore_cssplit
 # ----------------------------------------------------------

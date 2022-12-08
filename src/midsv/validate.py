@@ -41,7 +41,7 @@ def sam_alignments(sam: list[list]) -> None:
                 break
         if idx_cstag == -1:
             raise AttributeError("Input does not have long-formatted cs tag")
-        if "~" in alignment[idx_cstag]:
-            raise AttributeError("long-read spliced alignment are currently not supported")
+        # if "~" in alignment[idx_cstag]:
+        #     raise AttributeError("long-read spliced alignment are currently not supported")
     if not is_alignment:
         raise AttributeError("No alignment information")

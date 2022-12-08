@@ -34,7 +34,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
         raise ValueError("qscore must be False because the input does not contain QUAL")
 
     samdict = format.remove_softclips(samdict)
-    samdict = format.remove_overlapped(samdict)
+    samdict = format.remove_resequence(samdict)
 
     for alignment in samdict:
         if midsv:

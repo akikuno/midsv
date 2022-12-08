@@ -8,3 +8,4 @@
     {'QNAME': 'softclip', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,M,M,M,M,M,M'}, 
     {'QNAME': 'substitution', 'RNAME': 'example', 'MIDSV': 'M,M,M,M,S,M,M,M,M,M'}
 ]        
+

@@ -57,10 +57,43 @@ def test_remove_softclips():
         assert len(t["QUAL"]) == 100
 
 
-def test_remove_overlapped():
+def test_realign_sequence():
+    alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M1I1D1M"}
+    test = format.realign_sequence(alignment)
+    del test["POS"]
+    del test["CIGAR"]
+    answer = {'SEQ': 'ACNT'}
+    assert test == answer
+
+def test_realign_sequence_start_5nt():
+    alignment = {"POS": 5, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
+    test = format.realign_sequence(alignment)
+    del test["POS"]
+    del test["CIGAR"]
+    answer = {'SEQ': 'NNNNNACNT'}
+    assert test == answer
+
+def test_realign_sequence_hardclip():
+    alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
+    test = format.realign_sequence(alignment)
+    del test["POS"]
+    del test["CIGAR"]
+    answer = {'SEQ': 'ACNT'}
+    assert test == answer
+
+def test_realign_sequence_splicing():
+    alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M5N2M"}
+    test = format.realign_sequence(alignment)
+    del test["POS"]
+    del test["CIGAR"]
+    answer = {'SEQ': 'ACNNNNNGT'}
+    assert test == answer
+
+def test_remove_resequence():
     path = Path("tests", "data", "overlap", "overlapped.sam")
     sam = io.read_sam(path)
     samdict = format.dictionarize_sam(sam)
-    test = format.remove_overlapped(samdict)
+    test = format.remove_resequence(samdict)
     for t in test:
         assert not t["QNAME"].startswith("overlap")
+

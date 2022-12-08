@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 from itertools import groupby
-
+from copy import deepcopy
 
 ###########################################################
 # Format headers and alignments
@@ -53,6 +53,7 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
             RNAME=alignment[2],
             POS=int(alignment[3]),
             CIGAR=alignment[5],
+            SEQ=alignment[9],
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
@@ -73,7 +74,7 @@ def split_cigar(cigar: str) -> list[str]:
 
 
 def remove_softclips(sam: list[dict]) -> list[dict]:
-    """Remove softclip quality score from QUAL.
+    """Remove softclip information from SEQ and QUAL.
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -91,16 +92,56 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
         left, right = cigar_split[0], cigar_split[-1]
         if "S" in left:
             left = int(left[:-1])
+            alignment["SEQ"] = alignment["SEQ"][left:]
             alignment["QUAL"] = alignment["QUAL"][left:]
         if "S" in right:
             right = int(right[:-1])
+            alignment["SEQ"] = alignment["SEQ"][:-right]
             alignment["QUAL"] = alignment["QUAL"][:-right]
         sam_list.append(alignment)
     return sam_list
 
 
-def remove_overlapped(samdict: list[list]) -> list[list]:
-    """Remove overlapped reads within the same QNAME.
+def return_end_of_current_read(alignment:dict) -> int:
+    start_of_current_read = alignment["POS"]
+    cigar = alignment["CIGAR"]
+    cigar_split = split_cigar(cigar)
+    alignment_length = 0
+    for cig in cigar_split:
+        if "M" in cig or "D" in cig:
+            alignment_length += int(cig[:-1])
+    return start_of_current_read + alignment_length - 1
+
+
+def realign_sequence(alignment: dict) -> dict:
+    """Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    """
+    cigar = alignment["CIGAR"]
+    cigar_split = split_cigar(cigar)
+    sequence = alignment["SEQ"]
+    sequence_ignored = ["N"] * alignment["POS"]
+    start = 0
+    for cig in cigar_split:
+        if "M" in cig:
+            end = start + int(cig[:-1])
+            sequence_ignored.append(sequence[start: end])
+            start = end
+        elif "I" in cig:
+            start += int(cig[:-1])
+        elif any(x in cig for x in ["D", "N"]):
+            sequence_ignored.append("N" * int(cig[:-1]))
+    realignment = deepcopy(alignment)
+    realignment["SEQ"] = "".join(sequence_ignored)
+    return realignment
+
+
+
+def remove_resequence(samdict: list[list]) -> list[list]:
+    """Remove non-microhomologic overlapped reads within the same QNAME.
+    The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
+    The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
+    Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
         sam (list[list]): disctionalized SAM
@@ -112,21 +153,26 @@ def remove_overlapped(samdict: list[list]) -> list[list]:
     sam_groupby = groupby(samdict, lambda x: x["QNAME"])
     sam_nonoverlapped = []
     for _, alignments in sam_groupby:
-        alignments = sorted(alignments, key=lambda x: x["POS"])
+        alignments = list(alignments)
+        if len(alignments) == 1:
+            sam_nonoverlapped += alignments
+            continue
+        alignments = [realign_sequence(alignment) for alignment in alignments]
+        alignments = sorted(alignments, key=lambda x: [x["POS"], len(x["SEQ"])]) # real_overlap2 needs comparisons in the following order: (1) shortest read (2) longest read ,(3) middle read
         is_overraped = False
         end_of_previous_read = -1
+        previous_read = alignments[0]["SEQ"]
         for alignment in alignments:
             start_of_current_read = alignment["POS"]
             if end_of_previous_read > start_of_current_read:
-                is_overraped = True
-                break
-            alignment_length = 0
-            cigar = alignment["CIGAR"]
-            cigar_split = split_cigar(cigar)
-            for cig in cigar_split:
-                if "M" in cig or "D" in cig:
-                    alignment_length += int(cig[:-1])
-            end_of_previous_read = start_of_current_read + alignment_length - 1
+                end_of_current_read = return_end_of_current_read(alignment)
+                start_overlap = max(start_of_previous_read, start_of_current_read)
+                end_overlap = min(end_of_previous_read, end_of_current_read)
+                if previous_read[start_overlap: end_overlap] != alignment["SEQ"][start_overlap: end_overlap]:
+                    is_overraped = True
+                    break
+            end_of_previous_read = return_end_of_current_read(alignment)
+            start_of_previous_read = start_of_current_read
         if not is_overraped:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped

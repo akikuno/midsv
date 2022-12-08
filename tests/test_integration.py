@@ -61,10 +61,8 @@ def test_integration_cssplit_and_qual():
 def test_integration_real_sam():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = midsv.io.read_sam(str(sampath))
-
     sqheaders = midsv.format.extract_sqheaders(sam)
     samdict_polished = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
-
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
         MIDSV = alignment["MIDSV"]
@@ -78,29 +76,21 @@ def test_integration_real_sam():
 def test_integration_eachcomponent():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = midsv.io.read_sam(str(sampath))
-
     midsv.validate.sam_headers(sam)
     midsv.validate.sam_alignments(sam)
-
     sqheaders = midsv.format.extract_sqheaders(sam)
     samdict = midsv.format.dictionarize_sam(sam)
-
     samdict = midsv.format.remove_softclips(samdict)
-    samdict = midsv.format.remove_overlapped(samdict)
-
+    samdict = midsv.format.remove_resequence(samdict)
     for alignment in samdict:
         alignment["MIDSV"] = midsv.convert.cstag_to_midsv(alignment["CSTAG"])
-
     for alignment in samdict:
         alignment["CSSPLIT"] = midsv.convert.cstag_to_cssplit(alignment["CSTAG"])
-
     for alignment in samdict:
         alignment["QSCORE"] = midsv.convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
-
     samdict_polished = midsv.proofread.join(samdict)
     samdict_polished = midsv.proofread.pad(samdict_polished, sqheaders)
     samdict_polished = midsv.proofread.select(samdict_polished)
-
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
         MIDSV = alignment["MIDSV"]
