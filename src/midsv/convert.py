@@ -57,7 +57,7 @@ def to_midsv(cstag_splitted: list[str]) -> list[str]:
         elif cs.startswith("~"):
             match = re.match(r"([a-z]+)([0-9]+)([a-z]+)", cs[1:])
             _, splice, _ = match.groups()
-            midsv_splitted.append("D" * int(splice))
+            midsv_splitted.append("D" * (int(splice)))
         else:
             midsv_splitted.append("S")
     return midsv_splitted
@@ -184,10 +184,16 @@ def cstag_to_cssplit(cstag: str) -> str:
             if next_op == "*":
                 cssplits.append(insertion + "|" + next_cstag)
                 cstag_splitted[i + 1] = "*"
+            elif next_op == "~":
+                insertion = insertion + "|" + "N"
+                cssplits.append(insertion)
+                match = re.match(r"([a-z]+)([0-9]+)([a-z]+)", next_cstag[1:])
+                left, splice, right = match.groups()
+                cstag_splitted[i + 1] = f"{next_op}{left}{int(splice)-1}{right}"
             else:
-                cstag_splitted[i + 1] = next_op + next_cstag[2:]
                 insertion = insertion + "|" + next_cstag[:2]
                 cssplits.append(insertion)
+                cstag_splitted[i + 1] = next_op + next_cstag[2:]
         elif op == "*":
             cssplits.append(cs)
         elif op == "~":
@@ -267,7 +273,7 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -> str:
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + "|")
-            if cs.split("|")[-1].startswith("-"):
+            if cs.split("|")[-1].startswith("-") or cs.split("|")[-1] == "N":
                 insertion.append("-1")
                 idx -= 1
             else:

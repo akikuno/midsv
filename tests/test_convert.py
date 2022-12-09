@@ -213,3 +213,10 @@ def test_qual_to_qscore_cssplit_splicing():
     test = convert.qual_to_qscore_cssplit(qual, cssplit)
     answer = '0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31'
     assert test == answer
+
+def test_qual_to_qscore_cssplit_splicing_inversion():
+    qual = "!!!@@"
+    cssplit = '+C|+A|+G|N,N,N,N,N,N,N,N,N,N,=C,=C'
+    test = convert.qual_to_qscore_cssplit(qual, cssplit)
+    answer = '0|0|0|-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31'
+    assert test == answer
