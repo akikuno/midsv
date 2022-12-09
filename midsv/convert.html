@@ -85,7 +85,7 @@ def to_midsv(cstag_splitted: list[str]) -&gt; list[str]:
         elif cs.startswith(&#34;~&#34;):
             match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
             _, splice, _ = match.groups()
-            midsv_splitted.append(&#34;D&#34; * int(splice))
+            midsv_splitted.append(&#34;D&#34; * (int(splice)))
         else:
             midsv_splitted.append(&#34;S&#34;)
     return midsv_splitted
@@ -212,10 +212,16 @@ def cstag_to_cssplit(cstag: str) -&gt; str:
             if next_op == &#34;*&#34;:
                 cssplits.append(insertion + &#34;|&#34; + next_cstag)
                 cstag_splitted[i + 1] = &#34;*&#34;
+            elif next_op == &#34;~&#34;:
+                insertion = insertion + &#34;|&#34; + &#34;N&#34;
+                cssplits.append(insertion)
+                match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, next_cstag[1:])
+                left, splice, right = match.groups()
+                cstag_splitted[i + 1] = f&#34;{next_op}{left}{int(splice)-1}{right}&#34;
             else:
-                cstag_splitted[i + 1] = next_op + next_cstag[2:]
                 insertion = insertion + &#34;|&#34; + next_cstag[:2]
                 cssplits.append(insertion)
+                cstag_splitted[i + 1] = next_op + next_cstag[2:]
         elif op == &#34;*&#34;:
             cssplits.append(cs)
         elif op == &#34;~&#34;:
@@ -295,7 +301,7 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + &#34;|&#34;)
-            if cs.split(&#34;|&#34;)[-1].startswith(&#34;-&#34;):
+            if cs.split(&#34;|&#34;)[-1].startswith(&#34;-&#34;) or cs.split(&#34;|&#34;)[-1] == &#34;N&#34;:
                 insertion.append(&#34;-1&#34;)
                 idx -= 1
             else:
@@ -391,10 +397,16 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
             if next_op == &#34;*&#34;:
                 cssplits.append(insertion + &#34;|&#34; + next_cstag)
                 cstag_splitted[i + 1] = &#34;*&#34;
+            elif next_op == &#34;~&#34;:
+                insertion = insertion + &#34;|&#34; + &#34;N&#34;
+                cssplits.append(insertion)
+                match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, next_cstag[1:])
+                left, splice, right = match.groups()
+                cstag_splitted[i + 1] = f&#34;{next_op}{left}{int(splice)-1}{right}&#34;
             else:
-                cstag_splitted[i + 1] = next_op + next_cstag[2:]
                 insertion = insertion + &#34;|&#34; + next_cstag[:2]
                 cssplits.append(insertion)
+                cstag_splitted[i + 1] = next_op + next_cstag[2:]
         elif op == &#34;*&#34;:
             cssplits.append(cs)
         elif op == &#34;~&#34;:
@@ -516,7 +528,7 @@ To adjust the same length as cssplit, insertion is discarded and deletion is int
             insertion = []
             for j in range(idx, idx + num_insertion):
                 insertion.append(ascii_to_phred(qual[j]) + &#34;|&#34;)
-            if cs.split(&#34;|&#34;)[-1].startswith(&#34;-&#34;):
+            if cs.split(&#34;|&#34;)[-1].startswith(&#34;-&#34;) or cs.split(&#34;|&#34;)[-1] == &#34;N&#34;:
                 insertion.append(&#34;-1&#34;)
                 idx -= 1
             else:
@@ -743,7 +755,7 @@ To adjust the same length as MIDSV, insertion is discarded and deletion is inter
         elif cs.startswith(&#34;~&#34;):
             match = re.match(r&#34;([a-z]+)([0-9]+)([a-z]+)&#34;, cs[1:])
             _, splice, _ = match.groups()
-            midsv_splitted.append(&#34;D&#34; * int(splice))
+            midsv_splitted.append(&#34;D&#34; * (int(splice)))
         else:
             midsv_splitted.append(&#34;S&#34;)
     return midsv_splitted</code></pre>
