@@ -12,7 +12,7 @@
 
 MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.
 
-> ⚠️ MIDSV is for target amplicon sequence. It may crash when chromosomes are used as references due to a lack of memory .
+> ⚠️ MIDSV is for the target amplicon sequence (10-100 kbp). It may crash when whole chromosomes are used as reference due to running out of memory.
 
 MIDSV provides `MIDSV`, `CSSPLIT`, and `QSCORE`.
 
@@ -165,38 +165,28 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 
 As with `CSSPLIT`, `QSCORE` uses `|` to separate quality scores in insertion sites.
 
-# Miscellaneous functions
+# Helper functions
 
-## Read/Check SAM file
+## Read SAM file
 
 ```python
-midsv.read_sam(path_of_sam: Union[str, Path]) -> list[list]
+midsv.read_sam(path_of_sam: str | Path) -> list[list]
 ```
 
 `midsv.read_sam` read SAM file into a list of lists.
 
 
-```python
-midsv.check_sam_format(sam: list[list])
-```
-
-`midsv.check_sam_format` checks the followings.
-
-- SQ header
-- CS tag (long form)
-- No long-read spliced alignment
-
 ## Read/Write JSON Line (JSONL)
 
 ```python
-midsv.write_jsonl(dict: list[dict], path_of_jsonl: Union[str, Path])
+midsv.write_jsonl(dict: list[dict], path_of_jsonl: str | Path)
 ```
 
 ```python
-midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -> list[dict]
+midsv.read_jsonl(path_of_jsonl: str | Path) -> list[dict]
 ```
 
-Since `midsv` returns a list of dictionaries, `midsv.write_jsonl` outputs it to file as JSONL format.
+Since `midsv` returns a list of dictionaries, `midsv.write_jsonl` outputs it to a file in JSONL format.
 
 Conversely, `midsv.read_jsonl` reads JSONL as a list of dictionaries.
 
