@@ -33,7 +33,7 @@
 <p><code><a title="midsv" href="#midsv">midsv</a></code> is a Python module to convert SAM to MIDSV format.</p>
 <p>MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the difference between a reference and a query with the same length as the reference.</p>
 <blockquote>
-<p>⚠️ MIDSV is for target amplicon sequence. It may crash when chromosomes are used as references due to a lack of memory .</p>
+<p>⚠️ MIDSV is for the target amplicon sequence (10-100 kbp). It may crash when whole chromosomes are used as reference due to running out of memory.</p>
 </blockquote>
 <p>MIDSV provides <code>MIDSV</code>, <code>CSSPLIT</code>, and <code>QSCORE</code>.</p>
 <ul>
@@ -234,25 +234,17 @@ midsv.transform(sam)
 </table>
 <p><code>QSCORE</code> uses <code>-1</code> at deletion or unknown nucleotides.</p>
 <p>As with <code>CSSPLIT</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
-<h1 id="miscellaneous-functions">Miscellaneous functions</h1>
-<h2 id="readcheck-sam-file">Read/Check SAM file</h2>
-<pre><code class="language-python">midsv.read_sam(path_of_sam: Union[str, Path]) -&gt; list[list]
+<h1 id="helper-functions">Helper functions</h1>
+<h2 id="read-sam-file">Read SAM file</h2>
+<pre><code class="language-python">midsv.read_sam(path_of_sam: str | Path) -&gt; list[list]
 </code></pre>
 <p><code>midsv.read_sam</code> read SAM file into a list of lists.</p>
-<pre><code class="language-python">midsv.check_sam_format(sam: list[list])
-</code></pre>
-<p><code>midsv.check_sam_format</code> checks the followings.</p>
-<ul>
-<li>SQ header</li>
-<li>CS tag (long form)</li>
-<li>No long-read spliced alignment</li>
-</ul>
 <h2 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h2>
-<pre><code class="language-python">midsv.write_jsonl(dict: list[dict], path_of_jsonl: Union[str, Path])
+<pre><code class="language-python">midsv.write_jsonl(dict: list[dict], path_of_jsonl: str | Path)
 </code></pre>
-<pre><code class="language-python">midsv.read_jsonl(path_of_jsonl: Union[str, Path]) -&gt; list[dict]
+<pre><code class="language-python">midsv.read_jsonl(path_of_jsonl: str | Path) -&gt; list[dict]
 </code></pre>
-<p>Since <code><a title="midsv" href="#midsv">midsv</a></code> returns a list of dictionaries, <code>midsv.write_jsonl</code> outputs it to file as JSONL format.</p>
+<p>Since <code><a title="midsv" href="#midsv">midsv</a></code> returns a list of dictionaries, <code>midsv.write_jsonl</code> outputs it to a file in JSONL format.</p>
 <p>Conversely, <code>midsv.read_jsonl</code> reads JSONL as a list of dictionaries.</p>
 <details class="source">
 <summary>
@@ -317,8 +309,8 @@ from .io import write_jsonl</code></pre>
 <li><a href="#qscore">QSCORE</a></li>
 </ul>
 </li>
-<li><a href="#miscellaneous-functions">Miscellaneous functions</a><ul>
-<li><a href="#readcheck-sam-file">Read/Check SAM file</a></li>
+<li><a href="#helper-functions">Helper functions</a><ul>
+<li><a href="#read-sam-file">Read SAM file</a></li>
 <li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
 </ul>
 </li>
