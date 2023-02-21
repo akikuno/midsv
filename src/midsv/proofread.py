@@ -29,16 +29,7 @@ def join(samdict: list[dict]) -> list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
-                strand = 0
-            else:
-                strand = 1
-            if strand_first != strand:
-                if "MIDSV" in alignment:
-                    alignment["MIDSV"] = alignment["MIDSV"].lower()
-                if "CSSPLIT" in alignment:
-                    alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
+            # Remove microhomology
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment["POS"] - 1
             if "MIDSV" in alignment:
@@ -46,7 +37,6 @@ def join(samdict: list[dict]) -> list[dict]:
             else:
                 previous_end += len(previous_alignment["CSSPLIT"].split(","))
             current_start = alignment["POS"] - 1
-            # Remove microhomology
             if "CSSPLIT" in alignment:
                 previous_cssplit = previous_alignment["CSSPLIT"].split(",")
                 current_cssplit = alignment["CSSPLIT"].split(",")
@@ -58,7 +48,7 @@ def join(samdict: list[dict]) -> list[dict]:
                     if previous_cssplit[-i:] == current_cssplit[:i]:
                         if "QSCORE" in alignment and previous_qscore[-i:] == current_qscore[:i]:
                             num_microhomology = i
-                # Update
+                # Update CSSPLIT
                 alignment["CSSPLIT"] = ",".join(current_cssplit[num_microhomology:])
                 if "QSCORE" in alignment:
                     alignment["QSCORE"] = ",".join(current_qscore[num_microhomology:])
@@ -82,6 +72,16 @@ def join(samdict: list[dict]) -> list[dict]:
                 sam_template["CSSPLIT"] += "," + alignment["CSSPLIT"]
             if "QSCORE" in sam_template:
                 sam_template["QSCORE"] += "," + alignment["QSCORE"]
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
+                strand = 0
+            else:
+                strand = 1
+            if strand_first != strand:
+                if "MIDSV" in alignment:
+                    alignment["MIDSV"] = alignment["MIDSV"].lower()
+                if "CSSPLIT" in alignment:
+                    alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
         sam_joined.append(sam_template)
     return sam_joined
 

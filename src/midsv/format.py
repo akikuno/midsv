@@ -141,6 +141,7 @@ def remove_resequence(samdict: list[list]) -> list[list]:
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
     Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    In addition, if the start/end of two reads are exactly same, these sequences are resequenced so discarted.
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
@@ -163,11 +164,17 @@ def remove_resequence(samdict: list[list]) -> list[list]:
         end_of_previous_read = -1
         previous_read = alignments[0]["SEQ"]
         for alignment in alignments:
-            start_of_current_read = alignment["POS"]
+            start_of_current_read = alignment["POS"] - 1
             if end_of_previous_read > start_of_current_read:
                 end_of_current_read = return_end_of_current_read(alignment)
                 start_overlap = max(start_of_previous_read, start_of_current_read)
                 end_overlap = min(end_of_previous_read, end_of_current_read)
+                if start_of_previous_read == start_of_current_read:
+                    is_overraped = True
+                    break
+                if end_of_previous_read == end_of_current_read:
+                    is_overraped = True
+                    break
                 if previous_read[start_overlap: end_overlap] != alignment["SEQ"][start_overlap: end_overlap]:
                     is_overraped = True
                     break
