@@ -29,6 +29,16 @@ def join(samdict: list[dict]) -> list[dict]:
                 else:
                     strand_first = 1
                 continue
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
+                strand = 0
+            else:
+                strand = 1
+            if strand_first != strand:
+                if "MIDSV" in alignment:
+                    alignment["MIDSV"] = alignment["MIDSV"].lower()
+                if "CSSPLIT" in alignment:
+                    alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
             # Remove microhomology
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment["POS"] - 1
@@ -72,16 +82,6 @@ def join(samdict: list[dict]) -> list[dict]:
                 sam_template["CSSPLIT"] += "," + alignment["CSSPLIT"]
             if "QSCORE" in sam_template:
                 sam_template["QSCORE"] += "," + alignment["QSCORE"]
-            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
-                strand = 0
-            else:
-                strand = 1
-            if strand_first != strand:
-                if "MIDSV" in alignment:
-                    alignment["MIDSV"] = alignment["MIDSV"].lower()
-                if "CSSPLIT" in alignment:
-                    alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
         sam_joined.append(sam_template)
     return sam_joined
 

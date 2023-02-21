@@ -175,9 +175,12 @@ def remove_resequence(samdict: list[list]) -> list[list]:
                 if end_of_previous_read == end_of_current_read:
                     is_overraped = True
                     break
-                if previous_read[start_overlap: end_overlap] != alignment["SEQ"][start_overlap: end_overlap]:
-                    is_overraped = True
-                    break
+                for prev, curr in zip(previous_read[start_overlap: end_overlap], alignment["SEQ"][start_overlap: end_overlap]):
+                    if prev == "N" or curr == "N":
+                        continue
+                    if prev != curr:
+                        is_overraped = True
+                        break
             end_of_previous_read = return_end_of_current_read(alignment)
             start_of_previous_read = start_of_current_read
         if not is_overraped:
