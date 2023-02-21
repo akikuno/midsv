@@ -136,13 +136,13 @@ def return_end_of_current_read(alignment:dict) -&gt; int:
     cigar_split = split_cigar(cigar)
     alignment_length = 0
     for cig in cigar_split:
-        if &#34;M&#34; in cig or &#34;D&#34; in cig:
+        if &#34;M&#34; in cig or &#34;D&#34; in cig or &#34;N&#34; in cig:
             alignment_length += int(cig[:-1])
     return start_of_current_read + alignment_length - 1
 
 
 def realign_sequence(alignment: dict) -&gt; dict:
-    &#34;&#34;&#34;Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    &#34;&#34;&#34;Discard insertion, and add deletion and spliced nucreotide to unify sequence length
     &#34;&#34;&#34;
     cigar = alignment[&#34;CIGAR&#34;]
     cigar_split = split_cigar(cigar)
@@ -309,13 +309,13 @@ def remove_resequence(samdict: list[list]) -&gt; list[list]:
 <span>def <span class="ident">realign_sequence</span></span>(<span>alignment: dict) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Discard insertion and add deletion and spliced nucreotide to unify sequence length</p></div>
+<div class="desc"><p>Discard insertion, and add deletion and spliced nucreotide to unify sequence length</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def realign_sequence(alignment: dict) -&gt; dict:
-    &#34;&#34;&#34;Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    &#34;&#34;&#34;Discard insertion, and add deletion and spliced nucreotide to unify sequence length
     &#34;&#34;&#34;
     cigar = alignment[&#34;CIGAR&#34;]
     cigar_split = split_cigar(cigar)
@@ -464,7 +464,7 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
     cigar_split = split_cigar(cigar)
     alignment_length = 0
     for cig in cigar_split:
-        if &#34;M&#34; in cig or &#34;D&#34; in cig:
+        if &#34;M&#34; in cig or &#34;D&#34; in cig or &#34;N&#34; in cig:
             alignment_length += int(cig[:-1])
     return start_of_current_read + alignment_length - 1</code></pre>
 </details>
