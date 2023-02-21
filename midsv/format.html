@@ -169,6 +169,7 @@ def remove_resequence(samdict: list[list]) -&gt; list[list]:
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
     Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    In addition, if the start/end of two reads are exactly same, these sequences are resequenced so discarted.
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
@@ -191,11 +192,17 @@ def remove_resequence(samdict: list[list]) -&gt; list[list]:
         end_of_previous_read = -1
         previous_read = alignments[0][&#34;SEQ&#34;]
         for alignment in alignments:
-            start_of_current_read = alignment[&#34;POS&#34;]
+            start_of_current_read = alignment[&#34;POS&#34;] - 1
             if end_of_previous_read &gt; start_of_current_read:
                 end_of_current_read = return_end_of_current_read(alignment)
                 start_overlap = max(start_of_previous_read, start_of_current_read)
                 end_overlap = min(end_of_previous_read, end_of_current_read)
+                if start_of_previous_read == start_of_current_read:
+                    is_overraped = True
+                    break
+                if end_of_previous_read == end_of_current_read:
+                    is_overraped = True
+                    break
                 if previous_read[start_overlap: end_overlap] != alignment[&#34;SEQ&#34;][start_overlap: end_overlap]:
                     is_overraped = True
                     break
@@ -344,6 +351,7 @@ def remove_resequence(samdict: list[list]) -&gt; list[list]:
 The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
 The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
 Since resequence is a Nanopore sequencing error, the reads should be discarded.
+In addition, if the start/end of two reads are exactly same, these sequences are resequenced so discarted.
 Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>tests/data/overlap/real_overlap2.sam</code></p>
 <h2 id="args">Args</h2>
 <dl>
@@ -364,6 +372,7 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
     Since resequence is a Nanopore sequencing error, the reads should be discarded.
+    In addition, if the start/end of two reads are exactly same, these sequences are resequenced so discarted.
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
@@ -386,11 +395,17 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
         end_of_previous_read = -1
         previous_read = alignments[0][&#34;SEQ&#34;]
         for alignment in alignments:
-            start_of_current_read = alignment[&#34;POS&#34;]
+            start_of_current_read = alignment[&#34;POS&#34;] - 1
             if end_of_previous_read &gt; start_of_current_read:
                 end_of_current_read = return_end_of_current_read(alignment)
                 start_overlap = max(start_of_previous_read, start_of_current_read)
                 end_overlap = min(end_of_previous_read, end_of_current_read)
+                if start_of_previous_read == start_of_current_read:
+                    is_overraped = True
+                    break
+                if end_of_previous_read == end_of_current_read:
+                    is_overraped = True
+                    break
                 if previous_read[start_overlap: end_overlap] != alignment[&#34;SEQ&#34;][start_overlap: end_overlap]:
                     is_overraped = True
                     break

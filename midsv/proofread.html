@@ -57,16 +57,7 @@ def join(samdict: list[dict]) -&gt; list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                strand = 0
-            else:
-                strand = 1
-            if strand_first != strand:
-                if &#34;MIDSV&#34; in alignment:
-                    alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
-                if &#34;CSSPLIT&#34; in alignment:
-                    alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
+            # Remove microhomology
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
@@ -74,7 +65,6 @@ def join(samdict: list[dict]) -&gt; list[dict]:
             else:
                 previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
             current_start = alignment[&#34;POS&#34;] - 1
-            # Remove microhomology
             if &#34;CSSPLIT&#34; in alignment:
                 previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
                 current_cssplit = alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
@@ -86,7 +76,7 @@ def join(samdict: list[dict]) -&gt; list[dict]:
                     if previous_cssplit[-i:] == current_cssplit[:i]:
                         if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
                             num_microhomology = i
-                # Update
+                # Update CSSPLIT
                 alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
                 if &#34;QSCORE&#34; in alignment:
                     alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
@@ -110,6 +100,16 @@ def join(samdict: list[dict]) -&gt; list[dict]:
                 sam_template[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
             if &#34;QSCORE&#34; in sam_template:
                 sam_template[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                strand = 0
+            else:
+                strand = 1
+            if strand_first != strand:
+                if &#34;MIDSV&#34; in alignment:
+                    alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
+                if &#34;CSSPLIT&#34; in alignment:
+                    alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
         sam_joined.append(sam_template)
     return sam_joined
 
@@ -215,16 +215,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 else:
                     strand_first = 1
                 continue
-            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                strand = 0
-            else:
-                strand = 1
-            if strand_first != strand:
-                if &#34;MIDSV&#34; in alignment:
-                    alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
-                if &#34;CSSPLIT&#34; in alignment:
-                    alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
+            # Remove microhomology
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
@@ -232,7 +223,6 @@ def select(samdict: list[dict]) -&gt; list[dict]:
             else:
                 previous_end += len(previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;))
             current_start = alignment[&#34;POS&#34;] - 1
-            # Remove microhomology
             if &#34;CSSPLIT&#34; in alignment:
                 previous_cssplit = previous_alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
                 current_cssplit = alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)
@@ -244,7 +234,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                     if previous_cssplit[-i:] == current_cssplit[:i]:
                         if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
                             num_microhomology = i
-                # Update
+                # Update CSSPLIT
                 alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
                 if &#34;QSCORE&#34; in alignment:
                     alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
@@ -268,6 +258,16 @@ def select(samdict: list[dict]) -&gt; list[dict]:
                 sam_template[&#34;CSSPLIT&#34;] += &#34;,&#34; + alignment[&#34;CSSPLIT&#34;]
             if &#34;QSCORE&#34; in sam_template:
                 sam_template[&#34;QSCORE&#34;] += &#34;,&#34; + alignment[&#34;QSCORE&#34;]
+            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
+            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
+                strand = 0
+            else:
+                strand = 1
+            if strand_first != strand:
+                if &#34;MIDSV&#34; in alignment:
+                    alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
+                if &#34;CSSPLIT&#34; in alignment:
+                    alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
         sam_joined.append(sam_template)
     return sam_joined</code></pre>
 </details>
