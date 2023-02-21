@@ -108,13 +108,13 @@ def return_end_of_current_read(alignment:dict) -> int:
     cigar_split = split_cigar(cigar)
     alignment_length = 0
     for cig in cigar_split:
-        if "M" in cig or "D" in cig:
+        if "M" in cig or "D" in cig or "N" in cig:
             alignment_length += int(cig[:-1])
     return start_of_current_read + alignment_length - 1
 
 
 def realign_sequence(alignment: dict) -> dict:
-    """Discard insertion and add deletion and spliced nucreotide to unify sequence length
+    """Discard insertion, and add deletion and spliced nucreotide to unify sequence length
     """
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
