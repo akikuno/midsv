@@ -94,6 +94,12 @@ def test_remove_resequence():
     sam = io.read_sam(path)
     samdict = format.dictionarize_sam(sam)
     test = format.remove_resequence(samdict)
+    count_overlap = 0
+    count_nonoverlap = 0
     for t in test:
-        assert not t["QNAME"].startswith("overlap")
+        if t["QNAME"].startswith("overlap"):
+            count_overlap += 1
+        else:
+            count_nonoverlap += 1
+    assert count_overlap == 1 and count_nonoverlap == 2
 

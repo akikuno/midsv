@@ -139,9 +139,11 @@ def realign_sequence(alignment: dict) -> dict:
 def remove_resequence(samdict: list[list]) -> list[list]:
     """Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
-    The resequenced reads are overlapped but not the same DNA sequence. In contrast, realignments preserve the same sequence.
-    Since resequence is a Nanopore sequencing error, the reads should be discarded.
-    In addition, if the start/end of two reads are exactly same, these sequences are resequenced so discarted.
+    The 'realignments' is not sequencing errors, and it preserves the same sequence.
+    In contrast, the 'resequence' is a sequencing error with the following characteristics:
+    (1) The shorter reads are completely included in the longer reads
+    (2) Overlapped but not the same DNA sequence
+    The resequenced fragments will be discarded and the longest alignment will be retain.
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
@@ -159,30 +161,36 @@ def remove_resequence(samdict: list[list]) -> list[list]:
             sam_nonoverlapped += alignments
             continue
         alignments = [realign_sequence(alignment) for alignment in alignments]
-        alignments = sorted(alignments, key=lambda x: [x["POS"], len(x["SEQ"])]) # real_overlap2 needs comparisons in the following order: (1) shortest read (2) longest read ,(3) middle read
+        alignments = sorted(alignments, key=lambda x: [x["POS"], -len(x["SEQ"])])
         is_overraped = False
         end_of_previous_read = -1
         previous_read = alignments[0]["SEQ"]
-        for alignment in alignments:
+        for i, alignment in enumerate(alignments):
+            if i == 0:
+                start_of_previous_read = alignment["POS"] - 1
+                end_of_previous_read = return_end_of_current_read(alignment)
+                continue
             start_of_current_read = alignment["POS"] - 1
-            if end_of_previous_read > start_of_current_read:
-                end_of_current_read = return_end_of_current_read(alignment)
+            end_of_current_read = return_end_of_current_read(alignment)
+            # (1) The shorter reads are completely included in the longer reads
+            if start_of_previous_read <= start_of_current_read and end_of_previous_read >= end_of_current_read:
+                is_overraped = True
+                break
+            else:
                 start_overlap = max(start_of_previous_read, start_of_current_read)
                 end_overlap = min(end_of_previous_read, end_of_current_read)
-                if start_of_previous_read == start_of_current_read:
-                    is_overraped = True
-                    break
-                if end_of_previous_read == end_of_current_read:
-                    is_overraped = True
-                    break
                 for prev, curr in zip(previous_read[start_overlap: end_overlap], alignment["SEQ"][start_overlap: end_overlap]):
                     if prev == "N" or curr == "N":
                         continue
+                    # (2) Overlapped but not the same DNA sequence
                     if prev != curr:
                         is_overraped = True
                         break
-            end_of_previous_read = return_end_of_current_read(alignment)
             start_of_previous_read = start_of_current_read
-        if not is_overraped:
+            end_of_previous_read = return_end_of_current_read(alignment)
+        if is_overraped:
+            # The longest alignment will be retain
+            sam_nonoverlapped.append(alignments[0])
+        else:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped
