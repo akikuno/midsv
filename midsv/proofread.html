@@ -146,6 +146,29 @@ def pad(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
     return samdict_padding
 
 
+def remove_different_length(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
+    &#34;&#34;&#34;remove different sequence length of the reference
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+        sqheaders (dict): dictionary as {SQ:LN}
+
+    Returns:
+        list[dict]: filtered SAM by different sequence length of the reference
+    &#34;&#34;&#34;
+    samdict_filtered = []
+    for alignment in samdict:
+        reflength = sqheaders[alignment[&#34;RNAME&#34;]]
+        if &#34;MIDSV&#34; in alignment:
+            if len(alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)) != reflength:
+                continue
+        if &#34;CSSPLIT&#34; in alignment:
+            if len(alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)) != reflength:
+                continue
+        samdict_filtered.append(alignment)
+    return samdict_filtered
+
+
 def select(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
@@ -325,6 +348,50 @@ def select(samdict: list[dict]) -&gt; list[dict]:
     return samdict_padding</code></pre>
 </details>
 </dd>
+<dt id="midsv.proofread.remove_different_length"><code class="name flex">
+<span>def <span class="ident">remove_different_length</span></span>(<span>samdict: list[dict], sqheaders: dict) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>remove different sequence length of the reference</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dd>dictionarized SAM</dd>
+<dt><strong><code>sqheaders</code></strong> :&ensp;<code>dict</code></dt>
+<dd>dictionary as {SQ:LN}</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict]</code></dt>
+<dd>filtered SAM by different sequence length of the reference</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_different_length(samdict: list[dict], sqheaders: dict) -&gt; list[dict]:
+    &#34;&#34;&#34;remove different sequence length of the reference
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+        sqheaders (dict): dictionary as {SQ:LN}
+
+    Returns:
+        list[dict]: filtered SAM by different sequence length of the reference
+    &#34;&#34;&#34;
+    samdict_filtered = []
+    for alignment in samdict:
+        reflength = sqheaders[alignment[&#34;RNAME&#34;]]
+        if &#34;MIDSV&#34; in alignment:
+            if len(alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)) != reflength:
+                continue
+        if &#34;CSSPLIT&#34; in alignment:
+            if len(alignment[&#34;CSSPLIT&#34;].split(&#34;,&#34;)) != reflength:
+                continue
+        samdict_filtered.append(alignment)
+    return samdict_filtered</code></pre>
+</details>
+</dd>
 <dt id="midsv.proofread.select"><code class="name flex">
 <span>def <span class="ident">select</span></span>(<span>samdict: list[dict]) ‑> list[dict]</span>
 </code></dt>
@@ -381,6 +448,7 @@ def select(samdict: list[dict]) -&gt; list[dict]:
 <ul class="">
 <li><code><a title="midsv.proofread.join" href="#midsv.proofread.join">join</a></code></li>
 <li><code><a title="midsv.proofread.pad" href="#midsv.proofread.pad">pad</a></code></li>
+<li><code><a title="midsv.proofread.remove_different_length" href="#midsv.proofread.remove_different_length">remove_different_length</a></code></li>
 <li><code><a title="midsv.proofread.select" href="#midsv.proofread.select">select</a></code></li>
 </ul>
 </li>
