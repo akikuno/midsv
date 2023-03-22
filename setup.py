@@ -5,14 +5,16 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="midsv",
-    version="0.9.0",
+    version="0.9.5",
     author="Akihiro Kuno",
     author_email="akuno@md.tsukuba.ac.jp",
     description="Python module to convert SAM to MIDSV format.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/akikuno/midsv",
-    packages=setuptools.find_packages(where="src",),
+    packages=setuptools.find_packages(
+        where="src",
+    ),
     package_dir={"": "src"},
     classifiers=[
         "Programming Language :: Python :: 3.7",

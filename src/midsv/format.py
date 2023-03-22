@@ -102,7 +102,7 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
     return sam_list
 
 
-def return_end_of_current_read(alignment:dict) -> int:
+def return_end_of_current_read(alignment: dict) -> int:
     start_of_current_read = alignment["POS"]
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
@@ -114,8 +114,7 @@ def return_end_of_current_read(alignment:dict) -> int:
 
 
 def realign_sequence(alignment: dict) -> dict:
-    """Discard insertion, and add deletion and spliced nucreotide to unify sequence length
-    """
+    """Discard insertion, and add deletion and spliced nucreotide to unify sequence length"""
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
     sequence = alignment["SEQ"]
@@ -124,7 +123,7 @@ def realign_sequence(alignment: dict) -> dict:
     for cig in cigar_split:
         if "M" in cig:
             end = start + int(cig[:-1])
-            sequence_ignored.append(sequence[start: end])
+            sequence_ignored.append(sequence[start:end])
             start = end
         elif "I" in cig:
             start += int(cig[:-1])
@@ -135,13 +134,12 @@ def realign_sequence(alignment: dict) -> dict:
     return realignment
 
 
-
 def remove_resequence(samdict: list[list]) -> list[list]:
     """Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The 'realignments' is not sequencing errors, and it preserves the same sequence.
     In contrast, the 'resequence' is a sequencing error with the following characteristics:
-    (1) The shorter reads are completely included in the longer reads
+    (1) The shorter reads that are completely included in the longer reads
     (2) Overlapped but not the same DNA sequence
     The resequenced fragments will be discarded and the longest alignment will be retain.
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
@@ -161,7 +159,7 @@ def remove_resequence(samdict: list[list]) -> list[list]:
             sam_nonoverlapped += alignments
             continue
         alignments = [realign_sequence(alignment) for alignment in alignments]
-        alignments = sorted(alignments, key=lambda x: [x["POS"], -len(x["SEQ"])])
+        alignments = sorted(alignments, key=lambda x: [x["POS"]])
         is_overraped = False
         end_of_previous_read = -1
         previous_read = alignments[0]["SEQ"]
@@ -172,14 +170,16 @@ def remove_resequence(samdict: list[list]) -> list[list]:
                 continue
             start_of_current_read = alignment["POS"] - 1
             end_of_current_read = return_end_of_current_read(alignment)
-            # (1) The shorter reads are completely included in the longer reads
+            # (1) The shorter reads that are completely included in the longer reads
             if start_of_previous_read <= start_of_current_read and end_of_previous_read >= end_of_current_read:
                 is_overraped = True
                 break
             else:
                 start_overlap = max(start_of_previous_read, start_of_current_read)
                 end_overlap = min(end_of_previous_read, end_of_current_read)
-                for prev, curr in zip(previous_read[start_overlap: end_overlap], alignment["SEQ"][start_overlap: end_overlap]):
+                for prev, curr in zip(
+                    previous_read[start_overlap:end_overlap], alignment["SEQ"][start_overlap:end_overlap]
+                ):
                     if prev == "N" or curr == "N":
                         continue
                     # (2) Overlapped but not the same DNA sequence
@@ -190,7 +190,8 @@ def remove_resequence(samdict: list[list]) -> list[list]:
             end_of_previous_read = return_end_of_current_read(alignment)
         if is_overraped:
             # The longest alignment will be retain
-            sam_nonoverlapped.append(alignments[0])
+            alignment = sorted(alignments, key=lambda x: -len(x["SEQ"]))[0]
+            sam_nonoverlapped.append(alignment)
         else:
             sam_nonoverlapped += alignments
     return sam_nonoverlapped

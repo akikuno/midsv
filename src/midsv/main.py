@@ -48,5 +48,6 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
+    samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
     samdict_polished = proofread.select(samdict_polished)
     return samdict_polished

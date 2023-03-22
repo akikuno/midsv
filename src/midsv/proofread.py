@@ -118,6 +118,29 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_padding
 
 
+def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
+    """remove different sequence length of the reference
+
+    Args:
+        sam (list[dict]): dictionarized SAM
+        sqheaders (dict): dictionary as {SQ:LN}
+
+    Returns:
+        list[dict]: filtered SAM by different sequence length of the reference
+    """
+    samdict_filtered = []
+    for alignment in samdict:
+        reflength = sqheaders[alignment["RNAME"]]
+        if "MIDSV" in alignment:
+            if len(alignment["MIDSV"].split(",")) != reflength:
+                continue
+        if "CSSPLIT" in alignment:
+            if len(alignment["CSSPLIT"].split(",")) != reflength:
+                continue
+        samdict_filtered.append(alignment)
+    return samdict_filtered
+
+
 def select(samdict: list[dict]) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
