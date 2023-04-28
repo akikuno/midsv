@@ -28,13 +28,14 @@
 </summary>
 <pre><code class="python">from __future__ import annotations
 
+from typing import Generator
 from . import validate
 from . import format
 from . import convert
 from . import proofread
 
 
-def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
+def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
@@ -52,6 +53,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     else:
         raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
 
+    sam = list(sam)
     validate.sam_headers(sam)
     validate.sam_alignments(sam)
 
@@ -89,7 +91,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.main.transform"><code class="name flex">
-<span>def <span class="ident">transform</span></span>(<span>sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) ‑> list[dict]</span>
+<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Integrated function to perform MIDSV conversion</p>
@@ -113,7 +115,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
+<pre><code class="python">def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
@@ -131,6 +133,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     else:
         raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
 
+    sam = list(sam)
     validate.sam_headers(sam)
     validate.sam_alignments(sam)
 

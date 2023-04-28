@@ -29,7 +29,7 @@
 <pre><code class="python">from __future__ import annotations
 import json
 from pathlib import Path
-
+from typing import Generator
 
 ###########################################################
 # Read sam
@@ -38,7 +38,7 @@ from pathlib import Path
 
 def read_sam(path_of_sam: str | Path) -&gt; list[list]:
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
-    return [s.split(&#34;\t&#34;) for s in sam]
+    return (s.split(&#34;\t&#34;) for s in sam)
 
 
 ###########################################################
@@ -46,12 +46,10 @@ def read_sam(path_of_sam: str | Path) -&gt; list[list]:
 ###########################################################
 
 
-def read_jsonl(filepath: str | Path) -&gt; list[dict]:
-    dicts = []
+def read_jsonl(filepath: str | Path) -&gt; Generator[dict]:
     with open(filepath, &#34;r&#34;) as f:
         for line in f:
-            dicts.append(json.JSONDecoder().decode(line))
-    return dicts
+            yield json.JSONDecoder(strict=False).decode(line)
 
 
 def write_jsonl(dicts: list[dict], filepath: str | Path):
@@ -69,7 +67,7 @@ def write_jsonl(dicts: list[dict], filepath: str | Path):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.io.read_jsonl"><code class="name flex">
-<span>def <span class="ident">read_jsonl</span></span>(<span>filepath: str | Path) ‑> list[dict]</span>
+<span>def <span class="ident">read_jsonl</span></span>(<span>filepath: str | Path) ‑> Generator[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -77,12 +75,10 @@ def write_jsonl(dicts: list[dict], filepath: str | Path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_jsonl(filepath: str | Path) -&gt; list[dict]:
-    dicts = []
+<pre><code class="python">def read_jsonl(filepath: str | Path) -&gt; Generator[dict]:
     with open(filepath, &#34;r&#34;) as f:
         for line in f:
-            dicts.append(json.JSONDecoder().decode(line))
-    return dicts</code></pre>
+            yield json.JSONDecoder(strict=False).decode(line)</code></pre>
 </details>
 </dd>
 <dt id="midsv.io.read_sam"><code class="name flex">
@@ -96,7 +92,7 @@ def write_jsonl(dicts: list[dict], filepath: str | Path):
 </summary>
 <pre><code class="python">def read_sam(path_of_sam: str | Path) -&gt; list[list]:
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
-    return [s.split(&#34;\t&#34;) for s in sam]</code></pre>
+    return (s.split(&#34;\t&#34;) for s in sam)</code></pre>
 </details>
 </dd>
 <dt id="midsv.io.write_jsonl"><code class="name flex">
