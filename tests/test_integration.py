@@ -61,6 +61,7 @@ def test_integration_cssplit_and_qual():
 def test_integration_real_sam():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = midsv.io.read_sam(str(sampath))
+    sam = list(sam)
     sqheaders = midsv.format.extract_sqheaders(sam)
     samdict_polished = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
     for alignment in samdict_polished:
@@ -75,6 +76,7 @@ def test_integration_real_sam():
 
 def test_integration_real_splicing():
     sam = midsv.io.read_sam("tests/data/splicing/real_splicing.sam")
+    sam = list(sam)
     sqheaders = midsv.format.extract_sqheaders(sam)
     test = midsv.transform(sam)
     mlen = len(test[0]["MIDSV"].split(","))
@@ -87,6 +89,7 @@ def test_integration_real_splicing():
 def test_integration_eachcomponent():
     sampath = Path("tests", "data", "real", "tyr_cslong.sam")
     sam = midsv.io.read_sam(str(sampath))
+    sam = list(sam)
     midsv.validate.sam_headers(sam)
     midsv.validate.sam_alignments(sam)
     sqheaders = midsv.format.extract_sqheaders(sam)

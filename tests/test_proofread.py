@@ -58,6 +58,7 @@ def test_join_real_microhomology():
 def test_pad():
     sam = Path("tests", "data", "pad", "padding.sam")
     sam = io.read_sam(str(sam))
+    sam = list(sam)
     sqheaders = format.extract_sqheaders(sam)
     samdict = format.dictionarize_sam(sam)
     for i, alignment in enumerate(samdict):

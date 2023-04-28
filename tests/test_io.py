@@ -13,6 +13,7 @@ reload(io)
 def test_check_read_sam_str():
     path = str(Path("tests", "data", "subindel", "subindel_cslong.sam"))
     test = io.read_sam(path)
+    test = list(test)
     answer = eval(Path("tests", "data", "read_sam", "answer.txt").read_text())
     assert test == answer
 
@@ -20,6 +21,7 @@ def test_check_read_sam_str():
 def test_check_read_sam_Path():
     path = Path("tests", "data", "subindel", "subindel_cslong.sam")
     test = io.read_sam(path)
+    test = list(test)
     answer = eval(Path("tests", "data", "read_sam", "answer.txt").read_text())
     assert test == answer
 
@@ -41,6 +43,7 @@ def test_check_read_sam_FileNotFoundError():
 def test_read_jsonl():
     path_jsonl = Path("tests", "data", "read_jsonl", "test.jsonl")
     test = io.read_jsonl(path_jsonl)
+    test = list(test)
     answer = [{"hoge": 1, "fuga": 2}, {"foo": "3", "bar": "4"}]
     assert test == answer
 

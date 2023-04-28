@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="midsv",
-    version="0.9.5",
+    version="0.10.0",
     author="Akihiro Kuno",
     author_email="akuno@md.tsukuba.ac.jp",
     description="Python module to convert SAM to MIDSV format.",

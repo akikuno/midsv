@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from typing import Generator
 from . import validate
 from . import format
 from . import convert
 from . import proofread
 
 
-def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -> list[dict]:
+def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -> list[dict]:
     """Integrated function to perform MIDSV conversion
 
     Args:
@@ -24,6 +25,7 @@ def transform(sam: list[list], midsv: bool = True, cssplit: bool = True, qscore:
     else:
         raise ValueError("Either midsv or cssplit must be True")
 
+    sam = list(sam)
     validate.sam_headers(sam)
     validate.sam_alignments(sam)
 
