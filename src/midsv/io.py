@@ -8,7 +8,7 @@ from typing import Generator
 ###########################################################
 
 
-def read_sam(path_of_sam: str | Path) -> list[list]:
+def read_sam(path_of_sam: str | Path) -> Generator[list]:
     sam = Path(path_of_sam).read_text().strip().split("\n")
     return (s.split("\t") for s in sam)
 
