@@ -36,7 +36,7 @@ from typing import Generator
 ###########################################################
 
 
-def read_sam(path_of_sam: str | Path) -&gt; list[list]:
+def read_sam(path_of_sam: str | Path) -&gt; Generator[list]:
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
     return (s.split(&#34;\t&#34;) for s in sam)
 
@@ -82,7 +82,7 @@ def write_jsonl(dicts: list[dict], filepath: str | Path):
 </details>
 </dd>
 <dt id="midsv.io.read_sam"><code class="name flex">
-<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str | Path) ‑> list[list]</span>
+<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str | Path) ‑> Generator[list]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -90,7 +90,7 @@ def write_jsonl(dicts: list[dict], filepath: str | Path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_sam(path_of_sam: str | Path) -&gt; list[list]:
+<pre><code class="python">def read_sam(path_of_sam: str | Path) -&gt; Generator[list]:
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
     return (s.split(&#34;\t&#34;) for s in sam)</code></pre>
 </details>
