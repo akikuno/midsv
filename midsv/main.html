@@ -35,7 +35,7 @@ from . import convert
 from . import proofread
 
 
-def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
+def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(str) = set()) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
@@ -43,7 +43,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
         midsv (bool, optional): Output MIDSV. Defaults to True.
         cssplit (bool, optional): Output CSSPLIT. Defaults to True.
         qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-
+        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     &#34;&#34;&#34;
@@ -52,6 +52,9 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
         pass
     else:
         raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
+
+    if keep != set() and {&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;} - keep != set():
+        raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
 
     sam = list(sam)
     validate.sam_headers(sam)
@@ -79,7 +82,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
     samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished)
+    samdict_polished = proofread.select(samdict_polished, keep)
     return samdict_polished</code></pre>
 </details>
 </section>
@@ -91,7 +94,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.main.transform"><code class="name flex">
-<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) ‑> list[dict]</span>
+<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(str) = set()) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Integrated function to perform MIDSV conversion</p>
@@ -106,6 +109,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
 <dt><strong><code>qscore</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Output QSCORE. Require <code>midsv == True</code> or <code>cssplit == True</code>. Defaults to True.</dd>
 </dl>
+<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[dict]</code></dt>
@@ -115,7 +119,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True) -&gt; list[dict]:
+<pre><code class="python">def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(str) = set()) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
@@ -123,7 +127,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
         midsv (bool, optional): Output MIDSV. Defaults to True.
         cssplit (bool, optional): Output CSSPLIT. Defaults to True.
         qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-
+        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
     Returns:
         list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
     &#34;&#34;&#34;
@@ -132,6 +136,9 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
         pass
     else:
         raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
+
+    if keep != set() and {&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;} - keep != set():
+        raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
 
     sam = list(sam)
     validate.sam_headers(sam)
@@ -159,7 +166,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
     samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished)
+    samdict_polished = proofread.select(samdict_polished, keep)
     return samdict_polished</code></pre>
 </details>
 </dd>
