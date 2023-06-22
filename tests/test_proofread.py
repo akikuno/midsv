@@ -54,6 +54,14 @@ def test_join_real_microhomology():
     answer = eval(answer)
     assert test == answer
 
+def test_select_keep_FLAG():
+    samdict = Path("tests", "data", "join", "test_real_microhomology.txt").read_text()
+    samdict = eval(samdict)
+    test = proofread.select(samdict, keep={"FLAG", "SEQ"})
+    test = set(list(test[0].keys()))
+    answer = {'QNAME', 'RNAME', 'FLAG', 'CSSPLIT', 'QSCORE'}
+    assert test == answer
+
 
 def test_pad():
     sam = Path("tests", "data", "pad", "padding.sam")

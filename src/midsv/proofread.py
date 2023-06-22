@@ -141,7 +141,7 @@ def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_filtered
 
 
-def select(samdict: list[dict]) -> list[dict]:
+def select(samdict: list[dict], keep: set(str) = set()) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
@@ -152,7 +152,8 @@ def select(samdict: list[dict]) -> list[dict]:
     """
     selected = []
     for m in samdict:
-        for delkeys in ["FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"]:
-            m.pop(delkeys)
+        delkeys = {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep
+        for key in delkeys:
+            m.pop(key)
         selected.append(m)
     return selected
