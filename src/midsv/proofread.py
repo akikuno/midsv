@@ -145,8 +145,8 @@ def select(samdict: list[dict], keep: set(str) = set()) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
-        sam (list[dict]): dictionarized SAM
-
+        samdict (list[dict]): dictionarized SAM
+        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
     Returns:
         list[dict]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     """
