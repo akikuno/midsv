@@ -7,7 +7,7 @@ from . import convert
 from . import proofread
 
 
-def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(str) = set()) -> list[dict]:
+def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(list[str]) = set()) -> list[dict]:
     """Integrated function to perform MIDSV conversion
 
     Args:
@@ -25,7 +25,7 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
     else:
         raise ValueError("Either midsv or cssplit must be True")
 
-    if keep != set() and {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep != set():
+    if keep != set() and not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
         raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
 
     sam = list(sam)
