@@ -1,8 +1,5 @@
 from pathlib import Path
 from src.midsv import format, io
-from importlib import reload
-
-reload(format)
 
 ###########################################################
 # Format headers and alignments
@@ -42,11 +39,9 @@ def test_dictionarize_sam_not_primary():
     answer = []
     assert test == answer
 
-
 ###########################################################
-# Remove undesired reads
+# Remove softclips
 ###########################################################
-
 
 def test_remove_softclips():
     path = Path("tests", "data", "softclip", "softclip_cslong.sam")
@@ -57,37 +52,52 @@ def test_remove_softclips():
         assert len(t["QUAL"]) == 100
 
 
+###########################################################
+# Remove undesired reads
+###########################################################
+
+
+def test_return_end_of_current_read():
+    assert format.return_end_of_current_read({"POS": 10, "CIGAR": "10M5D5M"}) == 29
+    assert format.return_end_of_current_read({"POS": 0, "CIGAR": "5M10N5M"}) == 19
+    assert format.return_end_of_current_read({"POS": 5, "CIGAR": ""}) == 4
+
+
 def test_realign_sequence():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M1I1D1M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNT'}
+    answer = {"SEQ": "ACNT"}
     assert test == answer
+
 
 def test_realign_sequence_start_5nt():
     alignment = {"POS": 5, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'NNNNNACNT'}
+    answer = {"SEQ": "NNNNNACNT"}
     assert test == answer
+
 
 def test_realign_sequence_hardclip():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNT'}
+    answer = {"SEQ": "ACNT"}
     assert test == answer
+
 
 def test_realign_sequence_splicing():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M5N2M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNNNNNGT'}
+    answer = {"SEQ": "ACNNNNNGT"}
     assert test == answer
+
 
 def test_remove_resequence():
     path = Path("tests", "data", "overlap", "overlapped.sam")
@@ -102,4 +112,3 @@ def test_remove_resequence():
         else:
             count_nonoverlap += 1
     assert count_overlap == 1 and count_nonoverlap == 2
-

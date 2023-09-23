@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 from itertools import groupby
-from copy import deepcopy
+from midsv.utils.cigar_handler import split_cigar
 
 ###########################################################
 # Format headers and alignments
@@ -63,78 +63,89 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
 
 
 ###########################################################
+# Remove softclips
+###########################################################
+
+
+def process_softclip(cigar: str, seq: str, qual: str) -> tuple[str, str]:
+    cigar_split = split_cigar(cigar)
+    left, right = cigar_split[0], cigar_split[-1]
+    left_clip = int(left[:-1]) if "S" in left else 0
+    right_clip = int(right[:-1]) if "S" in right else 0
+    return seq[left_clip : -right_clip or None], qual[left_clip : -right_clip or None]
+
+
+def remove_softclips(samdict: list[dict]) -> list[dict]:
+    """Remove softclip information from SEQ and QUAL.
+
+    Args:
+        samdict (list[dict]): disctionalized SAM
+
+    Returns:
+        list[dict]: disctionalized SAM with trimmed softclips in SEQ and QUAL
+    """
+    samdict_trimmed_softclips = []
+    for alignment in samdict:
+        if "S" in alignment["CIGAR"]:
+            new_seq, new_qual = process_softclip(alignment["CIGAR"], alignment["SEQ"], alignment["QUAL"])
+            updated_alignment = {**alignment, "SEQ": new_seq, "QUAL": new_qual}
+            samdict_trimmed_softclips.append(updated_alignment)
+        else:
+            samdict_trimmed_softclips.append(alignment)
+    return samdict_trimmed_softclips
+
+
+###########################################################
 # Remove undesired reads
 ###########################################################
 
 
-def split_cigar(cigar: str) -> list[str]:
-    cigar_iter = iter(re.split(r"([MIDNSHPX=])", cigar))
-    cigar_splitted = [i + op for i, op in zip(cigar_iter, cigar_iter)]
-    return cigar_splitted
-
-
-def remove_softclips(sam: list[dict]) -> list[dict]:
-    """Remove softclip information from SEQ and QUAL.
-
-    Args:
-        sam (list[list]): disctionalized SAM
-
-    Returns:
-        list[list]: disctionalized SAM with trimmed softclips in QUAL
-    """
-    sam_list = []
-    for alignment in sam:
-        cigar = alignment["CIGAR"]
-        if "S" not in cigar:
-            sam_list.append(alignment)
-            continue
-        cigar_split = split_cigar(cigar)
-        left, right = cigar_split[0], cigar_split[-1]
-        if "S" in left:
-            left = int(left[:-1])
-            alignment["SEQ"] = alignment["SEQ"][left:]
-            alignment["QUAL"] = alignment["QUAL"][left:]
-        if "S" in right:
-            right = int(right[:-1])
-            alignment["SEQ"] = alignment["SEQ"][:-right]
-            alignment["QUAL"] = alignment["QUAL"][:-right]
-        sam_list.append(alignment)
-    return sam_list
-
-
 def return_end_of_current_read(alignment: dict) -> int:
     start_of_current_read = alignment["POS"]
-    cigar = alignment["CIGAR"]
-    cigar_split = split_cigar(cigar)
-    alignment_length = 0
-    for cig in cigar_split:
-        if "M" in cig or "D" in cig or "N" in cig:
-            alignment_length += int(cig[:-1])
+    cigar_split = split_cigar(alignment["CIGAR"])
+    alignment_length = sum(int(cig[:-1]) for cig in cigar_split if cig[-1] in "MDN")
     return start_of_current_read + alignment_length - 1
 
 
-def realign_sequence(alignment: dict) -> dict:
+def get_min_position(samdict: list[dict]) -> int:
+    return min(alignments["POS"] for alignments in samdict)
+
+
+def realign_sequence(alignment: dict, min_position: int = 0) -> dict:
     """Discard insertion, and add deletion and spliced nucreotide to unify sequence length"""
+
     cigar = alignment["CIGAR"]
-    cigar_split = split_cigar(cigar)
     sequence = alignment["SEQ"]
-    sequence_ignored = ["N"] * alignment["POS"]
+    cigar_split = split_cigar(cigar)
+    sequence_unified_length = ["N"] * (alignment["POS"] - min_position)
     start = 0
     for cig in cigar_split:
         if "M" in cig:
             end = start + int(cig[:-1])
-            sequence_ignored.append(sequence[start:end])
+            sequence_unified_length.append(sequence[start:end])
             start = end
         elif "I" in cig:
             start += int(cig[:-1])
         elif any(x in cig for x in ["D", "N"]):
-            sequence_ignored.append("N" * int(cig[:-1]))
-    realignment = deepcopy(alignment)
-    realignment["SEQ"] = "".join(sequence_ignored)
-    return realignment
+            sequence_unified_length.append("N" * int(cig[:-1]))
+    alignment["SEQ"] = "".join(sequence_unified_length)
+    return alignment
 
 
-def remove_resequence(samdict: list[list]) -> list[list]:
+def check_overlap(start_prev: int, end_prev: int, start_curr: int, end_curr: int) -> bool:
+    # Check if shorter read is completely included in longer read
+    return start_prev <= start_curr and end_prev >= end_curr
+
+
+def has_mismatched_overlap(seq_prev: str, seq_curr: str, start: int, end: int) -> bool:
+    # Check for DNA sequence overlap but not the same DNA sequence
+    for prev, curr in zip(seq_prev[start:end], seq_curr[start:end]):
+        if prev != "N" and curr != "N" and prev != curr:
+            return True
+    return False
+
+
+def remove_resequence(samdict: list[dict]) -> list[dict]:
     """Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The 'realignments' is not sequencing errors, and it preserves the same sequence.
@@ -145,10 +156,10 @@ def remove_resequence(samdict: list[list]) -> list[list]:
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
-        sam (list[list]): disctionalized SAM
+        samdict (list[dict]): disctionalized SAM
 
     Returns:
-        list[list]: disctionalized SAM with removed overlaped reads
+        list[dict]: disctionalized SAM with removed overlaped reads
     """
     samdict.sort(key=lambda x: x["QNAME"])
     sam_groupby = groupby(samdict, lambda x: x["QNAME"])
@@ -158,40 +169,35 @@ def remove_resequence(samdict: list[list]) -> list[list]:
         if len(alignments) == 1:
             sam_nonoverlapped += alignments
             continue
-        alignments = [realign_sequence(alignment) for alignment in alignments]
-        alignments = sorted(alignments, key=lambda x: [x["POS"]])
-        is_overraped = False
-        end_of_previous_read = -1
-        previous_read = alignments[0]["SEQ"]
-        for i, alignment in enumerate(alignments):
-            if i == 0:
-                start_of_previous_read = alignment["POS"] - 1
-                end_of_previous_read = return_end_of_current_read(alignment)
-                continue
-            start_of_current_read = alignment["POS"] - 1
-            end_of_current_read = return_end_of_current_read(alignment)
-            # (1) The shorter reads that are completely included in the longer reads
-            if start_of_previous_read <= start_of_current_read and end_of_previous_read >= end_of_current_read:
-                is_overraped = True
+
+        min_position = get_min_position(alignments)
+        alignments = [realign_sequence(alignment, min_position) for alignment in alignments]
+        alignments.sort(key=lambda x: x["POS"])
+
+        is_overlapped = False
+        prev_alignment = alignments[0]
+        start_prev, end_prev = prev_alignment["POS"] - 1, return_end_of_current_read(prev_alignment)
+
+        for curr_alignment in alignments[1:]:
+            start_curr, end_curr = curr_alignment["POS"] - 1, return_end_of_current_read(curr_alignment)
+
+            if check_overlap(start_prev, end_prev, start_curr, end_curr):
+                is_overlapped = True
                 break
-            else:
-                start_overlap = max(start_of_previous_read, start_of_current_read)
-                end_overlap = min(end_of_previous_read, end_of_current_read)
-                for prev, curr in zip(
-                    previous_read[start_overlap:end_overlap], alignment["SEQ"][start_overlap:end_overlap]
-                ):
-                    if prev == "N" or curr == "N":
-                        continue
-                    # (2) Overlapped but not the same DNA sequence
-                    if prev != curr:
-                        is_overraped = True
-                        break
-            start_of_previous_read = start_of_current_read
-            end_of_previous_read = return_end_of_current_read(alignment)
-        if is_overraped:
-            # The longest alignment will be retain
-            alignment = sorted(alignments, key=lambda x: -len(x["SEQ"]))[0]
-            sam_nonoverlapped.append(alignment)
+
+            start_overlap, end_overlap = max(start_prev, start_curr), min(end_prev, end_curr)
+            if has_mismatched_overlap(prev_alignment["SEQ"], curr_alignment["SEQ"], start_overlap, end_overlap):
+                is_overlapped = True
+                break
+
+            start_prev, end_prev = start_curr, end_curr
+            prev_alignment = curr_alignment
+
+        if is_overlapped:
+            # Retain the longest alignment
+            longest_alignment = max(alignments, key=lambda x: len(x["SEQ"]))
+            sam_nonoverlapped.append(longest_alignment)
         else:
             sam_nonoverlapped += alignments
+
     return sam_nonoverlapped
