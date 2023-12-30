@@ -29,13 +29,19 @@
 <pre><code class="python">from __future__ import annotations
 
 from typing import Generator
-from . import validate
-from . import format
-from . import convert
-from . import proofread
+from midsv import validate
+from midsv import format
+from midsv import convert
+from midsv import proofread
 
 
-def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(list[str]) = set()) -&gt; list[dict]:
+def transform(
+    sam: list[list] | Generator[list],
+    midsv: bool = True,
+    cssplit: bool = True,
+    qscore: bool = True,
+    keep: set(list[str]) = set(),
+) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:
@@ -119,7 +125,13 @@ def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bo
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(list[str]) = set()) -&gt; list[dict]:
+<pre><code class="python">def transform(
+    sam: list[list] | Generator[list],
+    midsv: bool = True,
+    cssplit: bool = True,
+    qscore: bool = True,
+    keep: set(list[str]) = set(),
+) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
     Args:

@@ -90,6 +90,7 @@ def to_midsv(cstag_splitted: list[str]) -&gt; list[str]:
             midsv_splitted.append(&#34;S&#34;)
     return midsv_splitted
 
+
 def numerize_insertion(midsv: list[str]) -&gt; list[str]:
     &#34;&#34;&#34;Convert insertion to numeric numbers
     Example:
@@ -293,7 +294,7 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -&gt; str:
     qscore = []
     idx = 0
     for cs in cssplit.split(&#34;,&#34;):
-        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;: # N = spliced loci
+        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;:  # N = spliced loci
             qscore.append(&#34;-1&#34;)
             idx -= 1
         elif cs.startswith(&#34;+&#34;):
@@ -520,7 +521,7 @@ To adjust the same length as cssplit, insertion is discarded and deletion is int
     qscore = []
     idx = 0
     for cs in cssplit.split(&#34;,&#34;):
-        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;: # N = spliced loci
+        if cs.startswith(&#34;-&#34;) or cs == &#34;N&#34;:  # N = spliced loci
             qscore.append(&#34;-1&#34;)
             idx -= 1
         elif cs.startswith(&#34;+&#34;):

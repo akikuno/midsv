@@ -31,6 +31,20 @@ from itertools import groupby
 from copy import deepcopy
 
 
+def is_forward_strand(flag: int) -&gt; bool:
+    &#34;&#34;&#34;
+    Determines if the read is mapped to the forward strand.
+
+    Args:
+    flag (int): The SAM flag value.
+
+    Returns:
+    bool: True if the read is mapped to the forward strand, False otherwise.
+    &#34;&#34;&#34;
+    # Check if the bit 4 (0-based) is NOT set
+    return not (flag &amp; 16)
+
+
 def join(samdict: list[dict]) -&gt; list[dict]:
     &#34;&#34;&#34;Join splitted reads including large deletion or inversion.
 
@@ -43,31 +57,36 @@ def join(samdict: list[dict]) -&gt; list[dict]:
     sam_sorted = sorted(samdict, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
     sam_joined = []
-    for _, alignments in sam_groupby:
+    for *_, alignments in sam_groupby:
         alignments = list(alignments)
         if len(alignments) == 1:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
+            #########################################
+            # Inversion detection
+            #########################################
             # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_template = deepcopy(alignment)
-                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                    strand_first = 0
+                if is_forward_strand(alignment[&#34;FLAG&#34;]):
+                    first_read_is_forward = True
                 else:
-                    strand_first = 1
+                    first_read_is_forward = False
                 continue
             # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                strand = 0
+            if is_forward_strand(alignment[&#34;FLAG&#34;]):
+                current_read_is_forward = True
             else:
-                strand = 1
-            if strand_first != strand:
+                current_read_is_forward = False
+            if first_read_is_forward is not current_read_is_forward:
                 if &#34;MIDSV&#34; in alignment:
                     alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
                 if &#34;CSSPLIT&#34; in alignment:
                     alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
+            #########################################
             # Remove microhomology
+            #########################################
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
@@ -84,9 +103,14 @@ def join(samdict: list[dict]) -&gt; list[dict]:
                 num_microhomology = 0
                 for i in range(min(len(previous_cssplit), len(current_cssplit))):
                     if previous_cssplit[-i:] == current_cssplit[:i]:
-                        if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                        if &#34;QSCORE&#34; in alignment:
+                            if previous_qscore[-i:] == current_qscore[:i]:
+                                num_microhomology = i
+                        else:
                             num_microhomology = i
+                #########################################
                 # Update CSSPLIT
+                #########################################
                 alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
                 if &#34;QSCORE&#34; in alignment:
                     alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
@@ -194,6 +218,33 @@ def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="midsv.proofread.is_forward_strand"><code class="name flex">
+<span>def <span class="ident">is_forward_strand</span></span>(<span>flag: int) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determines if the read is mapped to the forward strand.</p>
+<p>Args:
+flag (int): The SAM flag value.</p>
+<p>Returns:
+bool: True if the read is mapped to the forward strand, False otherwise.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_forward_strand(flag: int) -&gt; bool:
+    &#34;&#34;&#34;
+    Determines if the read is mapped to the forward strand.
+
+    Args:
+    flag (int): The SAM flag value.
+
+    Returns:
+    bool: True if the read is mapped to the forward strand, False otherwise.
+    &#34;&#34;&#34;
+    # Check if the bit 4 (0-based) is NOT set
+    return not (flag &amp; 16)</code></pre>
+</details>
+</dd>
 <dt id="midsv.proofread.join"><code class="name flex">
 <span>def <span class="ident">join</span></span>(<span>samdict: list[dict]) ‑> list[dict]</span>
 </code></dt>
@@ -225,31 +276,36 @@ def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
     sam_sorted = sorted(samdict, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
     sam_joined = []
-    for _, alignments in sam_groupby:
+    for *_, alignments in sam_groupby:
         alignments = list(alignments)
         if len(alignments) == 1:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
+            #########################################
+            # Inversion detection
+            #########################################
             # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_template = deepcopy(alignment)
-                if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                    strand_first = 0
+                if is_forward_strand(alignment[&#34;FLAG&#34;]):
+                    first_read_is_forward = True
                 else:
-                    strand_first = 1
+                    first_read_is_forward = False
                 continue
             # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment[&#34;FLAG&#34;] == 0 or alignment[&#34;FLAG&#34;] == 2048:
-                strand = 0
+            if is_forward_strand(alignment[&#34;FLAG&#34;]):
+                current_read_is_forward = True
             else:
-                strand = 1
-            if strand_first != strand:
+                current_read_is_forward = False
+            if first_read_is_forward is not current_read_is_forward:
                 if &#34;MIDSV&#34; in alignment:
                     alignment[&#34;MIDSV&#34;] = alignment[&#34;MIDSV&#34;].lower()
                 if &#34;CSSPLIT&#34; in alignment:
                     alignment[&#34;CSSPLIT&#34;] = alignment[&#34;CSSPLIT&#34;].lower()
+            #########################################
             # Remove microhomology
+            #########################################
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment[&#34;POS&#34;] - 1
             if &#34;MIDSV&#34; in alignment:
@@ -266,9 +322,14 @@ def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
                 num_microhomology = 0
                 for i in range(min(len(previous_cssplit), len(current_cssplit))):
                     if previous_cssplit[-i:] == current_cssplit[:i]:
-                        if &#34;QSCORE&#34; in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                        if &#34;QSCORE&#34; in alignment:
+                            if previous_qscore[-i:] == current_qscore[:i]:
+                                num_microhomology = i
+                        else:
                             num_microhomology = i
+                #########################################
                 # Update CSSPLIT
+                #########################################
                 alignment[&#34;CSSPLIT&#34;] = &#34;,&#34;.join(current_cssplit[num_microhomology:])
                 if &#34;QSCORE&#34; in alignment:
                     alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
@@ -449,6 +510,7 @@ def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="midsv.proofread.is_forward_strand" href="#midsv.proofread.is_forward_strand">is_forward_strand</a></code></li>
 <li><code><a title="midsv.proofread.join" href="#midsv.proofread.join">join</a></code></li>
 <li><code><a title="midsv.proofread.pad" href="#midsv.proofread.pad">pad</a></code></li>
 <li><code><a title="midsv.proofread.remove_different_length" href="#midsv.proofread.remove_different_length">remove_different_length</a></code></li>
