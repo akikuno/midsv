@@ -3,6 +3,20 @@ from itertools import groupby
 from copy import deepcopy
 
 
+def is_forward_strand(flag: int) -> bool:
+    """
+    Determines if the read is mapped to the forward strand.
+
+    Args:
+    flag (int): The SAM flag value.
+
+    Returns:
+    bool: True if the read is mapped to the forward strand, False otherwise.
+    """
+    # Check if the bit 4 (0-based) is NOT set
+    return not (flag & 16)
+
+
 def join(samdict: list[dict]) -> list[dict]:
     """Join splitted reads including large deletion or inversion.
 
@@ -15,31 +29,36 @@ def join(samdict: list[dict]) -> list[dict]:
     sam_sorted = sorted(samdict, key=lambda x: [x["QNAME"], x["POS"]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x["QNAME"])
     sam_joined = []
-    for _, alignments in sam_groupby:
+    for *_, alignments in sam_groupby:
         alignments = list(alignments)
         if len(alignments) == 1:
             sam_joined.append(alignments[0])
             continue
         for i, alignment in enumerate(alignments):
+            #########################################
+            # Inversion detection
+            #########################################
             # Determine the strand (strand_first) of the first read
             if i == 0:
                 sam_template = deepcopy(alignment)
-                if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
-                    strand_first = 0
+                if is_forward_strand(alignment["FLAG"]):
+                    first_read_is_forward = True
                 else:
-                    strand_first = 1
+                    first_read_is_forward = False
                 continue
             # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if alignment["FLAG"] == 0 or alignment["FLAG"] == 2048:
-                strand = 0
+            if is_forward_strand(alignment["FLAG"]):
+                current_read_is_forward = True
             else:
-                strand = 1
-            if strand_first != strand:
+                current_read_is_forward = False
+            if first_read_is_forward is not current_read_is_forward:
                 if "MIDSV" in alignment:
                     alignment["MIDSV"] = alignment["MIDSV"].lower()
                 if "CSSPLIT" in alignment:
                     alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
+            #########################################
             # Remove microhomology
+            #########################################
             previous_alignment = alignments[i - 1]
             previous_end = previous_alignment["POS"] - 1
             if "MIDSV" in alignment:
@@ -56,9 +75,14 @@ def join(samdict: list[dict]) -> list[dict]:
                 num_microhomology = 0
                 for i in range(min(len(previous_cssplit), len(current_cssplit))):
                     if previous_cssplit[-i:] == current_cssplit[:i]:
-                        if "QSCORE" in alignment and previous_qscore[-i:] == current_qscore[:i]:
+                        if "QSCORE" in alignment:
+                            if previous_qscore[-i:] == current_qscore[:i]:
+                                num_microhomology = i
+                        else:
                             num_microhomology = i
+                #########################################
                 # Update CSSPLIT
+                #########################################
                 alignment["CSSPLIT"] = ",".join(current_cssplit[num_microhomology:])
                 if "QSCORE" in alignment:
                     alignment["QSCORE"] = ",".join(current_qscore[num_microhomology:])
