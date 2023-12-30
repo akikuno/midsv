@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 from typing import Generator
-from . import validate
-from . import format
-from . import convert
-from . import proofread
+from midsv import validate
+from midsv import format
+from midsv import convert
+from midsv import proofread
 
 
-def transform(sam: list[list] | Generator[list], midsv: bool = True, cssplit: bool = True, qscore: bool = True, keep: set(list[str]) = set()) -> list[dict]:
+def transform(
+    sam: list[list] | Generator[list],
+    midsv: bool = True,
+    cssplit: bool = True,
+    qscore: bool = True,
+    keep: set(list[str]) = set(),
+) -> list[dict]:
     """Integrated function to perform MIDSV conversion
 
     Args:

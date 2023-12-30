@@ -62,6 +62,7 @@ def to_midsv(cstag_splitted: list[str]) -> list[str]:
             midsv_splitted.append("S")
     return midsv_splitted
 
+
 def numerize_insertion(midsv: list[str]) -> list[str]:
     """Convert insertion to numeric numbers
     Example:
@@ -265,7 +266,7 @@ def qual_to_qscore_cssplit(qual: str, cssplit: str) -> str:
     qscore = []
     idx = 0
     for cs in cssplit.split(","):
-        if cs.startswith("-") or cs == "N": # N = spliced loci
+        if cs.startswith("-") or cs == "N":  # N = spliced loci
             qscore.append("-1")
             idx -= 1
         elif cs.startswith("+"):
