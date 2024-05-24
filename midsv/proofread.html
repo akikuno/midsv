@@ -193,7 +193,7 @@ def remove_different_length(samdict: list[dict], sqheaders: dict) -&gt; list[dic
     return samdict_filtered
 
 
-def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
+def select(samdict: list[dict], keep: set[str] = {}) -&gt; list[dict]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
@@ -455,7 +455,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 </details>
 </dd>
 <dt id="midsv.proofread.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>samdict: list[dict], keep: set(str) = set()) ‑> list[dict]</span>
+<span>def <span class="ident">select</span></span>(<span>samdict: list[dict], keep: set[str] = {}) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE</p>
@@ -474,7 +474,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(samdict: list[dict], keep: set(str) = set()) -&gt; list[dict]:
+<pre><code class="python">def select(samdict: list[dict], keep: set[str] = {}) -&gt; list[dict]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
