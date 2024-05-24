@@ -165,7 +165,7 @@ def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_filtered
 
 
-def select(samdict: list[dict], keep: set(str) = set()) -> list[dict]:
+def select(samdict: list[dict], keep: set[str] = {}) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:

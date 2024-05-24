@@ -12,7 +12,7 @@ def transform(
     midsv: bool = True,
     cssplit: bool = True,
     qscore: bool = True,
-    keep: set(list[str]) = set(),
+    keep: set[list[str]] = {},
 ) -> list[dict]:
     """Integrated function to perform MIDSV conversion
 
