@@ -27,7 +27,7 @@ def extract_sqheaders(sam: list[list]) -> dict[str, int]:
     return SNLN
 
 
-def dictionarize_sam(sam: list[list]) -> list[dict]:
+def dictionarize_sam(sam: list[list[str]]) -> list[dict[str | int]]:
     """Extract mapped alignments from SAM
 
     Args:
@@ -47,7 +47,7 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
         for i, a in enumerate(alignment):
             if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
                 idx_cstag = i
-        samdict = dict(
+        alignments = dict(
             QNAME=alignment[0].replace(",", "_"),
             FLAG=int(alignment[1]),
             RNAME=alignment[2],
@@ -57,7 +57,7 @@ def dictionarize_sam(sam: list[list]) -> list[dict]:
             QUAL=alignment[10],
             CSTAG=alignment[idx_cstag],
         )
-        aligns.append(samdict)
+        aligns.append(alignments)
     aligns = sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
     return aligns
 
@@ -73,20 +73,20 @@ def split_cigar(cigar: str) -> list[str]:
     return cigar_splitted
 
 
-def remove_softclips(sam: list[dict]) -> list[dict]:
+def remove_softclips(alignments: list[dict[str | int]]) -> list[dict[str | int]]:
     """Remove softclip information from SEQ and QUAL.
 
     Args:
-        sam (list[list]): disctionalized SAM
+        alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
         list[list]: disctionalized SAM with trimmed softclips in QUAL
     """
-    sam_list = []
-    for alignment in sam:
+    alignments_softclips_removed = []
+    for alignment in alignments:
         cigar = alignment["CIGAR"]
         if "S" not in cigar:
-            sam_list.append(alignment)
+            alignments_softclips_removed.append(alignment)
             continue
         cigar_split = split_cigar(cigar)
         left, right = cigar_split[0], cigar_split[-1]
@@ -98,11 +98,11 @@ def remove_softclips(sam: list[dict]) -> list[dict]:
             right = int(right[:-1])
             alignment["SEQ"] = alignment["SEQ"][:-right]
             alignment["QUAL"] = alignment["QUAL"][:-right]
-        sam_list.append(alignment)
-    return sam_list
+        alignments_softclips_removed.append(alignment)
+    return alignments_softclips_removed
 
 
-def return_end_of_current_read(alignment: dict) -> int:
+def return_end_of_current_read(alignment: dict[str, str | int]) -> int:
     start_of_current_read = alignment["POS"]
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
@@ -113,7 +113,7 @@ def return_end_of_current_read(alignment: dict) -> int:
     return start_of_current_read + alignment_length - 1
 
 
-def realign_sequence(alignment: dict) -> dict:
+def realign_sequence(alignment: dict[str, str | int]) -> dict:
     """Discard insertion, and add deletion and spliced nucreotide to unify sequence length"""
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
@@ -134,7 +134,7 @@ def realign_sequence(alignment: dict) -> dict:
     return realignment
 
 
-def remove_resequence(samdict: list[list]) -> list[list]:
+def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict]:
     """Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The 'realignments' is not sequencing errors, and it preserves the same sequence.
@@ -145,13 +145,13 @@ def remove_resequence(samdict: list[list]) -> list[list]:
     Example reads are in `tests/data/overlap/real_overlap.sam` and `tests/data/overlap/real_overlap2.sam`
 
     Args:
-        sam (list[list]): disctionalized SAM
+        alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
         list[list]: disctionalized SAM with removed overlaped reads
     """
-    samdict.sort(key=lambda x: x["QNAME"])
-    sam_groupby = groupby(samdict, lambda x: x["QNAME"])
+    alignments.sort(key=lambda x: x["QNAME"])
+    sam_groupby = groupby(alignments, lambda x: x["QNAME"])
     sam_nonoverlapped = []
     for _, alignments in sam_groupby:
         alignments = list(alignments)
