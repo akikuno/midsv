@@ -114,7 +114,7 @@ def return_end_of_current_read(alignment: dict[str, str | int]) -> int:
 
 
 def realign_sequence(alignment: dict[str, str | int]) -> dict:
-    """Discard insertion, and add deletion and spliced nucreotide to unify sequence length"""
+    """Discard insertion, and add deletion and spliced nucleotides to unify sequence length"""
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
     sequence = alignment["SEQ"]
