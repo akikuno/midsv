@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from typing import Generator
-from midsv import validate
-from midsv import format
-from midsv import convert
-from midsv import proofread
+from collections.abc import Iterator
+
+from midsv import convert, format, proofread, validate
 
 
 def transform(
-    sam: list[list] | Generator[list],
+    sam: list[list] | Iterator[list],
     midsv: bool = True,
     cssplit: bool = True,
     qscore: bool = True,
-    keep: set[list[str]] = {},
+    keep: list[str] = None,
 ) -> list[dict]:
     """Integrated function to perform MIDSV conversion
 
@@ -31,6 +29,7 @@ def transform(
     else:
         raise ValueError("Either midsv or cssplit must be True")
 
+    keep = set(keep) if keep else set()
     if keep != set() and not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
         raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
-from itertools import groupby
+
 from copy import deepcopy
+from itertools import groupby
 
 
 def is_forward_strand(flag: int) -> bool:
@@ -165,7 +166,7 @@ def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_filtered
 
 
-def select(samdict: list[dict], keep: set[str] = {}) -> list[dict]:
+def select(samdict: list[dict], keep: set[str] = None) -> list[dict]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
@@ -174,6 +175,7 @@ def select(samdict: list[dict], keep: set[str] = {}) -> list[dict]:
     Returns:
         list[dict]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     """
+    keep = set(keep) if keep else set()
     selected = []
     for m in samdict:
         delkeys = {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep
