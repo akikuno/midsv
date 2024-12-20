@@ -1,6 +1,7 @@
-from pathlib import Path
-from src.midsv import format, io
 from importlib import reload
+from pathlib import Path
+
+from src.midsv import format, io
 
 reload(format)
 
@@ -62,32 +63,36 @@ def test_realign_sequence():
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNT'}
+    answer = {"SEQ": "ACNT"}
     assert test == answer
+
 
 def test_realign_sequence_start_5nt():
     alignment = {"POS": 5, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'NNNNNACNT'}
+    answer = {"SEQ": "NNNNNACNT"}
     assert test == answer
+
 
 def test_realign_sequence_hardclip():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNT'}
+    answer = {"SEQ": "ACNT"}
     assert test == answer
+
 
 def test_realign_sequence_splicing():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M5N2M"}
     test = format.realign_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
-    answer = {'SEQ': 'ACNNNNNGT'}
+    answer = {"SEQ": "ACNNNNNGT"}
     assert test == answer
+
 
 def test_remove_resequence():
     path = Path("tests", "data", "overlap", "overlapped.sam")
@@ -102,4 +107,3 @@ def test_remove_resequence():
         else:
             count_nonoverlap += 1
     assert count_overlap == 1 and count_nonoverlap == 2
-

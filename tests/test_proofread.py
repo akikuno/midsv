@@ -1,10 +1,7 @@
-from pathlib import Path
-from src.midsv import io
-from src.midsv import format
-from src.midsv import convert
-from src.midsv import proofread
-
 from importlib import reload
+from pathlib import Path
+
+from src.midsv import convert, format, io, proofread
 
 reload(proofread)
 
@@ -54,12 +51,13 @@ def test_join_real_microhomology():
     answer = eval(answer)
     assert test == answer
 
+
 def test_select_keep_FLAG():
     samdict = Path("tests", "data", "join", "test_real_microhomology.txt").read_text()
     samdict = eval(samdict)
     test = proofread.select(samdict, keep={"FLAG", "SEQ"})
     test = set(list(test[0].keys()))
-    answer = {'QNAME', 'RNAME', 'FLAG', 'CSSPLIT', 'QSCORE'}
+    answer = {"QNAME", "RNAME", "FLAG", "CSSPLIT", "QSCORE"}
     assert test == answer
 
 
@@ -82,4 +80,3 @@ def test_pad():
     answer = Path("tests", "data", "pad", "answer_pad.txt").read_text()
     answer = eval(answer)
     assert test == answer
-

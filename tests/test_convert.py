@@ -1,6 +1,7 @@
-from pathlib import Path
-from src.midsv import io, convert, format
 from importlib import reload
+from pathlib import Path
+
+from src.midsv import convert, format, io
 
 reload(convert)
 
@@ -24,9 +25,9 @@ def test_to_midsv():
 
 
 def test_to_midsv_splice():
-    cstag_splitted = ['=ACGT', '~tg5ca', '=ACGT']
+    cstag_splitted = ["=ACGT", "~tg5ca", "=ACGT"]
     test = convert.to_midsv(cstag_splitted)
-    answer = ['MMMM', 'DDDDD', 'MMMM']
+    answer = ["MMMM", "DDDDD", "MMMM"]
     assert test == answer
 
 
@@ -109,6 +110,7 @@ def test_cstag_to_cssplit_splice():
 # Phred score
 ###########################################################
 
+
 # ----------------------------------------------------------
 # qual_to_qscore_midsv
 # ----------------------------------------------------------
@@ -164,9 +166,11 @@ def test_qual_to_qscore_midsv_real():
     answer = eval(answer)
     assert test == answer
 
+
 # ----------------------------------------------------------
 # qual_to_qscore_cssplit
 # ----------------------------------------------------------
+
 
 def test_qual_to_qscore_cssplit_insertion():
     qual = "@!!!@@"
@@ -207,16 +211,18 @@ def test_qual_to_qscore_cssplit_ins_sub():
     answer = "31,15|16|17|0"
     assert test == answer
 
+
 def test_qual_to_qscore_cssplit_splicing():
     qual = "!@"
-    cssplit = '=A,N,N,N,N,N,N,N,N,N,N,=T'
+    cssplit = "=A,N,N,N,N,N,N,N,N,N,N,=T"
     test = convert.qual_to_qscore_cssplit(qual, cssplit)
-    answer = '0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31'
+    answer = "0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31"
     assert test == answer
+
 
 def test_qual_to_qscore_cssplit_splicing_inversion():
     qual = "!!!@@"
-    cssplit = '+C|+A|+G|N,N,N,N,N,N,N,N,N,N,=C,=C'
+    cssplit = "+C|+A|+G|N,N,N,N,N,N,N,N,N,N,=C,=C"
     test = convert.qual_to_qscore_cssplit(qual, cssplit)
-    answer = '0|0|0|-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31'
+    answer = "0|0|0|-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31"
     assert test == answer

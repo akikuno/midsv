@@ -1,7 +1,9 @@
-from pathlib import Path
-from src import midsv
-import pytest
 from importlib import reload
+from pathlib import Path
+
+import pytest
+
+from src import midsv
 
 reload(midsv)
 

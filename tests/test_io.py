@@ -1,7 +1,9 @@
-import pytest
-from pathlib import Path
-from src.midsv import io
 from importlib import reload
+from pathlib import Path
+
+import pytest
+
+from src.midsv import io
 
 reload(io)
 
@@ -34,6 +36,7 @@ def test_check_read_sam_TypeError():
 def test_check_read_sam_FileNotFoundError():
     with pytest.raises(FileNotFoundError):
         assert io.read_sam("hoge")
+
 
 ###########################################################
 # Read / Write jsonl

@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import re
-from itertools import groupby
 from copy import deepcopy
+from itertools import groupby
 
 ###########################################################
 # Format headers and alignments
