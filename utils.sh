@@ -11,3 +11,10 @@
     pytest tests/ -vv ||
     exit 1
 )
+
+
+###########################################################
+# TOKEN
+###########################################################
+
+git remote set-url origin https://<PAT>@github.com/akikuno/midsv.git
