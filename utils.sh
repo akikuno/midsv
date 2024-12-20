@@ -4,6 +4,7 @@
 # test
 ###########################################################
 
+(cd midsv && pip install -qe .)
 (
     cd midsv &&
     export PYTHONPATH="$PYTHONPATH:./src" &&

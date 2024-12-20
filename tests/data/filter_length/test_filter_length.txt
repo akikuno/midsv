@@ -1,4 +1,0 @@
-[
-    {"MIDSV": 'N,N,N,N,N,N,N,N,N,N,N,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T'},
-    {"MIDSV": 'A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,A,C,G,T,N,N,N,N,N,N,N,N,N,N,N'}
-]

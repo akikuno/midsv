@@ -1,5 +1,0 @@
-[
-    {'QNAME': 'inversion-5nt', 'FLAG': 2048, 'RNAME': 'random_15bp', 'POS': 1, 'MIDS': 'M,M,M,M,M', 'QSCORE': '0,0,0,0,0'}, 
-    {'QNAME': 'inversion-5nt', 'FLAG': 2064, 'RNAME': 'random_15bp', 'POS': 6, 'MIDS': 'M,M,M,M,M', 'QSCORE': '1,1,1,1,1'}, 
-    {'QNAME': 'inversion-5nt', 'FLAG': 0, 'RNAME': 'random_15bp', 'POS': 11, 'MIDS': 'M,M,M,M,M', 'QSCORE': '0,0,0,0,0'},
-]

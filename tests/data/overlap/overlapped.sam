@@ -1,5 +1,0 @@
-@SQ	SN:random_100bp	LN:100
-overlapped	0	random_100bp	1	60	95M	*	0	0	GCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	NM:i:0	ms:i:190	AS:i:190	nn:i:0	tp:A:P	cm:i:14	s1:i:89	s2:i:0	de:f:0	cs:Z:=GCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATACAAGTC	rl:i:0
-overlapped	0	random_100bp	5	60	95M	*	0	0	ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATAC	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	NM:i:0	ms:i:190	AS:i:190	nn:i:0	tp:A:P	cm:i:14	s1:i:85	s2:i:0	de:f:0	cs:Z:=ACTGTGCGGCATACTTAATTATACATTTGAAACGCGCCCAAGTGACGCTAGGCAAGTCAGAGCAGGTTCCCGTGTTAGCTTAAGGGTAAACATAC	rl:i:0
-non-overlapped	0	random_100bp	1	60	10M	*	0	0	GTGCGGCATA	!!!!!!!!!!	NM:i:0	ms:i:184	AS:i:184	nn:i:0	tp:A:P	cm:i:13	s1:i:79	s2:i:0	de:f:0	cs:Z:=GTGCGGCATA	rl:i:0
-non-overlapped	0	random_100bp	50	60	10M	*	0	0	GTGCGGCATA	!!!!!!!!!!	NM:i:0	ms:i:184	AS:i:184	nn:i:0	tp:A:P	cm:i:13	s1:i:79	s2:i:0	de:f:0	cs:Z:=GTGCGGCATA	rl:i:0
