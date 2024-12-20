@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Generator
+from collections.abc import Iterator
 
 ###########################################################
 # Read sam
 ###########################################################
 
 
-def read_sam(path_of_sam: str | Path) -> Generator[list]:
+def read_sam(path_of_sam: str | Path) -> Iterator[list]:
     sam = Path(path_of_sam).read_text().strip().split("\n")
     return (s.split("\t") for s in sam)
 
@@ -19,7 +19,7 @@ def read_sam(path_of_sam: str | Path) -> Generator[list]:
 ###########################################################
 
 
-def read_jsonl(filepath: str | Path) -> Generator[dict]:
+def read_jsonl(filepath: str | Path) -> Iterator[dict]:
     with open(filepath, "r") as f:
         for line in f:
             yield json.JSONDecoder(strict=False).decode(line)
