@@ -281,14 +281,14 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 </dl></div>
 </dd>
 <dt id="midsv.proofread.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>samdict: list[dict], keep: set[str] = {}) ‑> list[dict]</span>
+<span>def <span class="ident">select</span></span>(<span>samdict: list[dict], keep: set[str] = None) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(samdict: list[dict], keep: set[str] = {}) -&gt; list[dict]:
+<pre><code class="python">def select(samdict: list[dict], keep: set[str] = None) -&gt; list[dict]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
@@ -297,6 +297,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
     Returns:
         list[dict]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     &#34;&#34;&#34;
+    keep = set(keep) if keep else set()
     selected = []
     for m in samdict:
         delkeys = {&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;} - keep

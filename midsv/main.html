@@ -45,7 +45,7 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.main.transform"><code class="name flex">
-<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Generator[list],<br>midsv: bool = True,<br>cssplit: bool = True,<br>qscore: bool = True,<br>keep: set[list[str]] = {}) ‑> list[dict]</span>
+<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Iterator[list],<br>midsv: bool = True,<br>cssplit: bool = True,<br>qscore: bool = True,<br>keep: list[str] = None) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -53,11 +53,11 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transform(
-    sam: list[list] | Generator[list],
+    sam: list[list] | Iterator[list],
     midsv: bool = True,
     cssplit: bool = True,
     qscore: bool = True,
-    keep: set[list[str]] = {},
+    keep: list[str] = None,
 ) -&gt; list[dict]:
     &#34;&#34;&#34;Integrated function to perform MIDSV conversion
 
@@ -76,6 +76,7 @@ el.replaceWith(d);
     else:
         raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
 
+    keep = set(keep) if keep else set()
     if keep != set() and not keep.issubset({&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;}):
         raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
 
