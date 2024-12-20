@@ -1,0 +1,7 @@
+[{'CSSPLIT': '=A,=C,=G,=T,=A,N,N,N,N,N,=C,=G,=T,=A,=T',
+  'FLAG': 2048,
+  'MIDSV': 'M,M,M,M,M,D,D,D,D,D,M,M,M,M,M',
+  'POS': 1,
+  'QNAME': 'deletion-5bp',
+  'QSCORE': '0,0,0,0,0,-1,-1,-1,-1,-1,1,1,1,1,1',
+  'RNAME': 'random_15bp'}]

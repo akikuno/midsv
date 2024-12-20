@@ -1,0 +1,10 @@
+[
+    {'QNAME': 'control', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,=C,=G,=T,=A,=C'}, 
+    {'QNAME': 'deletion', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,-C,-G,-T,=A,=C'}, 
+    {'QNAME': 'insertion', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,+T|+T|+T|=C,=G,=T,=A,=C'}, 
+    {'QNAME': 'inversion', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,=c,=g,=t,=A,=C'}, 
+    {'QNAME': 'inversion-3nt-ins', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,=c,=g,+c|+c|+c|=t,=A,=C'}, 
+    {'QNAME': 'large-deletion', 'RNAME': 'example', 'CSSPLIT': '=A,=C,N,N,N,N,N,N,=A,=C'}, 
+    {'QNAME': 'softclip', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,=A,=C,=G,=T,=A,=C'}, 
+    {'QNAME': 'substitution', 'RNAME': 'example', 'CSSPLIT': '=A,=C,=G,=T,*AG,=C,=G,=T,=A,=C'}
+]
