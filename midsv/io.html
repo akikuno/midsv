@@ -45,14 +45,14 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.io.read_jsonl"><code class="name flex">
-<span>def <span class="ident">read_jsonl</span></span>(<span>filepath: str | Path) ‑> Generator[dict]</span>
+<span>def <span class="ident">read_jsonl</span></span>(<span>filepath: str | Path) ‑> Iterator[dict]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_jsonl(filepath: str | Path) -&gt; Generator[dict]:
+<pre><code class="python">def read_jsonl(filepath: str | Path) -&gt; Iterator[dict]:
     with open(filepath, &#34;r&#34;) as f:
         for line in f:
             yield json.JSONDecoder(strict=False).decode(line)</code></pre>
@@ -60,14 +60,14 @@ el.replaceWith(d);
 <div class="desc"></div>
 </dd>
 <dt id="midsv.io.read_sam"><code class="name flex">
-<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str | Path) ‑> Generator[list]</span>
+<span>def <span class="ident">read_sam</span></span>(<span>path_of_sam: str | Path) ‑> Iterator[list]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_sam(path_of_sam: str | Path) -&gt; Generator[list]:
+<pre><code class="python">def read_sam(path_of_sam: str | Path) -&gt; Iterator[list]:
     sam = Path(path_of_sam).read_text().strip().split(&#34;\n&#34;)
     return (s.split(&#34;\t&#34;) for s in sam)</code></pre>
 </details>
