@@ -8,21 +8,27 @@ from midsv import convert, format, proofread, validate
 def transform(
     sam: list[list[str]] | Iterator[list[str]],
     qscore: bool = True,
-    keep: list[str] = None,
+    keep: str | list[str] = None,
 ) -> list[dict]:
     """Integrated function to perform MIDSV conversion.
 
     Args:
         sam (list[list[str]] | Iterator[list[str]]): List or Iterator of SAM format.
-        qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-        keep (set[str], optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
+        qscore (bool, optional): Output QSCORE. Defaults to True.
+        keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG' to keep. Defaults to None.
 
     Returns:
         list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE.
     """
 
-    keep = set(keep) if keep else set()
-    if keep != set() and not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
+    if keep is None:
+        keep = set()
+    elif isinstance(keep, str):
+        keep = [keep]
+
+    keep = set(keep)
+
+    if not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
         raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
 
     sam = list(sam)
