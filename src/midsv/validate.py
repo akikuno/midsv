@@ -25,13 +25,13 @@ def sam_alignments(sam: list[list]) -> None:
     Args:
         sam (list[list]): a list of lists of SAM format including CS tag
     """
-    is_alignment = False
+    has_alignment = False
     for alignment in sam:
         if alignment[0].startswith("@"):
             continue
-        if alignment[2] == "*":
+        if alignment[2] == "*" or alignment[9] == "*": # No alinment of reads
             continue
-        is_alignment = True
+        has_alignment = True
         if len(alignment) < 10:
             raise ValueError("Alighment may not be SAM format")
         idx_cstag = -1
@@ -43,5 +43,5 @@ def sam_alignments(sam: list[list]) -> None:
             raise ValueError("Input does not have long-formatted cs tag")
         # if "~" in alignment[idx_cstag]:
         #     raise ValueError("long-read spliced alignment are currently not supported")
-    if not is_alignment:
+    if not has_alignment:
         raise ValueError("No alignment information")

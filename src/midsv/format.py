@@ -19,13 +19,13 @@ def extract_sqheaders(sam: list[list]) -> dict[str, int]:
         dict: a dictionary containing (multiple) SN and LN
     """
     sqheaders = [s for s in sam if "@SQ" in s]
-    SNLN = {}
+    header_snln = {}
     for sqheader in sqheaders:
-        sn_ln = [sq for sq in sqheader if re.search(("SN:|LN:"), sq)]
-        sn = sn_ln[0].replace("SN:", "")
-        ln = sn_ln[1].replace("LN:", "")
-        SNLN.update({sn: int(ln)})
-    return SNLN
+        snln = [sq for sq in sqheader if re.search(("SN:|LN:"), sq)]
+        sn = snln[0].replace("SN:", "")
+        ln = snln[1].replace("LN:", "")
+        header_snln.update({sn: int(ln)})
+    return header_snln
 
 
 def dictionarize_sam(sam: list[list[str]]) -> list[dict[str | int]]:
@@ -41,13 +41,13 @@ def dictionarize_sam(sam: list[list[str]]) -> list[dict[str | int]]:
     for alignment in sam:
         if alignment[0].startswith("@"):
             continue
-        if alignment[2] == "*":
+        if alignment[2] == "*" or alignment[9] == "*":
             continue
-        if alignment[9] == "*":
-            continue
+
         for i, a in enumerate(alignment):
             if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
                 idx_cstag = i
+
         alignments = dict(
             QNAME=alignment[0].replace(",", "_"),
             FLAG=int(alignment[1]),
@@ -59,8 +59,8 @@ def dictionarize_sam(sam: list[list[str]]) -> list[dict[str | int]]:
             CSTAG=alignment[idx_cstag],
         )
         aligns.append(alignments)
-    aligns = sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
-    return aligns
+
+    return sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
 
 
 ###########################################################
