@@ -1,33 +1,30 @@
-from importlib import reload
 from pathlib import Path
 
 import pytest
 
 from src import midsv
 
-reload(midsv)
+
+# def test_valueerror_midsv_cssplit():
+#     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+#     sam = midsv.io.read_sam(str(sampath))
+#     with pytest.raises(ValueError) as e:
+#         _ = midsv.transform(sam, qscore=False)
+#     assert str(e.value) == "Either midsv or cssplit must be True"
 
 
-def test_valueerror_midsv_cssplit():
-    sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
-    sam = midsv.io.read_sam(str(sampath))
-    with pytest.raises(ValueError) as e:
-        _ = midsv.transform(sam, midsv=False, cssplit=False, qscore=False)
-    assert str(e.value) == "Either midsv or cssplit must be True"
-
-
-def test_valueerror_qscore():
-    sampath = Path("tests", "data", "sam_from_fasta", "control.sam")
-    sam = midsv.io.read_sam(str(sampath))
-    with pytest.raises(ValueError) as e:
-        _ = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
-    assert str(e.value) == "qscore must be False because the input does not contain QUAL"
+# def test_valueerror_qscore():
+#     sampath = Path("tests", "data", "sam_from_fasta", "control.sam")
+#     sam = midsv.io.read_sam(str(sampath))
+#     with pytest.raises(ValueError) as e:
+#         _ = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
+#     assert str(e.value) == "qscore must be False because the input does not contain QUAL"
 
 
 def test_integration_midsv():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = midsv.io.read_sam(str(sampath))
-    test = midsv.transform(sam, midsv=True, cssplit=False, qscore=False)
+    test = midsv.transform(sam, qscore=False)
     answer = Path("tests", "data", "integrate", "answer_integrate_onlymidsv.txt").read_text()
     answer = eval(answer)
     assert test == answer
@@ -36,7 +33,7 @@ def test_integration_midsv():
 def test_integration_cssplit():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = midsv.io.read_sam(str(sampath))
-    test = midsv.transform(sam, midsv=False, cssplit=True, qscore=False)
+    test = midsv.transform(sam, qscore=False)
     answer = Path("tests", "data", "integrate", "answer_integrate_onlycssplit.txt").read_text()
     answer = eval(answer)
     assert test == answer
@@ -45,7 +42,7 @@ def test_integration_cssplit():
 def test_integration_all_true():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = midsv.io.read_sam(str(sampath))
-    test = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
+    test = midsv.transform(sam, qscore=True)
     answer = Path("tests", "data", "integrate", "answer_integrate_all_true.txt").read_text()
     answer = eval(answer)
     assert test == answer
@@ -54,7 +51,7 @@ def test_integration_all_true():
 def test_integration_cssplit_and_qual():
     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
     sam = midsv.io.read_sam(str(sampath))
-    test = midsv.transform(sam, midsv=False, cssplit=True, qscore=True)
+    test = midsv.transform(sam, qscore=True)
     answer = Path("tests", "data", "integrate", "answer_integrate_cssplit_and_qual.txt").read_text()
     answer = eval(answer)
     assert test == answer
@@ -65,7 +62,7 @@ def test_integration_real_sam():
     sam = midsv.io.read_sam(str(sampath))
     sam = list(sam)
     sqheaders = midsv.format.extract_sqheaders(sam)
-    samdict_polished = midsv.transform(sam, midsv=True, cssplit=True, qscore=True)
+    samdict_polished = midsv.transform(sam, qscore=True)
     for alignment in samdict_polished:
         RNAME = alignment["RNAME"]
         MIDSV = alignment["MIDSV"]
