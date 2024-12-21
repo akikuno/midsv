@@ -6,28 +6,20 @@ from midsv import convert, format, proofread, validate
 
 
 def transform(
-    sam: list[list] | Iterator[list],
-    midsv: bool = True,
-    cssplit: bool = True,
+    sam: list[list[str]] | Iterator[list[str]],
     qscore: bool = True,
     keep: list[str] = None,
 ) -> list[dict]:
-    """Integrated function to perform MIDSV conversion
+    """Integrated function to perform MIDSV conversion.
 
     Args:
-        sam (list[list]): Lists ot SAM format
-        midsv (bool, optional): Output MIDSV. Defaults to True.
-        cssplit (bool, optional): Output CSSPLIT. Defaults to True.
+        sam (list[list[str]] | Iterator[list[str]]): List or Iterator of SAM format.
         qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
-    Returns:
-        list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
-    """
+        keep (set[str], optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
 
-    if midsv or cssplit:
-        pass
-    else:
-        raise ValueError("Either midsv or cssplit must be True")
+    Returns:
+        list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE.
+    """
 
     keep = set(keep) if keep else set()
     if keep != set() and not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
@@ -38,7 +30,7 @@ def transform(
     validate.sam_alignments(sam)
 
     sqheaders = format.extract_sqheaders(sam)
-    samdict = format.dictionarize_sam(sam)
+    samdict: list[dict[str | int]] = format.dictionarize_sam(sam)
 
     if qscore and any(s["QUAL"] == "*" for s in samdict):
         raise ValueError("qscore must be False because the input does not contain QUAL")
@@ -47,17 +39,13 @@ def transform(
     samdict = format.remove_resequence(samdict)
 
     for alignment in samdict:
-        if midsv:
-            alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
-        if cssplit:
-            alignment["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
-        if midsv and qscore:
+        alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
+        if qscore:
             alignment["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
-        elif cssplit and qscore:
-            alignment["QSCORE"] = convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
 
     samdict_polished = proofread.join(samdict)
     samdict_polished = proofread.pad(samdict_polished, sqheaders)
     samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
     samdict_polished = proofread.select(samdict_polished, keep)
+
     return samdict_polished
