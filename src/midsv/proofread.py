@@ -18,14 +18,14 @@ def is_forward_strand(flag: int) -> bool:
     return not (flag & 16)
 
 
-def join(samdict: list[dict]) -> list[dict]:
+def join(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
     """Join splitted reads including large deletion or inversion.
 
     Args:
-        samdict (list[dict]): dictionarized SAM
+        samdict (list[dict[str, int | str]]): dictionarized SAM
 
     Returns:
-        list[dict]: SAM with joined splitted reads to single read
+        list[dict[str, int | str]]: SAM with joined splitted reads to single read
     """
     sam_sorted = sorted(samdict, key=lambda x: [x["QNAME"], x["POS"]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x["QNAME"])
@@ -111,15 +111,15 @@ def join(samdict: list[dict]) -> list[dict]:
     return sam_joined
 
 
-def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
+def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
     """Padding left and right flanks as "=" in MIDSV, "-1" in QUAL
 
     Args:
-        sam (list[dict]): dictionarized SAM
-        sqheaders (dict): dictionary as {SQ:LN}
+        sam (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: dictionarized SAM with padding as "N" in MIDSV and CSSPLIT, and "-1" in QUAL
+        list[dict[str, int | str]]: dictionarized SAM with padding as "N" in MIDSV and CSSPLIT, and "-1" in QUAL
     """
     samdict_padding = []
     for alignment in samdict:
@@ -143,15 +143,15 @@ def pad(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_padding
 
 
-def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
+def remove_different_length(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
     """remove different sequence length of the reference
 
     Args:
-        sam (list[dict]): dictionarized SAM
-        sqheaders (dict): dictionary as {SQ:LN}
+        sam (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
 
     Returns:
-        list[dict]: filtered SAM by different sequence length of the reference
+        list[dict[str, int | str]]: filtered SAM by different sequence length of the reference
     """
     samdict_filtered = []
     for alignment in samdict:
@@ -166,14 +166,14 @@ def remove_different_length(samdict: list[dict], sqheaders: dict) -> list[dict]:
     return samdict_filtered
 
 
-def select(samdict: list[dict], keep: set[str] = None) -> list[dict]:
+def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[dict[str, int | str]]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
-        samdict (list[dict]): dictionarized SAM
+        samdict (list[dict[str, int | str]]): dictionarized SAM
         keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
     Returns:
-        list[dict]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
+        list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     """
     keep = set(keep) if keep else set()
     selected = []

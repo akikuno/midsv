@@ -9,7 +9,7 @@ def transform(
     sam: list[list[str]] | Iterator[list[str]],
     qscore: bool = True,
     keep: str | list[str] = None,
-) -> list[dict]:
+) -> list[dict[str, str | int]]:
     """Integrated function to perform MIDSV conversion.
 
     Args:

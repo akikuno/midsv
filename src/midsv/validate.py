@@ -7,11 +7,11 @@ import re
 ###########################################################
 
 
-def sam_headers(sam: list[list]) -> None:
+def sam_headers(sam: list[list[str]]) -> None:
     """Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
 
     Args:
-        sam (list[list]): a list of lists of SAM format
+        sam (list[list[str]]): a list of lists of SAM format
 
     """
     sqheaders = [s for s in sam if "@SQ" in s]
@@ -19,11 +19,11 @@ def sam_headers(sam: list[list]) -> None:
         raise ValueError("Input does not have @SQ header")
 
 
-def sam_alignments(sam: list[list]) -> None:
+def sam_alignments(sam: list[list[str]]) -> None:
     """Check alignments are mapped and have long-formatted cs tag
 
     Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
+        sam (list[list[str]]): a list of lists of SAM format including CS tag
     """
     has_alignment = False
     for alignment in sam:
