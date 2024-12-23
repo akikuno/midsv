@@ -7,14 +7,14 @@ from midsv import convert, format, io, proofread, validate
 
 def transform(
     path_sam: Path | str,
-    qscore: bool = True,
+    qscore: bool = False,
     keep: str | list[str] = None,
 ) -> list[dict[str, str | int]]:
     """Integrated function to perform MIDSV conversion.
 
     Args:
         path_sam (str | Path): Path of a SAM file.
-        qscore (bool, optional): Output QSCORE. Defaults to True.
+        qscore (bool, optional): Output QSCORE. Defaults to False.
         keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'CIGAR', 'SEQ', 'QUAL', 'CSTAG' to keep. Defaults to None.
 
     Returns:
