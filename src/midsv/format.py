@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from copy import deepcopy
 from itertools import groupby
 
@@ -9,14 +10,14 @@ from itertools import groupby
 ###########################################################
 
 
-def extract_sqheaders(sam: list[list]) -> dict[str, int]:
+def extract_sqheaders(sam: list[list[str]] | Iterator[list[str]]) -> dict[str, int]:
     """Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
 
     Args:
-        sam (list[list]): a list of lists of SAM format
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format
 
     Returns:
-        dict: a dictionary containing (multiple) SN and LN
+        dict[str, int]: a dictionary containing (multiple) SN and LN
     """
     sqheaders = [s for s in sam if "@SQ" in s]
     header_snln = {}
@@ -28,14 +29,14 @@ def extract_sqheaders(sam: list[list]) -> dict[str, int]:
     return header_snln
 
 
-def dictionarize_sam(sam: list[list[str]]) -> list[dict[str | int]]:
+def dictionarize_sam(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
     """Extract mapped alignments from SAM
 
     Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
 
     Returns:
-        dict: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
+        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
     """
     aligns = []
     for alignment in sam:
@@ -74,14 +75,14 @@ def split_cigar(cigar: str) -> list[str]:
     return cigar_splitted
 
 
-def remove_softclips(alignments: list[dict[str | int]]) -> list[dict[str | int]]:
+def remove_softclips(alignments: list[dict[str, str | int]]) -> list[dict[str, str | int]]:
     """Remove softclip information from SEQ and QUAL.
 
     Args:
         alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
-        list[list]: disctionalized SAM with trimmed softclips in QUAL
+        list[dict[str, str | int]]: disctionalized SAM with trimmed softclips in QUAL
     """
     alignments_softclips_removed = []
     for alignment in alignments:
@@ -114,7 +115,7 @@ def return_end_of_current_read(alignment: dict[str, str | int]) -> int:
     return start_of_current_read + alignment_length - 1
 
 
-def realign_sequence(alignment: dict[str, str | int]) -> dict:
+def realign_sequence(alignment: dict[str, str | int]) -> dict[str, str | int]:
     """Discard insertion, and add deletion and spliced nucleotides to unify sequence length"""
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
@@ -135,7 +136,7 @@ def realign_sequence(alignment: dict[str, str | int]) -> dict:
     return realignment
 
 
-def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict]:
+def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, str | int]]:
     """Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The 'realignments' is not sequencing errors, and it preserves the same sequence.
@@ -149,7 +150,7 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict]:
         alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
-        list[list]: disctionalized SAM with removed overlaped reads
+        list[dict[str, str | int]]: disctionalized SAM with removed overlaped reads
     """
     alignments.sort(key=lambda x: x["QNAME"])
     sam_groupby = groupby(alignments, lambda x: x["QNAME"])

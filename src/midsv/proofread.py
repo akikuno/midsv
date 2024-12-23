@@ -143,7 +143,9 @@ def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[
     return samdict_padding
 
 
-def remove_different_length(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
+def remove_different_length(
+    samdict: list[dict[str, int | str]], sqheaders: dict[str, int]
+) -> list[dict[str, int | str]]:
     """remove different sequence length of the reference
 
     Args:

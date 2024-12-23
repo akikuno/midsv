@@ -4,6 +4,36 @@ import pytest
 
 from src.midsv import io, validate
 
+
+@pytest.mark.parametrize(
+    "input_value, expected_output",
+    [
+        (None, set()),
+        ("FLAG", {"FLAG"}),
+        (["FLAG", "POS"], {"FLAG", "POS"}),
+        (["SEQ", "QUAL", "CIGAR"], {"SEQ", "QUAL", "CIGAR"}),
+        ("CSTAG", {"CSTAG"}),
+    ],
+)
+def test_keep_argument_valid(input_value, expected_output):
+    assert validate.keep_argument(input_value) == expected_output
+
+
+@pytest.mark.parametrize(
+    "input_value",
+    [
+        "INVALID",
+        ["FLAG", "INVALID"],
+        ["SEQ", "QUAL", "INVALID"],
+    ],
+)
+def test_keep_argument_invalid(input_value):
+    with pytest.raises(
+        ValueError, match=r"'keep' must be a subset of \{'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'\}"
+    ):
+        validate.keep_argument(input_value)
+
+
 ###########################################################
 # Validate sam format
 ###########################################################

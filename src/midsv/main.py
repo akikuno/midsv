@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from pathlib import Path
 
-from midsv import convert, format, proofread, validate
+from midsv import convert, format, io, proofread, validate
 
 
 def transform(
-    sam: list[list[str]] | Iterator[list[str]],
+    path_sam: Path | str,
     qscore: bool = True,
     keep: str | list[str] = None,
 ) -> list[dict[str, str | int]]:
     """Integrated function to perform MIDSV conversion.
 
     Args:
-        sam (list[list[str]] | Iterator[list[str]]): List or Iterator of SAM format.
+        path_sam (str | Path): Path of a SAM file.
         qscore (bool, optional): Output QSCORE. Defaults to True.
         keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG' to keep. Defaults to None.
 
@@ -21,22 +21,14 @@ def transform(
         list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE.
     """
 
-    if keep is None:
-        keep = set()
-    elif isinstance(keep, str):
-        keep = [keep]
+    keep = validate.keep_argument(keep)
 
-    keep = set(keep)
+    path_sam = Path(path_sam)
+    validate.sam_headers(io.read_sam(path_sam))
+    validate.sam_alignments(io.read_sam(path_sam))
 
-    if not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
-        raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
-
-    sam = list(sam)
-    validate.sam_headers(sam)
-    validate.sam_alignments(sam)
-
-    sqheaders = format.extract_sqheaders(sam)
-    samdict: list[dict[str | int]] = format.dictionarize_sam(sam)
+    sqheaders: dict[str, str | int] = format.extract_sqheaders(io.read_sam(path_sam))
+    samdict: list[dict[str, str | int]] = format.dictionarize_sam(io.read_sam(path_sam))
 
     if qscore and any(s["QUAL"] == "*" for s in samdict):
         raise ValueError("qscore must be False because the input does not contain QUAL")
