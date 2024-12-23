@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterator
-from copy import deepcopy
 from itertools import groupby
 
 ###########################################################
@@ -45,9 +44,12 @@ def dictionarize_sam(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[st
         if alignment[2] == "*" or alignment[9] == "*":
             continue
 
+        idx_cstag = None
         for i, a in enumerate(alignment):
             if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
                 idx_cstag = i
+        if idx_cstag is None:
+            continue
 
         alignments = dict(
             QNAME=alignment[0].replace(",", "_"),
@@ -104,7 +106,7 @@ def remove_softclips(alignments: list[dict[str, str | int]]) -> list[dict[str, s
     return alignments_softclips_removed
 
 
-def return_end_of_current_read(alignment: dict[str, str | int]) -> int:
+def _return_end_of_current_read(alignment: dict[str, str | int]) -> int:
     start_of_current_read = alignment["POS"]
     cigar = alignment["CIGAR"]
     cigar_split = split_cigar(cigar)
@@ -115,25 +117,40 @@ def return_end_of_current_read(alignment: dict[str, str | int]) -> int:
     return start_of_current_read + alignment_length - 1
 
 
-def realign_sequence(alignment: dict[str, str | int]) -> dict[str, str | int]:
+def _padding_n_to_sequence(alignment: dict[str, str | int]) -> dict[str, str | int]:
     """Discard insertion, and add deletion and spliced nucleotides to unify sequence length"""
     cigar = alignment["CIGAR"]
-    cigar_split = split_cigar(cigar)
+    cigar_operations = split_cigar(cigar)
     sequence = alignment["SEQ"]
-    sequence_ignored = ["N"] * alignment["POS"]
-    start = 0
-    for cig in cigar_split:
-        if "M" in cig:
-            end = start + int(cig[:-1])
-            sequence_ignored.append(sequence[start:end])
-            start = end
-        elif "I" in cig:
-            start += int(cig[:-1])
-        elif any(x in cig for x in ["D", "N"]):
-            sequence_ignored.append("N" * int(cig[:-1]))
-    realignment = deepcopy(alignment)
-    realignment["SEQ"] = "".join(sequence_ignored)
-    return realignment
+    unified_sequence = ["N"] * alignment["POS"]
+    start_position = 0
+
+    def process_match(operation: str):
+        nonlocal start_position
+        length = int(operation[:-1])
+        end_position = start_position + length
+        unified_sequence.append(sequence[start_position:end_position])
+        start_position = end_position
+
+    def process_insertion(operation: str):
+        nonlocal start_position
+        length = int(operation[:-1])
+        start_position += length
+
+    def process_deletion_or_splice(operation: str):
+        length = int(operation[:-1])
+        unified_sequence.append("N" * length)
+
+    for operation in cigar_operations:
+        if "M" in operation:
+            process_match(operation)
+        elif "I" in operation:
+            process_insertion(operation)
+        elif "D" in operation or "N" in operation:
+            process_deletion_or_splice(operation)
+
+    alignment["SEQ"] = "".join(unified_sequence)
+    return alignment
 
 
 def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, str | int]]:
@@ -160,7 +177,7 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
         if len(alignments) == 1:
             sam_nonoverlapped += alignments
             continue
-        alignments = [realign_sequence(alignment) for alignment in alignments]
+        alignments = [_padding_n_to_sequence(alignment) for alignment in alignments]
         alignments = sorted(alignments, key=lambda x: [x["POS"]])
         is_overraped = False
         end_of_previous_read = -1
@@ -168,10 +185,10 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
         for i, alignment in enumerate(alignments):
             if i == 0:
                 start_of_previous_read = alignment["POS"] - 1
-                end_of_previous_read = return_end_of_current_read(alignment)
+                end_of_previous_read = _return_end_of_current_read(alignment)
                 continue
             start_of_current_read = alignment["POS"] - 1
-            end_of_current_read = return_end_of_current_read(alignment)
+            end_of_current_read = _return_end_of_current_read(alignment)
             # (1) The shorter reads that are completely included in the longer reads
             if start_of_previous_read <= start_of_current_read and end_of_previous_read >= end_of_current_read:
                 is_overraped = True
@@ -189,7 +206,7 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
                         is_overraped = True
                         break
             start_of_previous_read = start_of_current_read
-            end_of_previous_read = return_end_of_current_read(alignment)
+            end_of_previous_read = _return_end_of_current_read(alignment)
         if is_overraped:
             # The longest alignment will be retain
             alignment = sorted(alignments, key=lambda x: -len(x["SEQ"]))[0]

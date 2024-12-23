@@ -1,9 +1,6 @@
-from importlib import reload
 from pathlib import Path
 
 from src.midsv import format, io
-
-reload(format)
 
 ###########################################################
 # Format headers and alignments
@@ -58,36 +55,36 @@ def test_remove_softclips():
         assert len(t["QUAL"]) == 100
 
 
-def test_realign_sequence():
+def test_padding_n_to_sequence():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M1I1D1M"}
-    test = format.realign_sequence(alignment)
+    test = format._padding_n_to_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
     answer = {"SEQ": "ACNT"}
     assert test == answer
 
 
-def test_realign_sequence_start_5nt():
+def test_padding_n_to_sequence_start_5nt():
     alignment = {"POS": 5, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
-    test = format.realign_sequence(alignment)
+    test = format._padding_n_to_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
     answer = {"SEQ": "NNNNNACNT"}
     assert test == answer
 
 
-def test_realign_sequence_hardclip():
+def test_padding_n_to_sequence_hardclip():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}
-    test = format.realign_sequence(alignment)
+    test = format._padding_n_to_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
     answer = {"SEQ": "ACNT"}
     assert test == answer
 
 
-def test_realign_sequence_splicing():
+def test_padding_n_to_sequence_splicing():
     alignment = {"POS": 0, "SEQ": "ACGT", "CIGAR": "2M5N2M"}
-    test = format.realign_sequence(alignment)
+    test = format._padding_n_to_sequence(alignment)
     del test["POS"]
     del test["CIGAR"]
     answer = {"SEQ": "ACNNNNNGT"}

@@ -15,10 +15,10 @@ def transform(
     Args:
         path_sam (str | Path): Path of a SAM file.
         qscore (bool, optional): Output QSCORE. Defaults to True.
-        keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG' to keep. Defaults to None.
+        keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'CIGAR', 'SEQ', 'QUAL', 'CSTAG' to keep. Defaults to None.
 
     Returns:
-        list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE.
+        list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.
     """
 
     keep = validate.keep_argument(keep)
