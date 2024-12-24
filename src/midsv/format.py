@@ -169,48 +169,47 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
     Returns:
         list[dict[str, str | int]]: disctionalized SAM with removed overlaped reads
     """
+
+    def is_resequence(prev_read: dict[str, str | int], curr_read: dict[str, str | int]) -> bool:
+        """Check if the current read is a resequence of the previous read."""
+        start_overlap = max(prev_read["POS"], curr_read["POS"])
+        end_overlap = min(_return_end_of_current_read(prev_read), _return_end_of_current_read(curr_read))
+
+        if prev_read["POS"] <= curr_read["POS"] and _return_end_of_current_read(
+            prev_read
+        ) >= _return_end_of_current_read(curr_read):
+            return True  # Completely contained
+
+        overlap_prev = prev_read["SEQ"][start_overlap - prev_read["POS"] : end_overlap - prev_read["POS"]]
+        overlap_curr = curr_read["SEQ"][start_overlap - curr_read["POS"] : end_overlap - curr_read["POS"]]
+
+        for prev_base, curr_base in zip(overlap_prev, overlap_curr):
+            if prev_base != "N" and curr_base != "N" and prev_base != curr_base:
+                return True  # Overlapped but different sequences
+
+        return False
+
     alignments.sort(key=lambda x: x["QNAME"])
-    sam_groupby = groupby(alignments, lambda x: x["QNAME"])
-    sam_nonoverlapped = []
-    for _, alignments in sam_groupby:
-        alignments = list(alignments)
-        if len(alignments) == 1:
-            sam_nonoverlapped += alignments
-            continue
-        alignments = [_padding_n_to_sequence(alignment) for alignment in alignments]
-        alignments = sorted(alignments, key=lambda x: [x["POS"]])
-        is_overraped = False
-        end_of_previous_read = -1
-        previous_read = alignments[0]["SEQ"]
-        for i, alignment in enumerate(alignments):
+    grouped_alignments = groupby(alignments, key=lambda x: x["QNAME"])
+    filtered_alignments = []
+
+    for _, group in grouped_alignments:
+        group = sorted((_padding_n_to_sequence(alignment) for alignment in group), key=lambda x: x["POS"])
+
+        retained_alignments = []
+        longest_alignment = max(group, key=lambda x: len(x["SEQ"]))
+
+        for i, alignment in enumerate(group):
             if i == 0:
-                start_of_previous_read = alignment["POS"] - 1
-                end_of_previous_read = _return_end_of_current_read(alignment)
+                retained_alignments.append(alignment)
                 continue
-            start_of_current_read = alignment["POS"] - 1
-            end_of_current_read = _return_end_of_current_read(alignment)
-            # (1) The shorter reads that are completely included in the longer reads
-            if start_of_previous_read <= start_of_current_read and end_of_previous_read >= end_of_current_read:
-                is_overraped = True
+
+            if is_resequence(retained_alignments[-1], alignment):
+                retained_alignments = [longest_alignment]
                 break
-            else:
-                start_overlap = max(start_of_previous_read, start_of_current_read)
-                end_overlap = min(end_of_previous_read, end_of_current_read)
-                for prev, curr in zip(
-                    previous_read[start_overlap:end_overlap], alignment["SEQ"][start_overlap:end_overlap]
-                ):
-                    if prev == "N" or curr == "N":
-                        continue
-                    # (2) Overlapped but not the same DNA sequence
-                    if prev != curr:
-                        is_overraped = True
-                        break
-            start_of_previous_read = start_of_current_read
-            end_of_previous_read = _return_end_of_current_read(alignment)
-        if is_overraped:
-            # The longest alignment will be retain
-            alignment = sorted(alignments, key=lambda x: -len(x["SEQ"]))[0]
-            sam_nonoverlapped.append(alignment)
-        else:
-            sam_nonoverlapped += alignments
-    return sam_nonoverlapped
+
+            retained_alignments.append(alignment)
+
+        filtered_alignments.extend(retained_alignments)
+
+    return filtered_alignments
