@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from midsv import convert, format, io, proofread, validate
+from midsv import convert, format, io, validate
+from midsv.proofread import polish
 
 
 def transform(
@@ -25,13 +26,10 @@ def transform(
 
     path_sam = Path(path_sam)
     validate.sam_headers(io.read_sam(path_sam))
-    validate.sam_alignments(io.read_sam(path_sam))
+    validate.sam_alignments(io.read_sam(path_sam), qscore)
 
     sqheaders: dict[str, str | int] = format.extract_sqheaders(io.read_sam(path_sam))
     samdict: list[dict[str, str | int]] = format.dictionarize_sam(io.read_sam(path_sam))
-
-    if qscore and any(s["QUAL"] == "*" for s in samdict):
-        raise ValueError("qscore must be False because the input does not contain QUAL")
 
     samdict = format.remove_softclips(samdict)
     samdict = format.remove_resequence(samdict)
@@ -39,11 +37,8 @@ def transform(
     for alignment in samdict:
         alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
         if qscore:
-            alignment["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
+            alignment["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
 
-    samdict_polished = proofread.join(samdict)
-    samdict_polished = proofread.pad(samdict_polished, sqheaders)
-    samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished, keep)
+    samdict_polished = polish(samdict, sqheaders, keep)
 
     return samdict_polished

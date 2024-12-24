@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from src.midsv import io, validate
 
 
@@ -37,6 +36,37 @@ def test_keep_argument_invalid(input_value):
 ###########################################################
 # Validate sam format
 ###########################################################
+
+
+@pytest.mark.parametrize(
+    "sam, qscore, expected_exception",
+    [
+        # Case 1: Valid SAM input with cs tag
+        (
+            [["@header"], ["read1", "0", "chr1", "100", "*", "50M", "*", "*", "0", "ACGT", "!!!!", "cs:Z:=ACGT"]],
+            False,
+            None,
+        ),
+        # Case 2: Missing cs tag
+        ([["@header"], ["read1", "0", "chr1", "100", "*", "50M", "*", "*", "0", "ACGT", "!!!!"]], False, ValueError),
+        # Case 3: Missing QUAL information when qscore=True
+        (
+            [["@header"], ["read1", "0", "chr1", "100", "*", "50M", "*", "*", "0", "ACGT", "*", "cs:Z:=ACGT"]],
+            True,
+            ValueError,
+        ),
+        # Case 4: No alignment information
+        ([["@header"], ["read1", "0", "*", "*", "*", "*", "*", "*", "*", "*", "*"]], False, ValueError),
+        # Case 5: Invalid SAM format (less than 10 columns)
+        ([["@header"], ["read1", "0", "chr1", "100"]], False, ValueError),
+    ],
+)
+def test_sam_alignments(sam, qscore, expected_exception):
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            validate.sam_alignments(sam, qscore)
+    else:
+        validate.sam_alignments(sam, qscore)
 
 
 def test_validate_alignments_cs_short():

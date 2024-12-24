@@ -39,7 +39,7 @@ def sam_headers(sam: list[list[str]] | Iterator[list[str]]) -> None:
         raise ValueError("Input does not have @SQ header")
 
 
-def sam_alignments(sam: list[list[str]]) -> None:
+def sam_alignments(sam: list[list[str]], qscore: bool = False) -> None:
     """Check alignments are mapped and have long-formatted cs tag
 
     Args:
@@ -49,11 +49,17 @@ def sam_alignments(sam: list[list[str]]) -> None:
     for alignment in sam:
         if alignment[0].startswith("@"):
             continue
+
+        if len(alignment) < 10:
+            raise ValueError("Alignment may not be SAM format because it has less than 10 columns")
+
         if alignment[2] == "*" or alignment[9] == "*":  # No alignment of reads
             continue
         has_alignment = True
-        if len(alignment) < 10:
-            raise ValueError("Alignment may not be SAM format because it has less than 10 columns")
+
+        if qscore and alignment[10] == "*":
+            raise ValueError("Input does not have QUAL information")
+
         idx_cstag = None
         for i, a in enumerate(alignment):
             if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
@@ -61,7 +67,6 @@ def sam_alignments(sam: list[list[str]]) -> None:
                 break
         if idx_cstag is None:
             raise ValueError("Input does not have long-formatted cs tag")
-        # if "~" in alignment[idx_cstag]:
-        #     raise ValueError("long-read spliced alignment are currently not supported")
+
     if not has_alignment:
         raise ValueError("No alignment information")
