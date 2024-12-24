@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from midsv import converter, format, io, validate
-from midsv.proofread import polish
+from midsv import converter, formatter, io, polisher, validator
 
 
 def transform(
@@ -22,17 +21,17 @@ def transform(
         list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.
     """
 
-    keep = validate.keep_argument(keep)
+    keep = validator.keep_argument(keep)
 
     path_sam = Path(path_sam)
-    validate.sam_headers(io.read_sam(path_sam))
-    validate.sam_alignments(io.read_sam(path_sam), qscore)
+    validator.sam_headers(io.read_sam(path_sam))
+    validator.sam_alignments(io.read_sam(path_sam), qscore)
 
-    sqheaders: dict[str, str | int] = format.extract_sqheaders(io.read_sam(path_sam))
-    samdict: list[dict[str, str | int]] = format.dictionarize_alignments(io.read_sam(path_sam))
+    sqheaders: dict[str, str | int] = formatter.extract_sqheaders(io.read_sam(path_sam))
+    samdict: list[dict[str, str | int]] = formatter.organize_alignments_to_dict(io.read_sam(path_sam))
 
     samdict = converter.convert(samdict, qscore)
 
-    samdict_polished = polish(samdict, sqheaders, keep)
+    samdict_polished = polisher.polish(samdict, sqheaders, keep)
 
     return samdict_polished

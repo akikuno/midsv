@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import pytest
-from src.midsv import io, validate
+
+from src.midsv import io, validator
 
 
 @pytest.mark.parametrize(
@@ -15,7 +16,7 @@ from src.midsv import io, validate
     ],
 )
 def test_keep_argument_valid(input_value, expected_output):
-    assert validate.keep_argument(input_value) == expected_output
+    assert validator.keep_argument(input_value) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -30,7 +31,7 @@ def test_keep_argument_invalid(input_value):
     with pytest.raises(
         ValueError, match=r"'keep' must be a subset of \{'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'\}"
     ):
-        validate.keep_argument(input_value)
+        validator.keep_argument(input_value)
 
 
 ###########################################################
@@ -64,33 +65,33 @@ def test_keep_argument_invalid(input_value):
 def test_sam_alignments(sam, qscore, expected_exception):
     if expected_exception:
         with pytest.raises(expected_exception):
-            validate.sam_alignments(sam, qscore)
+            validator.sam_alignments(sam, qscore)
     else:
-        validate.sam_alignments(sam, qscore)
+        validator.sam_alignments(sam, qscore)
 
 
 def test_validate_alignments_cs_short():
     with pytest.raises(ValueError) as excinfo:
-        validate.sam_alignments([["id", "0", "test", "0", "0", "4M", "*", "0", "0", "ACGT", "0000", "cs:Z:*ga:3"]])
+        validator.sam_alignments([["id", "0", "test", "0", "0", "4M", "*", "0", "0", "ACGT", "0000", "cs:Z:*ga:3"]])
     assert str(excinfo.value) == "Input does not have long-formatted cs tag"
 
 
 def test_validate_alignments_start_substitution():
     with pytest.raises(AssertionError):
-        assert validate.sam_alignments(
+        assert validator.sam_alignments(
             [["id", "0", "test", "0", "0", "4M", "*", "0", "0", "ACGT", "0000", "cs:Z:*ga=CGT"]]
         )
 
 
 def test_validate_headers_no_header():
     with pytest.raises(ValueError) as excinfo:
-        validate.sam_headers([["no sq header"]])
+        validator.sam_headers([["no sq header"]])
         assert str(excinfo.value) == "Input does not have @SQ header"
 
 
 def test_validate_alignments_no_alignment():
     with pytest.raises(ValueError) as excinfo:
-        validate.sam_alignments([["@SQ", "SN:random_100bp", "LN:100"]])
+        validator.sam_alignments([["@SQ", "SN:random_100bp", "LN:100"]])
     assert str(excinfo.value) == "No alignment information"
 
 
@@ -98,5 +99,5 @@ def test_validate_alignments_no_cslong():
     path = Path("tests", "data", "splicing", "splicing_cs.sam")
     sam = io.read_sam(path)
     with pytest.raises(ValueError) as excinfo:
-        validate.sam_alignments(sam)
+        validator.sam_alignments(sam)
     assert str(excinfo.value) == "Input does not have long-formatted cs tag"

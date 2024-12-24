@@ -1,5 +1,5 @@
 import pytest
-from midsv.src.midsv import converter
+from src.midsv import converter
 
 ###########################################################
 # MIDSV conversion

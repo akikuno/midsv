@@ -178,11 +178,11 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
 
 
 ###########################################################
-# dictionarize_alignments
+# alignments_to_dict
 ###########################################################
 
 
-def dictionarize_alignments(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
+def alignments_to_dict(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
     """Extract mapped alignments from SAM
 
     Args:
@@ -216,7 +216,19 @@ def dictionarize_alignments(sam: list[list[str]] | Iterator[list[str]]) -> list[
             CSTAG=alignment[idx_cstag],
         )
         aligns.append(alignments)
+    return aligns
 
+
+def organize_alignments_to_dict(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
+    """Extract mapped alignments from SAM
+
+    Args:
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
+
+    Returns:
+        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
+    """
+    aligns = alignments_to_dict(sam)
     aligns = remove_softclips(aligns)
     aligns = remove_resequence(aligns)
 

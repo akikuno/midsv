@@ -1,6 +1,6 @@
 import pytest
 
-from midsv import proofread
+from src.midsv import polisher
 
 
 @pytest.mark.parametrize(
@@ -13,7 +13,7 @@ from midsv import proofread
     ],
 )
 def test_process_inversion(current_alignment, first_read_is_forward, expected_mid_sv):
-    proofread.process_inversion(current_alignment, first_read_is_forward)
+    polisher.process_inversion(current_alignment, first_read_is_forward)
     assert current_alignment["MIDSV"] == expected_mid_sv
 
 
@@ -73,13 +73,13 @@ def test_process_inversion(current_alignment, first_read_is_forward, expected_mi
     ],
 )
 def test_calculate_microhomology(previous_alignment, current_alignment, expected):
-    assert proofread.calculate_microhomology(previous_alignment, current_alignment) == expected
+    assert polisher.calculate_microhomology(previous_alignment, current_alignment) == expected
 
 
 # def test_join_control():
 #     sam = Path("tests", "data", "join", "test_control.txt").read_text()
 #     sam = eval(sam)
-#     test = proofread.merge(sam)
+#     test = polisher.merge(sam)
 #     answer = Path("tests", "data", "join", "answer_control.txt").read_text()
 #     answer = eval(answer)
 #     assert test == answer
@@ -88,7 +88,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 # def test_join_inversion():
 #     sam = Path("tests", "data", "join", "test_inv.txt").read_text()
 #     sam = eval(sam)
-#     test = proofread.merge(sam)
+#     test = polisher.merge(sam)
 #     answer = Path("tests", "data", "join", "answer_inv.txt").read_text()
 #     answer = eval(answer)
 #     assert test == answer
@@ -97,7 +97,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 # def test_join_deletion():
 #     sam = Path("tests", "data", "join", "test_del.txt").read_text()
 #     sam = eval(sam)
-#     test = proofread.merge(sam)
+#     test = polisher.merge(sam)
 #     answer = Path("tests", "data", "join", "answer_del.txt").read_text()
 #     answer = eval(answer)
 #     assert test == answer
@@ -106,7 +106,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 # def test_join_deletion_microhomology():
 #     samdict = Path("tests", "data", "join", "test_del_microhomology.txt").read_text()
 #     samdict = eval(samdict)
-#     test = proofread.merge(samdict)
+#     test = polisher.merge(samdict)
 #     answer = Path("tests", "data", "join", "answer_del_microhomology.txt").read_text()
 #     answer = eval(answer)
 #     assert test == answer
@@ -115,7 +115,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 # def test_join_real_microhomology():
 #     samdict = Path("tests", "data", "join", "test_real_microhomology.txt").read_text()
 #     samdict = eval(samdict)
-#     test = proofread.merge(samdict)
+#     test = polisher.merge(samdict)
 #     test = test[0]["CSSPLIT"]
 #     answer = Path("tests", "data", "join", "answer_real_microhomology.txt").read_text()
 #     answer = eval(answer)
@@ -125,7 +125,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 # def test_select_keep_FLAG():
 #     samdict = Path("tests", "data", "join", "test_real_microhomology.txt").read_text()
 #     samdict = eval(samdict)
-#     test = proofread.select(samdict, keep={"FLAG", "SEQ"})
+#     test = polisher.select(samdict, keep={"FLAG", "SEQ"})
 #     test = set(list(test[0].keys()))
 #     answer = {"QNAME", "RNAME", "FLAG", "CSSPLIT", "QSCORE"}
 #     assert test == answer
@@ -141,7 +141,7 @@ def test_calculate_microhomology(previous_alignment, current_alignment, expected
 #         samdict[i]["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
 #         samdict[i]["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
 #         samdict[i]["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
-#     test = proofread.pad(samdict, sqheaders)
+#     test = polisher.pad(samdict, sqheaders)
 #     for t in test:
 #         mlen = len(t["MIDSV"].split(","))
 #         clen = len(t["CSSPLIT"].split(","))
