@@ -28,44 +28,6 @@ def extract_sqheaders(sam: list[list[str]] | Iterator[list[str]]) -> dict[str, i
     return header_snln
 
 
-def dictionarize_sam(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
-    """Extract mapped alignments from SAM
-
-    Args:
-        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
-
-    Returns:
-        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
-    """
-    aligns = []
-    for alignment in sam:
-        if alignment[0].startswith("@"):
-            continue
-        if alignment[2] == "*" or alignment[9] == "*":
-            continue
-
-        idx_cstag = None
-        for i, a in enumerate(alignment):
-            if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
-                idx_cstag = i
-        if idx_cstag is None:
-            continue
-
-        alignments = dict(
-            QNAME=alignment[0].replace(",", "_"),
-            FLAG=int(alignment[1]),
-            RNAME=alignment[2],
-            POS=int(alignment[3]),
-            CIGAR=alignment[5],
-            SEQ=alignment[9],
-            QUAL=alignment[10],
-            CSTAG=alignment[idx_cstag],
-        )
-        aligns.append(alignments)
-
-    return sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
-
-
 ###########################################################
 # Remove undesired reads
 ###########################################################
@@ -213,3 +175,49 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
         filtered_alignments.extend(retained_alignments)
 
     return filtered_alignments
+
+
+###########################################################
+# dictionarize_alignments
+###########################################################
+
+
+def dictionarize_alignments(sam: list[list[str]] | Iterator[list[str]]) -> list[dict[str, str | int]]:
+    """Extract mapped alignments from SAM
+
+    Args:
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
+
+    Returns:
+        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
+    """
+    aligns = []
+    for alignment in sam:
+        if alignment[0].startswith("@"):
+            continue
+        if alignment[2] == "*" or alignment[9] == "*":
+            continue
+
+        idx_cstag = None
+        for i, a in enumerate(alignment):
+            if a.startswith("cs:Z:") and not re.search(r":[0-9]+", alignment[i]):
+                idx_cstag = i
+        if idx_cstag is None:
+            continue
+
+        alignments = dict(
+            QNAME=alignment[0].replace(",", "_"),
+            FLAG=int(alignment[1]),
+            RNAME=alignment[2],
+            POS=int(alignment[3]),
+            CIGAR=alignment[5],
+            SEQ=alignment[9],
+            QUAL=alignment[10],
+            CSTAG=alignment[idx_cstag],
+        )
+        aligns.append(alignments)
+
+    aligns = remove_softclips(aligns)
+    aligns = remove_resequence(aligns)
+
+    return sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])

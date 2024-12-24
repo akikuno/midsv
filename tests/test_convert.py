@@ -1,5 +1,5 @@
 import pytest
-from src.midsv import convert
+from midsv.src.midsv import converter
 
 ###########################################################
 # MIDSV conversion
@@ -8,7 +8,7 @@ from src.midsv import convert
 
 def test_split():
     cstag = "cs:Z:=ACGT*ag=C-g=T+t=ACGT"
-    test = convert.split_cstag(cstag)
+    test = converter.split_cstag(cstag)
     answer = ["=ACGT", "*ag", "=C", "-g", "=T", "+t", "=ACGT"]
     assert test == answer
 
@@ -23,7 +23,7 @@ def test_split():
 )
 def test_process_insertion(cstag_splitted, i, expected):
     cssplits = []
-    convert._process_insertion(cstag_splitted, i, cssplits)
+    converter._process_insertion(cstag_splitted, i, cssplits)
     assert cssplits == expected
 
 
@@ -36,7 +36,7 @@ def test_process_insertion(cstag_splitted, i, expected):
 )
 def test_process_splice(cs, expected):
     cssplits = []
-    convert._process_splice(cs, cssplits)
+    converter._process_splice(cs, cssplits)
     assert cssplits == expected
 
 
@@ -49,7 +49,7 @@ def test_process_splice(cs, expected):
 )
 def test_process_match(cs, expected):
     cssplits = []
-    convert._process_match(cs, cssplits)
+    converter._process_match(cs, cssplits)
     assert cssplits == expected
 
 
@@ -64,7 +64,7 @@ def test_process_match(cs, expected):
     ],
 )
 def test_cstag_to_midsv(cstag, expected):
-    assert convert.cstag_to_midsv(cstag) == expected
+    assert converter.cstag_to_midsv(cstag) == expected
 
 
 ###########################################################
@@ -75,7 +75,7 @@ def test_cstag_to_midsv(cstag, expected):
 def test_qual_to_qscore_insertion():
     qual = "@!!!@@"
     cssplit = "=A,+T|+T|+T|=A,-A,=A"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "31,0|0|0|31,-1,31"
     assert test == answer
 
@@ -83,7 +83,7 @@ def test_qual_to_qscore_insertion():
 def test_qual_to_qscore_deletion():
     qual = "@0"
     cssplit = "=A,-A,-A,-A,-A,-A,=A"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "31,-1,-1,-1,-1,-1,15"
     assert test == answer
 
@@ -91,7 +91,7 @@ def test_qual_to_qscore_deletion():
 def test_qual_to_qscore_substitution():
     qual = "@012@"
     cssplit = "=A,*AG,*AG,*AG,=A"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "31,15,16,17,31"
     assert test == answer
 
@@ -99,7 +99,7 @@ def test_qual_to_qscore_substitution():
 def test_qual_to_qscore_indel():
     qual = "@0@"
     cssplit = "=A,+T|-A,-A,=A"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "31,15|-1,-1,31"
     assert test == answer
 
@@ -107,7 +107,7 @@ def test_qual_to_qscore_indel():
 def test_qual_to_qscore_ins_sub():
     qual = "@012!"
     cssplit = "=A,+T|+T|+T|*AG"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "31,15|16|17|0"
     assert test == answer
 
@@ -115,7 +115,7 @@ def test_qual_to_qscore_ins_sub():
 def test_qual_to_qscore_splicing():
     qual = "!@"
     cssplit = "=A,=N,=N,=N,=N,=N,=N,=N,=N,=N,=N,=T"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31"
     assert test == answer
 
@@ -123,6 +123,6 @@ def test_qual_to_qscore_splicing():
 def test_qual_to_qscore_splicing_inversion():
     qual = "!!!@@"
     cssplit = "+C|+A|+G|=N,=N,=N,=N,=N,=N,=N,=N,=N,=N,=C,=C"
-    test = convert.qual_to_qscore(qual, cssplit)
+    test = converter.qual_to_qscore(qual, cssplit)
     answer = "0|0|0|-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31"
     assert test == answer

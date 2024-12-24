@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from midsv import convert, format, io, validate
+from midsv import converter, format, io, validate
 from midsv.proofread import polish
 
 
@@ -29,15 +29,9 @@ def transform(
     validate.sam_alignments(io.read_sam(path_sam), qscore)
 
     sqheaders: dict[str, str | int] = format.extract_sqheaders(io.read_sam(path_sam))
-    samdict: list[dict[str, str | int]] = format.dictionarize_sam(io.read_sam(path_sam))
+    samdict: list[dict[str, str | int]] = format.dictionarize_alignments(io.read_sam(path_sam))
 
-    samdict = format.remove_softclips(samdict)
-    samdict = format.remove_resequence(samdict)
-
-    for alignment in samdict:
-        alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
-        if qscore:
-            alignment["QSCORE"] = convert.qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+    samdict = converter.convert(samdict, qscore)
 
     samdict_polished = polish(samdict, sqheaders, keep)
 

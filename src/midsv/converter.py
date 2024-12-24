@@ -173,3 +173,16 @@ def qual_to_qscore(qual: str, midsv_tag: str) -> str:
             qscore.append(ascii_to_phred(qual[idx]))
         idx += 1
     return ",".join(qscore)
+
+
+###########################################################
+# main
+###########################################################
+
+
+def convert(samdict: list[dict[str, str | int]], qscore: bool = False) -> None:
+    for alignment in samdict:
+        alignment["MIDSV"] = cstag_to_midsv(alignment["CSTAG"])
+        if qscore:
+            alignment["QSCORE"] = qual_to_qscore(alignment["QUAL"], alignment["MIDSV"])
+    return samdict
