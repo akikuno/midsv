@@ -18,8 +18,56 @@ def is_forward_strand(flag: int) -> bool:
     return not (flag & 16)
 
 
-def join(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
-    """Join splitted reads including large deletion or inversion.
+def process_inversion(current_alignment: dict[str, int | str], first_strand: bool) -> None:
+    """Detect and mark inversion in the current alignment."""
+    current_read_is_forward = is_forward_strand(current_alignment["FLAG"])
+    if first_strand is not current_read_is_forward:
+        current_alignment["MIDSV"] = current_alignment["MIDSV"].lower()
+
+
+def calculate_microhomology(previous_alignment: dict[str, int | str], current_alignment: dict[str, int | str]) -> int:
+    """Calculate the length of microhomology between two alignments."""
+    previous_midsv = previous_alignment["MIDSV"].split(",")
+    current_midsv = current_alignment["MIDSV"].split(",")
+    if "QSCORE" in current_alignment:
+        previous_qscore = previous_alignment["QSCORE"].split(",")
+        current_qscore = current_alignment["QSCORE"].split(",")
+
+    num_microhomology = 0
+    min_length = min(len(previous_midsv), len(current_midsv))
+    for i in range(1, len(current_midsv) + 1):
+        if i == min_length + 1:
+            break
+        prev_index = len(previous_midsv) - i
+        if previous_midsv[prev_index:] == current_midsv[:i]:
+            if "QSCORE" in current_alignment and previous_qscore[prev_index:] != current_qscore[:i]:
+                break
+            num_microhomology = i
+    return num_microhomology
+
+
+def remove_microhomology(current_alignment: dict[str, int | str], num_microhomology: int) -> None:
+    """Remove microhomology and update the current alignment."""
+    current_midsv = current_alignment["MIDSV"].split(",")
+    current_alignment["MIDSV"] = ",".join(current_midsv[num_microhomology:])
+
+    if "QSCORE" in current_alignment:
+        current_qscore = current_alignment["QSCORE"].split(",")
+        current_alignment["QSCORE"] = ",".join(current_qscore[num_microhomology:])
+
+    current_alignment["POS"] += num_microhomology
+
+
+def fill_gap(sam_template: dict[str, int | str], gap: int) -> None:
+    """Fill the gap between alignments with unknown nucleotides."""
+    if "MIDSV" in sam_template:
+        sam_template["CSSPLIT"] += ",=N" * gap
+    if "QSCORE" in sam_template:
+        sam_template["QSCORE"] += ",-1" * gap
+
+
+def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
+    """Merge splitted reads including large deletion or inversion.
 
     Args:
         samdict (list[dict[str, int | str]]): dictionarized SAM
@@ -29,86 +77,36 @@ def join(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
     """
     sam_sorted = sorted(samdict, key=lambda x: [x["QNAME"], x["POS"]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x["QNAME"])
-    sam_joined = []
+    sam_merged = []
+
     for *_, alignments in sam_groupby:
         alignments = list(alignments)
         if len(alignments) == 1:
-            sam_joined.append(alignments[0])
+            sam_merged.append(alignments[0])
             continue
-        for i, alignment in enumerate(alignments):
-            #########################################
-            # Inversion detection
-            #########################################
-            # Determine the strand (strand_first) of the first read
-            if i == 0:
-                sam_template = deepcopy(alignment)
-                if is_forward_strand(alignment["FLAG"]):
-                    first_read_is_forward = True
-                else:
-                    first_read_is_forward = False
-                continue
-            # If the strand of the next read is different from strand_first, lowercase it as an Inversion.
-            if is_forward_strand(alignment["FLAG"]):
-                current_read_is_forward = True
-            else:
-                current_read_is_forward = False
-            if first_read_is_forward is not current_read_is_forward:
-                if "MIDSV" in alignment:
-                    alignment["MIDSV"] = alignment["MIDSV"].lower()
-                if "CSSPLIT" in alignment:
-                    alignment["CSSPLIT"] = alignment["CSSPLIT"].lower()
-            #########################################
-            # Remove microhomology
-            #########################################
-            previous_alignment = alignments[i - 1]
-            previous_end = previous_alignment["POS"] - 1
-            if "MIDSV" in alignment:
-                previous_end += len(previous_alignment["MIDSV"].split(","))
-            else:
-                previous_end += len(previous_alignment["CSSPLIT"].split(","))
-            current_start = alignment["POS"] - 1
-            if "CSSPLIT" in alignment:
-                previous_cssplit = previous_alignment["CSSPLIT"].split(",")
-                current_cssplit = alignment["CSSPLIT"].split(",")
-                if "QSCORE" in alignment:
-                    previous_qscore = previous_alignment["QSCORE"].split(",")
-                    current_qscore = alignment["QSCORE"].split(",")
-                num_microhomology = 0
-                for i in range(min(len(previous_cssplit), len(current_cssplit))):
-                    if previous_cssplit[-i:] == current_cssplit[:i]:
-                        if "QSCORE" in alignment:
-                            if previous_qscore[-i:] == current_qscore[:i]:
-                                num_microhomology = i
-                        else:
-                            num_microhomology = i
-                #########################################
-                # Update CSSPLIT
-                #########################################
-                alignment["CSSPLIT"] = ",".join(current_cssplit[num_microhomology:])
-                if "QSCORE" in alignment:
-                    alignment["QSCORE"] = ",".join(current_qscore[num_microhomology:])
-                if "MIDSV" in alignment:
-                    current_midsv = alignment["MIDSV"].split(",")
-                    alignment["MIDSV"] = ",".join(current_midsv[num_microhomology:])
-                current_start += num_microhomology
-                alignment["POS"] = current_start + 1
-            # Fill in the gap between the first read and the next read with a D (deletion)
-            gap = current_start - previous_end
+
+        sam_template = deepcopy(alignments[0])  # TODO Deepcopyをcopyに変えられるかテストする
+        first_strand = is_forward_strand(sam_template["FLAG"])
+
+        for i, current_alignment in enumerate(alignments[1:], start=1):
+            process_inversion(current_alignment, first_strand)
+
+            num_microhomology = calculate_microhomology(alignments[i - 1], current_alignment)
+            remove_microhomology(current_alignment, num_microhomology)
+
+            previous_end = alignments[i - 1]["POS"] - 1
+            current_start = current_alignment["POS"] - 1
+
+            fill_gap(sam_template, current_start - previous_end)
+
             if "MIDSV" in sam_template:
-                sam_template["MIDSV"] += ",D" * gap
-            if "CSSPLIT" in sam_template:
-                sam_template["CSSPLIT"] += ",N" * gap
+                sam_template["MIDSV"] += "," + current_alignment["MIDSV"]
             if "QSCORE" in sam_template:
-                sam_template["QSCORE"] += ",-1" * gap
-            # Update sam_template
-            if "MIDSV" in sam_template:
-                sam_template["MIDSV"] += "," + alignment["MIDSV"]
-            if "CSSPLIT" in sam_template:
-                sam_template["CSSPLIT"] += "," + alignment["CSSPLIT"]
-            if "QSCORE" in sam_template:
-                sam_template["QSCORE"] += "," + alignment["QSCORE"]
-        sam_joined.append(sam_template)
-    return sam_joined
+                sam_template["QSCORE"] += "," + current_alignment["QSCORE"]
+
+        sam_merged.append(sam_template)
+
+    return sam_merged
 
 
 def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
@@ -123,23 +121,18 @@ def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[
     """
     samdict_padding = []
     for alignment in samdict:
-        reflength = sqheaders[alignment["RNAME"]]
-        leftpad = max(0, alignment["POS"] - 1)
-        if "MIDSV" in alignment:
-            rightpad = reflength - (len(alignment["MIDSV"].split(",")) + leftpad)
-        else:
-            rightpad = reflength - (len(alignment["CSSPLIT"].split(",")) + leftpad)
-        rightpad = max(0, rightpad)
-        leftpad_midsv, rightpad_midsv = "N," * leftpad, ",N" * rightpad
-        leftpad_cssplit, rightpad_cssplit = "N," * leftpad, ",N" * rightpad
-        leftpad_qscore, rightpad_qscore = "-1," * leftpad, ",-1" * rightpad
-        if "MIDSV" in alignment:
-            alignment["MIDSV"] = leftpad_midsv + alignment["MIDSV"] + rightpad_midsv
-        if "CSSPLIT" in alignment:
-            alignment["CSSPLIT"] = leftpad_cssplit + alignment["CSSPLIT"] + rightpad_cssplit
+        ref_length = sqheaders[alignment["RNAME"]]
+        left_pad = max(0, alignment["POS"] - 1)
+        right_pad = max(0, ref_length - (len(alignment["MIDSV"].split(",")) + left_pad))
+        left_pad_midsv, right_pad_midsv = "=N," * left_pad, ",=N" * right_pad
+        left_pad_qscore, right_pad_qscore = "-1," * left_pad, ",-1" * right_pad
+
+        alignment["MIDSV"] = left_pad_midsv + alignment["MIDSV"] + right_pad_midsv
         if "QSCORE" in alignment:
-            alignment["QSCORE"] = leftpad_qscore + alignment["QSCORE"] + rightpad_qscore
+            alignment["QSCORE"] = left_pad_qscore + alignment["QSCORE"] + right_pad_qscore
+
         samdict_padding.append(alignment)
+
     return samdict_padding
 
 
@@ -157,13 +150,9 @@ def remove_different_length(
     """
     samdict_filtered = []
     for alignment in samdict:
-        reflength = sqheaders[alignment["RNAME"]]
-        if "MIDSV" in alignment:
-            if len(alignment["MIDSV"].split(",")) != reflength:
-                continue
-        if "CSSPLIT" in alignment:
-            if len(alignment["CSSPLIT"].split(",")) != reflength:
-                continue
+        ref_length = sqheaders[alignment["RNAME"]]
+        if len(alignment["MIDSV"].split(",")) != ref_length:
+            continue
         samdict_filtered.append(alignment)
     return samdict_filtered
 
@@ -185,3 +174,26 @@ def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[d
             m.pop(key)
         selected.append(m)
     return selected
+
+
+###############################################################################
+# main
+###############################################################################
+
+
+def polish(
+    samdict: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
+) -> list[dict[str, int | str]]:
+    """Polish SAM by merging splitted reads, padding, removing different length, and selecting fields
+    Args:
+        samdict (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
+        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
+
+    Returns:
+        list[dict[str, int | str]]: polished SAM
+    """
+    samdict_polished = merge(samdict)
+    samdict_polished = pad(samdict_polished, sqheaders)
+    samdict_polished = remove_different_length(samdict_polished, sqheaders)
+    return select(samdict_polished, keep)
