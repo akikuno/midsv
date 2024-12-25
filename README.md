@@ -20,7 +20,7 @@ MIDSV can provides `MIDSV` and `QSCORE`.
 - `QSCORE` provides Phred quality score on each nucleotide
 
 
-# Installation
+# 🛠️Installation
 
 From [Bioconda](https://anaconda.org/bioconda/midsv) (recommended):
 
@@ -34,7 +34,7 @@ From [PyPI](https://pypi.org/project/midsv/):
 pip install midsv
 ```
 
-# Usage
+# 📘Usage
 
 ```python
 midsv.transform(
@@ -50,7 +50,7 @@ midsv.transform(
 - `midsv.transform()` returns a list of dictionaries incuding `QNAME`, `RNAME`, `MIDSV`, and `QSCORE`.
 - `MIDSV` and `QSCORE` are comma-separated strings and have the same reference sequence length.
 
-# Specification
+# 📜Specification
 
 ## MIDSV
 
@@ -79,6 +79,34 @@ Therefore, `+A|+C|+G|+T|=A` can be easily splited to `[+A, +C, +G, +T, =A]` by `
 
 As with `MIDSV`, `QSCORE` uses `|` to separate quality scores in insertion sites.
 
+
+# 🧩Helper functions
+
+## Read SAM file
+
+```python
+midsv.read_sam(path_sam: str | Path) -> Iterator[list[str]]
+```
+
+`midsv.read_sam` read SAM file into a iterator of lists.
+
+
+## Read/Write JSON Line (JSONL)
+
+```python
+midsv.write_jsonl(dicts: list[dict[str, str]], path_jsonl: str | Path)
+```
+
+Since `midsv.transform` returns a list of dictionaries, `midsv.write_jsonl` outputs it to a file in JSONL format.
+
+```python
+midsv.read_jsonl(path_jsonl: str | Path) -> Iterator[dict[str, str]]
+```
+
+Conversely, `midsv.read_jsonl` reads JSONL as a list of dictionaries.
+
+
+# 🖍️Examples
 
 ```python
 import midsv
@@ -147,29 +175,4 @@ midsv.transform(sam)
 # ]
 
 ```
-
-# Helper functions
-
-## Read SAM file
-
-```python
-midsv.read_sam(path_of_sam: str | Path) -> list[list]
-```
-
-`midsv.read_sam` read SAM file into a list of lists.
-
-
-## Read/Write JSON Line (JSONL)
-
-```python
-midsv.write_jsonl(dict: list[dict], path_of_jsonl: str | Path)
-```
-
-```python
-midsv.read_jsonl(path_of_jsonl: str | Path) -> list[dict]
-```
-
-Since `midsv` returns a list of dictionaries, `midsv.write_jsonl` outputs it to a file in JSONL format.
-
-Conversely, `midsv.read_jsonl` reads JSONL as a list of dictionaries.
 
