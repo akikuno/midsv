@@ -153,7 +153,7 @@ midsv.transform(sam)
 # [
 #   {'QNAME': 'large-deletion',
 #   'RNAME': 'example',
-#   'MIDSV': '=A,=C,N,N,N,N,N,N,=A,=C',
+#   'MIDSV': '=A,=C,=N,=N,=N,=N,=N,=N,=A,=C',
 #   'QSCORE': '15,16,-1,-1,-1,-1,-1,-1,23,24'}
 # ]
 
