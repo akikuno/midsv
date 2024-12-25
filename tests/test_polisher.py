@@ -2,6 +2,10 @@ import pytest
 
 from src.midsv import polisher
 
+###########################################################
+# merge
+###########################################################
+
 
 @pytest.mark.parametrize(
     "current_alignment, first_read_is_forward, expected_mid_sv",
@@ -74,6 +78,48 @@ def test_process_inversion(current_alignment, first_read_is_forward, expected_mi
 )
 def test_calculate_microhomology(previous_alignment, current_alignment, expected):
     assert polisher.calculate_microhomology(previous_alignment, current_alignment) == expected
+
+
+@pytest.mark.parametrize(
+    "current_alignment, num_microhomology, expected_alignment",
+    [
+        ({"MIDSV": "A,B,C,D", "POS": 1}, 2, {"MIDSV": "C,D", "POS": 3}),
+        (
+            {"MIDSV": "A,B,C,D", "QSCORE": "10,20,30,40", "POS": 1},
+            1,
+            {"MIDSV": "B,C,D", "QSCORE": "20,30,40", "POS": 2},
+        ),
+        ({"MIDSV": "A,B,C,D", "QSCORE": "10,20,30,40", "POS": 1}, 3, {"MIDSV": "D", "QSCORE": "40", "POS": 4}),
+        ({"MIDSV": "A,B,C,D", "POS": 1}, 0, {"MIDSV": "A,B,C,D", "POS": 1}),
+    ],
+)
+def test_remove_microhomology(
+    current_alignment: dict[str, str], num_microhomology: int, expected_alignment: dict[str, str]
+) -> None:
+    polisher.remove_microhomology(current_alignment, num_microhomology)
+    assert current_alignment == expected_alignment
+
+
+@pytest.mark.parametrize(
+    "sam_template, gap, expected_template",
+    [
+        ({"MIDSV": "A,B,C", "POS": 1}, 2, {"MIDSV": "A,B,C,=N,=N", "POS": 1}),
+        (
+            {"MIDSV": "A,B,C", "QSCORE": "10,20,30", "POS": 1},
+            1,
+            {"MIDSV": "A,B,C,=N", "QSCORE": "10,20,30,-1", "POS": 1},
+        ),
+        (
+            {"MIDSV": "A,B,C", "QSCORE": "10,20,30", "POS": 1},
+            3,
+            {"MIDSV": "A,B,C,=N,=N,=N", "QSCORE": "10,20,30,-1,-1,-1", "POS": 1},
+        ),
+        ({"MIDSV": "A,B,C", "POS": 1}, 0, {"MIDSV": "A,B,C", "POS": 1}),
+    ],
+)
+def test_fill_gap(sam_template: dict[str, int | str], gap: int, expected_template: dict[str, int | str]) -> None:
+    polisher.fill_gap(sam_template, gap)
+    assert sam_template == expected_template
 
 
 # def test_join_control():

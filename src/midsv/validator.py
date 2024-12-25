@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterator
+from pathlib import Path
+
+from midsv import io
 
 ###########################################################
 # Validate keep argument
@@ -70,3 +73,22 @@ def sam_alignments(sam: list[list[str]], qscore: bool = False) -> None:
 
     if not has_alignment:
         raise ValueError("No alignment information")
+
+
+###########################################################
+# Validate sam format
+###########################################################
+
+
+def validate_sam(path_sam: str | Path, qscore: bool = False) -> None:
+    """Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
+
+    Args:
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format
+
+    """
+    path_sam = Path(path_sam)
+    if not path_sam.exists():
+        raise FileNotFoundError(f"{path_sam} does not exist")
+    sam_headers(io.read_sam(path_sam))
+    sam_alignments(io.read_sam(path_sam), qscore)

@@ -20,18 +20,18 @@ def transform(
     Returns:
         list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.
     """
-
+    # Validation
     keep = validator.keep_argument(keep)
+    validator.validate_sam(path_sam, qscore)
 
-    path_sam = Path(path_sam)
-    validator.sam_headers(io.read_sam(path_sam))
-    validator.sam_alignments(io.read_sam(path_sam), qscore)
+    # Formatting
+    sqheaders: dict[str, int] = formatter.extract_sqheaders(io.read_sam(path_sam))
+    alignments: list[dict[str, str | int]] = formatter.organize_alignments_to_dict(io.read_sam(path_sam))
 
-    sqheaders: dict[str, str | int] = formatter.extract_sqheaders(io.read_sam(path_sam))
-    samdict: list[dict[str, str | int]] = formatter.organize_alignments_to_dict(io.read_sam(path_sam))
+    # Conversion to MIDSV
+    alignments = converter.convert(alignments, qscore)
 
-    samdict = converter.convert(samdict, qscore)
+    # Polishing
+    alignments = polisher.pad(alignments, sqheaders)
 
-    samdict_polished = polisher.polish(samdict, sqheaders, keep)
-
-    return samdict_polished
+    return alignments

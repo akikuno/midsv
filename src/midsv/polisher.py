@@ -46,7 +46,7 @@ def calculate_microhomology(previous_alignment: dict[str, int | str], current_al
     return num_microhomology
 
 
-def remove_microhomology(current_alignment: dict[str, int | str], num_microhomology: int) -> None:
+def remove_microhomology(current_alignment: dict[str, str], num_microhomology: int) -> None:
     """Remove microhomology and update the current alignment."""
     current_midsv = current_alignment["MIDSV"].split(",")
     current_alignment["MIDSV"] = ",".join(current_midsv[num_microhomology:])
@@ -60,8 +60,7 @@ def remove_microhomology(current_alignment: dict[str, int | str], num_microhomol
 
 def fill_gap(sam_template: dict[str, int | str], gap: int) -> None:
     """Fill the gap between alignments with unknown nucleotides."""
-    if "MIDSV" in sam_template:
-        sam_template["CSSPLIT"] += ",=N" * gap
+    sam_template["MIDSV"] += ",=N" * gap
     if "QSCORE" in sam_template:
         sam_template["QSCORE"] += ",-1" * gap
 
@@ -85,7 +84,7 @@ def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
             sam_merged.append(alignments[0])
             continue
 
-        sam_template = deepcopy(alignments[0])  # TODO Deepcopyをcopyに変えられるかテストする
+        sam_template = deepcopy(alignments[0])
         first_strand = is_forward_strand(sam_template["FLAG"])
 
         for i, current_alignment in enumerate(alignments[1:], start=1):
@@ -99,8 +98,7 @@ def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
 
             fill_gap(sam_template, current_start - previous_end)
 
-            if "MIDSV" in sam_template:
-                sam_template["MIDSV"] += "," + current_alignment["MIDSV"]
+            sam_template["MIDSV"] += "," + current_alignment["MIDSV"]
             if "QSCORE" in sam_template:
                 sam_template["QSCORE"] += "," + current_alignment["QSCORE"]
 
@@ -167,12 +165,12 @@ def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[d
         list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     """
     keep = set(keep) if keep else set()
+    keys_to_delete = {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep
     selected = []
-    for m in samdict:
-        delkeys = {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep
-        for key in delkeys:
-            m.pop(key)
-        selected.append(m)
+    for record in samdict:
+        for key in keys_to_delete:
+            record.pop(key)
+        selected.append(record)
     return selected
 
 
