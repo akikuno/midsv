@@ -90,10 +90,11 @@ def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
         for i, current_alignment in enumerate(alignments[1:], start=1):
             process_inversion(current_alignment, first_strand)
 
-            num_microhomology = calculate_microhomology(alignments[i - 1], current_alignment)
+            previous_alignment = alignments[i - 1]
+            num_microhomology = calculate_microhomology(previous_alignment, current_alignment)
             remove_microhomology(current_alignment, num_microhomology)
 
-            previous_end = alignments[i - 1]["POS"] - 1
+            previous_end = previous_alignment["POS"] + len(previous_alignment["MIDSV"].split(",")) - 1
             current_start = current_alignment["POS"] - 1
 
             fill_gap(sam_template, current_start - previous_end)
@@ -115,7 +116,7 @@ def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[
         sqheaders (dict[str, int]): dictionary as {SQ:LN}
 
     Returns:
-        list[dict[str, int | str]]: dictionarized SAM with padding as "N" in MIDSV and CSSPLIT, and "-1" in QUAL
+        list[dict[str, int | str]]: dictionarized SAM with padding as "=N" in MIDSV and CSSPLIT, and "-1" in QUAL
     """
     samdict_padding = []
     for alignment in samdict:

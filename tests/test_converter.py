@@ -1,5 +1,4 @@
 import pytest
-
 from src.midsv import converter
 
 ###########################################################
@@ -17,15 +16,18 @@ def test_split():
 @pytest.mark.parametrize(
     "cstag_splitted, i, expected",
     [
-        (["+ttt", "*ag"], 0, ["+t|+t|+t|*ag"]),
-        (["+a", "~ta10cg"], 0, ["+a|=N"]),
-        (["+a", "=T"], 0, ["+a|=T"]),
+        pytest.param(["+ttt", "*ag"], 0, ["+t|+t|+t|*ag"], id="case_normal_insertion_with_star"),
+        pytest.param(["+a", "~ta10cg"], 0, ["+a|=N"], id="case_insertion_with_splice"),
+        pytest.param(["+a", "=T"], 0, ["+a|=T"], id="case_insertion_with_match"),
+        pytest.param(
+            ["+a"], 0, ["+a"], id="case_insertion_at_end"
+        ),  # New case for the condition i + 1 == len(cstag_splitted)
     ],
 )
 def test_process_insertion(cstag_splitted, i, expected):
-    cssplits = []
-    converter._process_insertion(cstag_splitted, i, cssplits)
-    assert cssplits == expected
+    results = []
+    converter._process_insertion(cstag_splitted, i, results)
+    assert results == expected
 
 
 @pytest.mark.parametrize(
@@ -36,9 +38,9 @@ def test_process_insertion(cstag_splitted, i, expected):
     ],
 )
 def test_process_splice(cs, expected):
-    cssplits = []
-    converter._process_splice(cs, cssplits)
-    assert cssplits == expected
+    results = []
+    converter._process_splice(cs, results)
+    assert results == expected
 
 
 @pytest.mark.parametrize(
@@ -49,9 +51,9 @@ def test_process_splice(cs, expected):
     ],
 )
 def test_process_match(cs, expected):
-    cssplits = []
-    converter._process_match(cs, cssplits)
-    assert cssplits == expected
+    results = []
+    converter._process_match(cs, results)
+    assert results == expected
 
 
 @pytest.mark.parametrize(

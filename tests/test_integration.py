@@ -3,20 +3,20 @@
 # from src import midsv
 # from src.midsv import io
 
-# # def test_valueerror_midsv_cssplit():
-# #     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
-# #     sam = midsv.io.read_sam(str(sampath))
-# #     with pytest.raises(ValueError) as e:
-# #         _ = midsv.transform(sampath, qscore=False)
-# #     assert str(e.value) == "Either midsv or cssplit must be True"
+# def test_valueerror_midsv_cssplit():
+#     sampath = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+#     sam = midsv.io.read_sam(str(sampath))
+#     with pytest.raises(ValueError) as e:
+#         _ = midsv.transform(sampath, qscore=False)
+#     assert str(e.value) == "Either midsv or cssplit must be True"
 
 
-# # def test_valueerror_qscore():
-# #     sampath = Path("tests", "data", "sam_from_fasta", "control.sam")
-# #     sam = midsv.io.read_sam(str(sampath))
-# #     with pytest.raises(ValueError) as e:
-# #         _ = midsv.transform(sampath, midsv=True, cssplit=True, qscore=True)
-# #     assert str(e.value) == "qscore must be False because the input does not contain QUAL"
+# def test_valueerror_qscore():
+#     sampath = Path("tests", "data", "sam_from_fasta", "control.sam")
+#     sam = midsv.io.read_sam(str(sampath))
+#     with pytest.raises(ValueError) as e:
+#         _ = midsv.transform(sampath, midsv=True, cssplit=True, qscore=True)
+#     assert str(e.value) == "qscore must be False because the input does not contain QUAL"
 
 
 # def test_integration_midsv():

@@ -1,10 +1,22 @@
 import pytest
-
 from src.midsv import polisher
 
 ###########################################################
 # merge
 ###########################################################
+
+
+@pytest.mark.parametrize(
+    "flag, expected",
+    [
+        pytest.param(0, True, id="case_forward_strand"),
+        pytest.param(16, False, id="case_reverse_strand"),
+        pytest.param(32, True, id="case_not_reverse_but_other_flags"),
+        pytest.param(48, False, id="case_reverse_with_other_flags"),
+    ],
+)
+def test_is_forward_strand(flag, expected):
+    assert polisher.is_forward_strand(flag) == expected
 
 
 @pytest.mark.parametrize(
@@ -120,6 +132,205 @@ def test_remove_microhomology(
 def test_fill_gap(sam_template: dict[str, int | str], gap: int, expected_template: dict[str, int | str]) -> None:
     polisher.fill_gap(sam_template, gap)
     assert sam_template == expected_template
+
+
+@pytest.mark.parametrize(
+    "samdict, expected",
+    [
+        pytest.param(
+            [
+                {"QNAME": "read1", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C", "QSCORE": "30,30,30"},
+                {"QNAME": "read1", "POS": 4, "FLAG": 0, "MIDSV": "=G,=T", "QSCORE": "30,30"},
+            ],
+            [
+                {"QNAME": "read1", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C,=G,=T", "QSCORE": "30,30,30,30,30"},
+            ],
+            id="case_merge_simple_forward",
+        ),
+        pytest.param(
+            [
+                {"QNAME": "read2", "POS": 1, "FLAG": 16, "MIDSV": "=A,=T", "QSCORE": "30,30"},
+                {"QNAME": "read2", "POS": 3, "FLAG": 16, "MIDSV": "=C,=G", "QSCORE": "30,30"},
+            ],
+            [
+                {"QNAME": "read2", "POS": 1, "FLAG": 16, "MIDSV": "=A,=T,=C,=G", "QSCORE": "30,30,30,30"},
+            ],
+            id="case_merge_reverse_strand",
+        ),
+        pytest.param(
+            [
+                {"QNAME": "read3", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C", "QSCORE": "30,30,30"},
+            ],
+            [
+                {"QNAME": "read3", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C", "QSCORE": "30,30,30"},
+            ],
+            id="case_single_read",
+        ),
+        pytest.param(
+            [
+                {"QNAME": "read4", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C", "QSCORE": "30,30,30"},
+                {"QNAME": "read4", "POS": 4, "FLAG": 16, "MIDSV": "=G,=T", "QSCORE": "30,30"},
+            ],
+            [
+                {"QNAME": "read4", "POS": 1, "FLAG": 0, "MIDSV": "=A,=T,=C,=g,=t", "QSCORE": "30,30,30,30,30"},
+            ],
+            id="case_inversion",
+        ),
+    ],
+)
+def test_merge(samdict, expected):
+    result = polisher.merge(samdict)
+    assert result == expected
+
+
+###############################################################################
+# pad
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "samdict, sqheaders, expected",
+    [
+        pytest.param(
+            [{"QNAME": "read1", "POS": 1, "RNAME": "chr1", "MIDSV": "=A,=T,=C", "QSCORE": "30,30,30"}],
+            {"chr1": 6},
+            [
+                {
+                    "QNAME": "read1",
+                    "POS": 1,
+                    "RNAME": "chr1",
+                    "MIDSV": "=A,=T,=C,=N,=N,=N",
+                    "QSCORE": "30,30,30,-1,-1,-1",
+                }
+            ],
+            id="case_no_left_padding",
+        ),
+        pytest.param(
+            [{"QNAME": "read2", "POS": 4, "RNAME": "chr2", "MIDSV": "=G,=T", "QSCORE": "30,30"}],
+            {"chr2": 6},
+            [
+                {
+                    "QNAME": "read2",
+                    "POS": 4,
+                    "RNAME": "chr2",
+                    "MIDSV": "=N,=N,=N,=G,=T,=N",
+                    "QSCORE": "-1,-1,-1,30,30,-1",
+                }
+            ],
+            id="case_left_and_right_padding",
+        ),
+        pytest.param(
+            [{"QNAME": "read3", "POS": 1, "RNAME": "chr3", "MIDSV": "=A,=T,=C,=G", "QSCORE": "30,30,30,30"}],
+            {"chr3": 4},
+            [{"QNAME": "read3", "POS": 1, "RNAME": "chr3", "MIDSV": "=A,=T,=C,=G", "QSCORE": "30,30,30,30"}],
+            id="case_no_padding_needed",
+        ),
+    ],
+)
+def test_pad(samdict, sqheaders, expected):
+    result = polisher.pad(samdict, sqheaders)
+    assert result == expected
+
+
+###############################################################################
+# remove_different_length
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "samdict, sqheaders, expected",
+    [
+        pytest.param(
+            [{"QNAME": "read1", "RNAME": "chr1", "MIDSV": "=A,=T,=C"}],
+            {"chr1": 3},
+            [{"QNAME": "read1", "RNAME": "chr1", "MIDSV": "=A,=T,=C"}],
+            id="case_matching_length",
+        ),
+        pytest.param(
+            [{"QNAME": "read2", "RNAME": "chr2", "MIDSV": "=A,=T,=C,=G"}],
+            {"chr2": 3},
+            [],
+            id="case_non_matching_length",
+        ),
+        pytest.param(
+            [{"QNAME": "read3", "RNAME": "chr3", "MIDSV": "=A,=T"}],
+            {"chr3": 2},
+            [{"QNAME": "read3", "RNAME": "chr3", "MIDSV": "=A,=T"}],
+            id="case_single_entry_matching",
+        ),
+    ],
+)
+def test_remove_different_length(samdict, sqheaders, expected):
+    result = polisher.remove_different_length(samdict, sqheaders)
+    assert result == expected
+
+
+###############################################################################
+# select
+###############################################################################
+
+@pytest.mark.parametrize(
+    "samdict, keep, expected",
+    [
+        pytest.param(
+            [
+                {
+                    "QNAME": "read1",
+                    "RNAME": "chr1",
+                    "MIDSV": "=A,=T",
+                    "FLAG": 0,
+                    "POS": 100,
+                    "SEQ": "AT",
+                    "QUAL": "30,30",
+                    "CIGAR": "2M",
+                    "CSTAG": "cs:Z:=AT",
+                }
+            ],
+            {"FLAG", "POS"},
+            [{"QNAME": "read1", "RNAME": "chr1", "MIDSV": "=A,=T", "FLAG": 0, "POS": 100}],
+            id="case_keep_flag_and_pos",
+        ),
+        pytest.param(
+            [
+                {
+                    "QNAME": "read2",
+                    "RNAME": "chr2",
+                    "MIDSV": "=A,=T",
+                    "FLAG": 0,
+                    "POS": 100,
+                    "SEQ": "CG",
+                    "QUAL": "30,30",
+                    "CIGAR": "2M",
+                    "CSTAG": "cs:Z:=AT",
+                }
+            ],
+            {"SEQ"},
+            [{"QNAME": "read2", "RNAME": "chr2", "MIDSV": "=A,=T", "SEQ": "CG"}],
+            id="case_keep_seq_only",
+        ),
+        pytest.param(
+            [
+                {
+                    "QNAME": "read3",
+                    "RNAME": "chr3",
+                    "MIDSV": "=A,=T",
+                    "FLAG": 0,
+                    "POS": 100,
+                    "SEQ": "AT",
+                    "QUAL": "30,30",
+                    "CIGAR": "2M",
+                    "CSTAG": "cs:Z:=AT",
+                }
+            ],
+            set(),
+            [{"QNAME": "read3", "RNAME": "chr3", "MIDSV": "=A,=T"}],
+            id="case_keep_none_additional",
+        ),
+    ],
+)
+def test_select(samdict, keep, expected):
+    result = polisher.select(samdict, keep)
+    assert result == expected
 
 
 # def test_join_control():

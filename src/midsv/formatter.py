@@ -146,7 +146,7 @@ def remove_resequence(alignments: list[dict[str, str | int]]) -> list[dict[str, 
         overlap_curr = curr_read["SEQ"][start_overlap - curr_read["POS"] : end_overlap - curr_read["POS"]]
 
         for prev_base, curr_base in zip(overlap_prev, overlap_curr):
-            if prev_base != "N" and curr_base != "N" and prev_base != curr_base:
+            if prev_base != "=N" and curr_base != "=N" and prev_base != curr_base:
                 return True  # Overlapped but different sequences
 
         return False
