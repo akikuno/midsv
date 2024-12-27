@@ -1,0 +1,2 @@
+@SQ     SN:example     LN:10
+indel_sub   0   example     1   60  5M3I1M2D2M *   0   0   ACGTGTTTCGT  01234!!!56789  cs:Z:=ACGT*ag+ttt=C-aa=GT

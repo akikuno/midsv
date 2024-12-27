@@ -1,0 +1,3 @@
+@SQ     SN:example     LN:10
+large-deletion  0   example     1   60  2M  *   0   0   AC  01  cs:Z:=AC
+large-deletion  0   example     9   60  2M  *   0   0   AC  89  cs:Z:=AC
