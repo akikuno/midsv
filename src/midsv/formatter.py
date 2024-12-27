@@ -84,7 +84,9 @@ def _padding_n_to_sequence(alignment: dict[str, str | int]) -> dict[str, str | i
     cigar = alignment["CIGAR"]
     cigar_operations = split_cigar(cigar)
     sequence = alignment["SEQ"]
-    unified_sequence = ["N"] * alignment["POS"]
+
+    unified_sequence = []
+    unified_sequence.append("N" * (alignment["POS"] - 1))
     start_position = 0
 
     def process_match(operation: str):

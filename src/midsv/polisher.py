@@ -65,32 +65,32 @@ def fill_gap(sam_template: dict[str, int | str], gap: int) -> None:
         sam_template["QSCORE"] += ",-1" * gap
 
 
-def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
+def merge(alignments: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
     """Merge splitted reads including large deletion or inversion.
 
     Args:
-        samdict (list[dict[str, int | str]]): dictionarized SAM
+        alignments (list[dict[str, int | str]]): dictionarized SAM
 
     Returns:
         list[dict[str, int | str]]: SAM with joined splitted reads to single read
     """
-    sam_sorted = sorted(samdict, key=lambda x: [x["QNAME"], x["POS"]])
+    sam_sorted = sorted(alignments, key=lambda x: [x["QNAME"], x["POS"]])
     sam_groupby = groupby(sam_sorted, key=lambda x: x["QNAME"])
     sam_merged = []
 
-    for *_, alignments in sam_groupby:
-        alignments = list(alignments)
-        if len(alignments) == 1:
-            sam_merged.append(alignments[0])
+    for *_, records in sam_groupby:
+        records = list(records)
+        if len(records) == 1:
+            sam_merged.append(records[0])
             continue
 
-        sam_template = deepcopy(alignments[0])
+        sam_template = deepcopy(records[0])
         first_strand = is_forward_strand(sam_template["FLAG"])
 
-        for i, current_alignment in enumerate(alignments[1:], start=1):
+        for i, current_alignment in enumerate(records[1:], start=1):
             process_inversion(current_alignment, first_strand)
 
-            previous_alignment = alignments[i - 1]
+            previous_alignment = records[i - 1]
             num_microhomology = calculate_microhomology(previous_alignment, current_alignment)
             remove_microhomology(current_alignment, num_microhomology)
 
@@ -108,7 +108,7 @@ def merge(samdict: list[dict[str, int | str]]) -> list[dict[str, int | str]]:
     return sam_merged
 
 
-def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
+def pad(alignments: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[dict[str, int | str]]:
     """Padding left and right flanks as "=" in MIDSV, "-1" in QUAL
 
     Args:
@@ -118,8 +118,8 @@ def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[
     Returns:
         list[dict[str, int | str]]: dictionarized SAM with padding as "=N" in MIDSV and CSSPLIT, and "-1" in QUAL
     """
-    samdict_padding = []
-    for alignment in samdict:
+    alignments_padding = []
+    for alignment in alignments:
         ref_length = sqheaders[alignment["RNAME"]]
         left_pad = max(0, alignment["POS"] - 1)
         right_pad = max(0, ref_length - (len(alignment["MIDSV"].split(",")) + left_pad))
@@ -130,13 +130,13 @@ def pad(samdict: list[dict[str, int | str]], sqheaders: dict[str, int]) -> list[
         if "QSCORE" in alignment:
             alignment["QSCORE"] = left_pad_qscore + alignment["QSCORE"] + right_pad_qscore
 
-        samdict_padding.append(alignment)
+        alignments_padding.append(alignment)
 
-    return samdict_padding
+    return alignments_padding
 
 
 def remove_different_length(
-    samdict: list[dict[str, int | str]], sqheaders: dict[str, int]
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int]
 ) -> list[dict[str, int | str]]:
     """remove different sequence length of the reference
 
@@ -147,20 +147,20 @@ def remove_different_length(
     Returns:
         list[dict[str, int | str]]: filtered SAM by different sequence length of the reference
     """
-    samdict_filtered = []
-    for alignment in samdict:
+    alignments_filtered = []
+    for alignment in alignments:
         ref_length = sqheaders[alignment["RNAME"]]
         if len(alignment["MIDSV"].split(",")) != ref_length:
             continue
-        samdict_filtered.append(alignment)
-    return samdict_filtered
+        alignments_filtered.append(alignment)
+    return alignments_filtered
 
 
-def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[dict[str, int | str]]:
+def select(alignments: list[dict[str, int | str]], keep: set[str] = None) -> list[dict[str, int | str]]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
-        samdict (list[dict[str, int | str]]): dictionarized SAM
+        alignments (list[dict[str, int | str]]): dictionarized SAM
         keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
     Returns:
         list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
@@ -168,7 +168,7 @@ def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[d
     keep = set(keep) if keep else set()
     keys_to_delete = {"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"} - keep
     selected = []
-    for record in samdict:
+    for record in alignments:
         for key in keys_to_delete:
             record.pop(key)
         selected.append(record)
@@ -181,18 +181,18 @@ def select(samdict: list[dict[str, int | str]], keep: set[str] = None) -> list[d
 
 
 def polish(
-    samdict: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
 ) -> list[dict[str, int | str]]:
     """Polish SAM by merging splitted reads, padding, removing different length, and selecting fields
     Args:
-        samdict (list[dict[str, int | str]]): dictionarized SAM
+        alignments (list[dict[str, int | str]]): dictionarized SAM
         sqheaders (dict[str, int]): dictionary as {SQ:LN}
         keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
 
     Returns:
         list[dict[str, int | str]]: polished SAM
     """
-    samdict_polished = merge(samdict)
-    samdict_polished = pad(samdict_polished, sqheaders)
-    samdict_polished = remove_different_length(samdict_polished, sqheaders)
-    return select(samdict_polished, keep)
+    alignments_polished = merge(alignments)
+    alignments_polished = pad(alignments_polished, sqheaders)
+    alignments_polished = remove_different_length(alignments_polished, sqheaders)
+    return select(alignments_polished, keep)

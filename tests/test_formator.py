@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from src.midsv import formatter, io
 
 ###########################################################
@@ -47,10 +48,10 @@ def test_remove_softclips():
 @pytest.mark.parametrize(
     "alignment, expected",
     [
-        pytest.param({"POS": 0, "SEQ": "ACGT", "CIGAR": "2M1I1D1M"}, {"SEQ": "ACNT"}, id="case_simple_cigar"),
-        pytest.param({"POS": 5, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}, {"SEQ": "NNNNNACNT"}, id="case_start_with_5nt"),
-        pytest.param({"POS": 0, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}, {"SEQ": "ACNT"}, id="case_hardclip"),
-        pytest.param({"POS": 0, "SEQ": "ACGT", "CIGAR": "2M5N2M"}, {"SEQ": "ACNNNNNGT"}, id="case_splicing"),
+        pytest.param({"POS": 1, "SEQ": "ACGT", "CIGAR": "2M1I1D1M"}, {"SEQ": "ACNT"}, id="case_simple_cigar"),
+        pytest.param({"POS": 6, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}, {"SEQ": "NNNNNACNT"}, id="case_start_with_5nt"),
+        pytest.param({"POS": 1, "SEQ": "ACGT", "CIGAR": "2H2M1I1D1M"}, {"SEQ": "ACNT"}, id="case_hardclip"),
+        pytest.param({"POS": 1, "SEQ": "ACGT", "CIGAR": "2M5N2M"}, {"SEQ": "ACNNNNNGT"}, id="case_splicing"),
     ],
 )
 def test_padding_n_to_sequence(alignment, expected):

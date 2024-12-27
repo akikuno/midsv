@@ -1,4 +1,5 @@
 import pytest
+
 from src.midsv import polisher
 
 ###########################################################
@@ -268,6 +269,7 @@ def test_remove_different_length(samdict, sqheaders, expected):
 ###############################################################################
 # select
 ###############################################################################
+
 
 @pytest.mark.parametrize(
     "samdict, keep, expected",
