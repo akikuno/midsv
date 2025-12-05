@@ -105,6 +105,18 @@ midsv.io.read_jsonl(path_jsonl: str | Path) -> Iterator[dict[str, str]]
 
 Conversely, `midsv.io.read_jsonl` reads JSONL as a list of dictionaries.
 
+## Export VCF
+
+```python
+from midsv import transform
+from midsv.io import write_vcf
+
+alignments = transform("examples/example_indels.sam", qscore=False)
+write_vcf(alignments, "variants.vcf", large_sv_threshold=50)
+```
+
+`midsv.io.write_vcf` writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than `large_sv_threshold` are emitted as symbolic `<INS>`, large deletions (or `=N` padding) use `<DEL>`, and inversions use `<INV>`. The INFO field includes `TYPE` or `SVTYPE`, `SVLEN`, `SEQ`, and `QNAME`.
+
 
 # 🖍️Examples
 
@@ -201,4 +213,3 @@ print(midsv.transform(sam, qscore=True))
 # ]
 
 ```
-

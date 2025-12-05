@@ -12,11 +12,16 @@
 
 <!-- ############################################################# # -->
 
-# v0.12.1 (2025-12-05)
+# v0.13.0 (2025-12-06)
 
-## 🐛 Bug Fixes
+## 🌟 New Features
 
-- Pass keep through transform to preserve requested fields such as FLAG
+- Add `midsv.io.write_vcf` to export MIDSV outputs as VCF supporting insertion, deletion, substitution, large insertion, large deletion, and inversion.
+
+## 📝 Documentation
+
+- Document VCF export usage and supported variant types in README.
+
 
 
 -------------------------------------------------------------
@@ -29,6 +34,15 @@
 </details> -->
 
 
+
+<details>
+<summary> v0.12.1 (2025-12-05) </summary>
+
+## 🐛 Bug Fixes
+
+- Pass keep through transform to preserve requested fields such as FLAG
+
+</details>
 
 <details>
 <summary> v0.12.0 (2025-12-05) </summary>
