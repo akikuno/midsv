@@ -180,7 +180,7 @@ def qual_to_qscore(qual: str, midsv_tag: str) -> str:
 ###########################################################
 
 
-def convert(samdict: list[dict[str, str | int]], qscore: bool = False) -> None:
+def convert(samdict: list[dict[str, str | int]], qscore: bool = False) -> list[dict[str, str | int]]:
     for alignment in samdict:
         alignment["MIDSV"] = cstag_to_midsv(alignment["CSTAG"])
         if qscore:

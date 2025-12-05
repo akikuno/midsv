@@ -67,3 +67,9 @@ def test_integration_eachcomponent():
         mlen = len(MIDSV.split(","))
         qlen = len(QSCORE.split(","))
         assert RLEN == mlen == qlen
+
+
+def test_keep_option_preserves_flag():
+    path_sam = Path("tests", "data", "integrate", "subindelinv_cslong_10bp.sam")
+    result = midsv.transform(path_sam=path_sam, qscore=False, keep={"FLAG"})
+    assert all("FLAG" in record for record in result)

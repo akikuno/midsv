@@ -11,15 +11,15 @@ from midsv import io
 ###########################################################
 
 
-def keep_argument(keep: str | list[str]) -> set[str]:
+def keep_argument(keep: str | list[str]) -> list[str]:
     if keep is None:
         keep = set()
     elif isinstance(keep, str):
         keep = [keep]
 
-    keep = set(keep)
+    keep_set = set(keep)
 
-    if not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
+    if not keep_set.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
         raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
 
     return keep
@@ -42,7 +42,7 @@ def sam_headers(sam: list[list[str]] | Iterator[list[str]]) -> None:
         raise ValueError("Input does not have @SQ header")
 
 
-def sam_alignments(sam: list[list[str]], qscore: bool = False) -> None:
+def sam_alignments(sam: list[list[str]] | Iterator[list[str]], qscore: bool = False) -> None:
     """Check alignments are mapped and have long-formatted cs tag
 
     Args:

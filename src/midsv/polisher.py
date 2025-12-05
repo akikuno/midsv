@@ -156,12 +156,12 @@ def remove_different_length(
     return alignments_filtered
 
 
-def select(alignments: list[dict[str, int | str]], keep: set[str] = None) -> list[dict[str, int | str]]:
+def select(alignments: list[dict[str, int | str]], keep: list[str] = None) -> list[dict[str, int | str]]:
     """Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
         alignments (list[dict[str, int | str]]): dictionarized SAM
-        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
+        keep (list(str), optional): Subset of ['FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'] to keep. Defaults to None.
     Returns:
         list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     """
@@ -181,13 +181,13 @@ def select(alignments: list[dict[str, int | str]], keep: set[str] = None) -> lis
 
 
 def polish(
-    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: list[str] = None
 ) -> list[dict[str, int | str]]:
     """Polish SAM by merging splitted reads, padding, removing different length, and selecting fields
     Args:
         alignments (list[dict[str, int | str]]): dictionarized SAM
         sqheaders (dict[str, int]): dictionary as {SQ:LN}
-        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
+        keep (list(str), optional): Subset of ['FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'] to keep. Defaults to None.
 
     Returns:
         list[dict[str, int | str]]: polished SAM

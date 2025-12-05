@@ -9,10 +9,10 @@ from src.midsv import io, validator
     "input_value, expected_output",
     [
         (None, set()),
-        ("FLAG", {"FLAG"}),
-        (["FLAG", "POS"], {"FLAG", "POS"}),
-        (["SEQ", "QUAL", "CIGAR"], {"SEQ", "QUAL", "CIGAR"}),
-        ("CSTAG", {"CSTAG"}),
+        ("FLAG", ["FLAG"]),
+        (["FLAG", "POS"], ["FLAG", "POS"]),
+        (["SEQ", "QUAL", "CIGAR"], ["SEQ", "QUAL", "CIGAR"]),
+        ("CSTAG", ["CSTAG"]),
     ],
 )
 def test_keep_argument_valid(input_value, expected_output):
