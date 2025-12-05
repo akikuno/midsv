@@ -12,7 +12,26 @@
 
 <!-- ############################################################# # -->
 
-# v0.12.0 (2025-12-05)
+# v0.12.1 (2025-12-05)
+
+## 🐛 Bug Fixes
+
+- Pass keep through transform to preserve requested fields such as FLAG
+
+
+-------------------------------------------------------------
+
+# Past Releases
+
+<!-- <details>
+<summary> v0.X.X (2024-MM-DD) </summary>
+
+</details> -->
+
+
+
+<details>
+<summary> v0.12.0 (2025-12-05) </summary>
 
 ## 💥 Breaking
 
@@ -26,15 +45,7 @@
 
 + Documentation refreshed to outline the breaking changes and differences from v0.11.x.
 
-
--------------------------------------------------------------
-
-# Past Releases
-
-<!-- <details>
-<summary> v0.X.X (2024-MM-DD) </summary>
-
-</details> -->
+</details>
 
 
 <details>
