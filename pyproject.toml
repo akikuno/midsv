@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "midsv"
-version = "0.11.1"
+version = "0.12.0"
 description = "Python module to convert SAM to MIDSV format."
 authors = ["Akihiro Kuno <akuno@md.tsukuba.ac.jp>"]
 homepage = "https://github.com/akikuno/midsv"
@@ -20,8 +20,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-cstag = ">=1.1.0"
+python = "^3.10"
 
 [tool.ruff]
 lint.select = ["E", "F", "W", "I", "Q"]

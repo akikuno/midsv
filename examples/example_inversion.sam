@@ -1,0 +1,4 @@
+@SQ     SN:example     LN:10
+inversion   0   example     1   60  5M  *   0   0   ACGTA  01234  cs:Z:=ACGTA
+inversion   16  example     6   60  3M  *   0   0   CGT  567  cs:Z:=CGT
+inversion   2048    example     9   60  2M  *   0   0   AC  89  cs:Z:=AC

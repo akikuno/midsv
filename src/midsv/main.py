@@ -1,63 +1,37 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from pathlib import Path
 
-from midsv import convert, format, proofread, validate
+from midsv import converter, formatter, io, polisher, validator
 
 
 def transform(
-    sam: list[list] | Iterator[list],
-    midsv: bool = True,
-    cssplit: bool = True,
-    qscore: bool = True,
-    keep: list[str] = None,
-) -> list[dict]:
-    """Integrated function to perform MIDSV conversion
+    path_sam: Path | str,
+    qscore: bool = False,
+    keep: str | list[str] = None,
+) -> list[dict[str, str | int]]:
+    """Integrated function to perform MIDSV conversion.
 
     Args:
-        sam (list[list]): Lists ot SAM format
-        midsv (bool, optional): Output MIDSV. Defaults to True.
-        cssplit (bool, optional): Output CSSPLIT. Defaults to True.
-        qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-        keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().
+        path_sam (str | Path): Path of a SAM file.
+        qscore (bool, optional): Output QSCORE. Defaults to False.
+        keep (str | list[str], optional): Subset of 'FLAG', 'POS', 'CIGAR', 'SEQ', 'QUAL', 'CSTAG' to keep. Defaults to None.
+
     Returns:
-        list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
+        list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.
     """
+    # Validation
+    keep = validator.keep_argument(keep)
+    validator.validate_sam(path_sam, qscore)
 
-    if midsv or cssplit:
-        pass
-    else:
-        raise ValueError("Either midsv or cssplit must be True")
+    # Formatting
+    sqheaders: dict[str, int] = formatter.extract_sqheaders(io.read_sam(path_sam))
+    alignments: list[dict[str, str | int]] = formatter.organize_alignments_to_dict(io.read_sam(path_sam))
 
-    keep = set(keep) if keep else set()
-    if keep != set() and not keep.issubset({"FLAG", "POS", "SEQ", "QUAL", "CIGAR", "CSTAG"}):
-        raise ValueError("'keep' must be a subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'}")
+    # Conversion to MIDSV
+    alignments = converter.convert(alignments, qscore)
 
-    sam = list(sam)
-    validate.sam_headers(sam)
-    validate.sam_alignments(sam)
+    # Polishing
+    alignments = polisher.polish(alignments, sqheaders)
 
-    sqheaders = format.extract_sqheaders(sam)
-    samdict = format.dictionarize_sam(sam)
-
-    if qscore and any(s["QUAL"] == "*" for s in samdict):
-        raise ValueError("qscore must be False because the input does not contain QUAL")
-
-    samdict = format.remove_softclips(samdict)
-    samdict = format.remove_resequence(samdict)
-
-    for alignment in samdict:
-        if midsv:
-            alignment["MIDSV"] = convert.cstag_to_midsv(alignment["CSTAG"])
-        if cssplit:
-            alignment["CSSPLIT"] = convert.cstag_to_cssplit(alignment["CSTAG"])
-        if midsv and qscore:
-            alignment["QSCORE"] = convert.qual_to_qscore_midsv(alignment["QUAL"], alignment["MIDSV"])
-        elif cssplit and qscore:
-            alignment["QSCORE"] = convert.qual_to_qscore_cssplit(alignment["QUAL"], alignment["CSSPLIT"])
-
-    samdict_polished = proofread.join(samdict)
-    samdict_polished = proofread.pad(samdict_polished, sqheaders)
-    samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished, keep)
-    return samdict_polished
+    return alignments

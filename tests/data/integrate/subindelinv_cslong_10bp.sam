@@ -5,7 +5,7 @@ insertion	0	example	1	60	5M3I5M	*	0	0	ACGTATTTCGTAC	01234!!!56789	cs:Z:=ACGTA+tt
 deletion	0	example	1	60	5M3D2M	*	0	0	ACGTAAC	0123489	cs:Z:=ACGTA-cgt=AC
 softclip	0	example	1	60	2S10M2S	*	0	0	NNACGTACGTACNN	!!0123456789!!	cs:Z:=ACGTACGTAC
 large-deletion	0	example	1	60	2M	*	0	0	AC	01	cs:Z:=AC
-large-deletion	0	example	9	60	2M	*	0	0	AC	89	cs:Z:=AC
+large-deletion	0	example	9	60	2M	*	0	0	GT	89	cs:Z:=GT
 inversion	0	example	1	60	5M	*	0	0	ACGTA	01234	cs:Z:=ACGTA
 inversion	16	example	6	60	3M	*	0	0	CGT	567	cs:Z:=CGT
 inversion	2048	example	9	60	2M	*	0	0	AC	89	cs:Z:=AC

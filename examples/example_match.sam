@@ -1,0 +1,2 @@
+@SQ     SN:example     LN:10
+match   0   example     1   60  10M *   0   0   ACGTACGTAC  0123456789  cs:Z:=ACGTACGTAC

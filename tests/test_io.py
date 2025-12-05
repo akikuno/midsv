@@ -1,11 +1,8 @@
-from importlib import reload
 from pathlib import Path
 
 import pytest
 
 from src.midsv import io
-
-reload(io)
 
 ###########################################################
 # Read sam
