@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
-<title>midsv.validate API documentation</title>
+<meta name="generator" content="pdoc3 0.11.6">
+<title>midsv.validator API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -33,7 +33,7 @@ el.replaceWith(d);
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>midsv.validate</code></h1>
+<h1 class="title">Module <code>midsv.validator</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -44,61 +44,89 @@ el.replaceWith(d);
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="midsv.validate.sam_alignments"><code class="name flex">
-<span>def <span class="ident">sam_alignments</span></span>(<span>sam: list[list]) ‑> None</span>
+<dt id="midsv.validator.keep_argument"><code class="name flex">
+<span>def <span class="ident">keep_argument</span></span>(<span>keep: str | list[str]) ‑> set[str]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def sam_alignments(sam: list[list]) -&gt; None:
+<pre><code class="python">def keep_argument(keep: str | list[str]) -&gt; set[str]:
+    if keep is None:
+        keep = set()
+    elif isinstance(keep, str):
+        keep = [keep]
+
+    keep = set(keep)
+
+    if not keep.issubset({&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;}):
+        raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
+
+    return keep</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="midsv.validator.sam_alignments"><code class="name flex">
+<span>def <span class="ident">sam_alignments</span></span>(<span>sam: list[list[str]], qscore: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sam_alignments(sam: list[list[str]], qscore: bool = False) -&gt; None:
     &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
 
     Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
+        sam (list[list[str]]): a list of lists of SAM format including CS tag
     &#34;&#34;&#34;
-    is_alignment = False
+    has_alignment = False
     for alignment in sam:
         if alignment[0].startswith(&#34;@&#34;):
             continue
-        if alignment[2] == &#34;*&#34;:
-            continue
-        is_alignment = True
+
         if len(alignment) &lt; 10:
-            raise ValueError(&#34;Alighment may not be SAM format&#34;)
-        idx_cstag = -1
+            raise ValueError(&#34;Alignment may not be SAM format because it has less than 10 columns&#34;)
+
+        if alignment[2] == &#34;*&#34; or alignment[9] == &#34;*&#34;:  # No alignment of reads
+            continue
+        has_alignment = True
+
+        if qscore and alignment[10] == &#34;*&#34;:
+            raise ValueError(&#34;Input does not have QUAL information&#34;)
+
+        idx_cstag = None
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
                 break
-        if idx_cstag == -1:
+        if idx_cstag is None:
             raise ValueError(&#34;Input does not have long-formatted cs tag&#34;)
-        # if &#34;~&#34; in alignment[idx_cstag]:
-        #     raise ValueError(&#34;long-read spliced alignment are currently not supported&#34;)
-    if not is_alignment:
+
+    if not has_alignment:
         raise ValueError(&#34;No alignment information&#34;)</code></pre>
 </details>
 <div class="desc"><p>Check alignments are mapped and have long-formatted cs tag</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]]</code></dt>
 <dd>a list of lists of SAM format including CS tag</dd>
 </dl></div>
 </dd>
-<dt id="midsv.validate.sam_headers"><code class="name flex">
-<span>def <span class="ident">sam_headers</span></span>(<span>sam: list[list]) ‑> None</span>
+<dt id="midsv.validator.sam_headers"><code class="name flex">
+<span>def <span class="ident">sam_headers</span></span>(<span>sam: list[list[str]] | Iterator[list[str]]) ‑> None</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def sam_headers(sam: list[list]) -&gt; None:
+<pre><code class="python">def sam_headers(sam: list[list[str]] | Iterator[list[str]]) -&gt; None:
     &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
 
     Args:
-        sam (list[list]): a list of lists of SAM format
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format
 
     &#34;&#34;&#34;
     sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
@@ -108,7 +136,35 @@ el.replaceWith(d);
 <div class="desc"><p>Check headers containing SN (Reference sequence name) and LN (Reference sequence length)</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]] | Iterator[list[str]]</code></dt>
+<dd>a list of lists of SAM format</dd>
+</dl></div>
+</dd>
+<dt id="midsv.validator.validate_sam"><code class="name flex">
+<span>def <span class="ident">validate_sam</span></span>(<span>path_sam: str | Path, qscore: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_sam(path_sam: str | Path, qscore: bool = False) -&gt; None:
+    &#34;&#34;&#34;Check headers containing SN (Reference sequence name) and LN (Reference sequence length)
+
+    Args:
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format
+
+    &#34;&#34;&#34;
+    path_sam = Path(path_sam)
+    if not path_sam.exists():
+        raise FileNotFoundError(f&#34;{path_sam} does not exist&#34;)
+    sam_headers(io.read_sam(path_sam))
+    sam_alignments(io.read_sam(path_sam), qscore)</code></pre>
+</details>
+<div class="desc"><p>Check headers containing SN (Reference sequence name) and LN (Reference sequence length)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]] | Iterator[list[str]]</code></dt>
 <dd>a list of lists of SAM format</dd>
 </dl></div>
 </dd>
@@ -129,15 +185,17 @@ el.replaceWith(d);
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="midsv.validate.sam_alignments" href="#midsv.validate.sam_alignments">sam_alignments</a></code></li>
-<li><code><a title="midsv.validate.sam_headers" href="#midsv.validate.sam_headers">sam_headers</a></code></li>
+<li><code><a title="midsv.validator.keep_argument" href="#midsv.validator.keep_argument">keep_argument</a></code></li>
+<li><code><a title="midsv.validator.sam_alignments" href="#midsv.validator.sam_alignments">sam_alignments</a></code></li>
+<li><code><a title="midsv.validator.sam_headers" href="#midsv.validator.sam_headers">sam_headers</a></code></li>
+<li><code><a title="midsv.validator.validate_sam" href="#midsv.validator.validate_sam">validate_sam</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>

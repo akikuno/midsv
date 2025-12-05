@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>midsv.main API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
@@ -45,7 +45,7 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.main.transform"><code class="name flex">
-<span>def <span class="ident">transform</span></span>(<span>sam: list[list] | Iterator[list],<br>midsv: bool = True,<br>cssplit: bool = True,<br>qscore: bool = True,<br>keep: list[str] = None) ‑> list[dict]</span>
+<span>def <span class="ident">transform</span></span>(<span>path_sam: Path | str, qscore: bool = False, keep: str | list[str] = None) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -53,79 +53,50 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transform(
-    sam: list[list] | Iterator[list],
-    midsv: bool = True,
-    cssplit: bool = True,
-    qscore: bool = True,
-    keep: list[str] = None,
-) -&gt; list[dict]:
-    &#34;&#34;&#34;Integrated function to perform MIDSV conversion
+    path_sam: Path | str,
+    qscore: bool = False,
+    keep: str | list[str] = None,
+) -&gt; list[dict[str, str | int]]:
+    &#34;&#34;&#34;Integrated function to perform MIDSV conversion.
 
     Args:
-        sam (list[list]): Lists ot SAM format
-        midsv (bool, optional): Output MIDSV. Defaults to True.
-        cssplit (bool, optional): Output CSSPLIT. Defaults to True.
-        qscore (bool, optional): Output QSCORE. Require `midsv == True` or `cssplit == True`. Defaults to True.
-        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
+        path_sam (str | Path): Path of a SAM file.
+        qscore (bool, optional): Output QSCORE. Defaults to False.
+        keep (str | list[str], optional): Subset of &#39;FLAG&#39;, &#39;POS&#39;, &#39;CIGAR&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CSTAG&#39; to keep. Defaults to None.
+
     Returns:
-        list[dict]: Dictionary containing QNAME, RNAME, MIDSV, and QSCORE
+        list[dict[str, str]]: Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.
     &#34;&#34;&#34;
+    # Validation
+    keep = validator.keep_argument(keep)
+    validator.validate_sam(path_sam, qscore)
 
-    if midsv or cssplit:
-        pass
-    else:
-        raise ValueError(&#34;Either midsv or cssplit must be True&#34;)
+    # Formatting
+    sqheaders: dict[str, int] = formatter.extract_sqheaders(io.read_sam(path_sam))
+    alignments: list[dict[str, str | int]] = formatter.organize_alignments_to_dict(io.read_sam(path_sam))
 
-    keep = set(keep) if keep else set()
-    if keep != set() and not keep.issubset({&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;}):
-        raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
+    # Conversion to MIDSV
+    alignments = converter.convert(alignments, qscore)
 
-    sam = list(sam)
-    validate.sam_headers(sam)
-    validate.sam_alignments(sam)
+    # Polishing
+    alignments = polisher.polish(alignments, sqheaders)
 
-    sqheaders = format.extract_sqheaders(sam)
-    samdict = format.dictionarize_sam(sam)
-
-    if qscore and any(s[&#34;QUAL&#34;] == &#34;*&#34; for s in samdict):
-        raise ValueError(&#34;qscore must be False because the input does not contain QUAL&#34;)
-
-    samdict = format.remove_softclips(samdict)
-    samdict = format.remove_resequence(samdict)
-
-    for alignment in samdict:
-        if midsv:
-            alignment[&#34;MIDSV&#34;] = convert.cstag_to_midsv(alignment[&#34;CSTAG&#34;])
-        if cssplit:
-            alignment[&#34;CSSPLIT&#34;] = convert.cstag_to_cssplit(alignment[&#34;CSTAG&#34;])
-        if midsv and qscore:
-            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_midsv(alignment[&#34;QUAL&#34;], alignment[&#34;MIDSV&#34;])
-        elif cssplit and qscore:
-            alignment[&#34;QSCORE&#34;] = convert.qual_to_qscore_cssplit(alignment[&#34;QUAL&#34;], alignment[&#34;CSSPLIT&#34;])
-
-    samdict_polished = proofread.join(samdict)
-    samdict_polished = proofread.pad(samdict_polished, sqheaders)
-    samdict_polished = proofread.remove_different_length(samdict_polished, sqheaders)
-    samdict_polished = proofread.select(samdict_polished, keep)
-    return samdict_polished</code></pre>
+    return alignments</code></pre>
 </details>
-<div class="desc"><p>Integrated function to perform MIDSV conversion</p>
+<div class="desc"><p>Integrated function to perform MIDSV conversion.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
-<dd>Lists ot SAM format</dd>
-<dt><strong><code>midsv</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Output MIDSV. Defaults to True.</dd>
-<dt><strong><code>cssplit</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Output CSSPLIT. Defaults to True.</dd>
+<dt><strong><code>path_sam</code></strong> :&ensp;<code>str | Path</code></dt>
+<dd>Path of a SAM file.</dd>
 <dt><strong><code>qscore</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Output QSCORE. Require <code>midsv == True</code> or <code>cssplit == True</code>. Defaults to True.</dd>
+<dd>Output QSCORE. Defaults to False.</dd>
+<dt><strong><code>keep</code></strong> :&ensp;<code>str | list[str]</code>, optional</dt>
+<dd>Subset of 'FLAG', 'POS', 'CIGAR', 'SEQ', 'QUAL', 'CSTAG' to keep. Defaults to None.</dd>
 </dl>
-<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list[dict]</code></dt>
-<dd>Dictionary containing QNAME, RNAME, MIDSV, and QSCORE</dd>
+<dt><code>list[dict[str, str]]</code></dt>
+<dd>Dictionary containing QNAME, RNAME, MIDSV, QSCORE, and fields specified by the keep argument.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -152,7 +123,7 @@ el.replaceWith(d);
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>

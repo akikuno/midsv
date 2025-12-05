@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>midsv.polisher API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>midsv.polisher</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="midsv.polisher.calculate_microhomology"><code class="name flex">
+<span>def <span class="ident">calculate_microhomology</span></span>(<span>previous_alignment: dict[str, int | str],<br>current_alignment: dict[str, int | str]) ‑> int</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calculate_microhomology(previous_alignment: dict[str, int | str], current_alignment: dict[str, int | str]) -&gt; int:
+    &#34;&#34;&#34;Calculate the length of microhomology between two alignments.&#34;&#34;&#34;
+    previous_midsv = previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
+    current_midsv = current_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
+    if &#34;QSCORE&#34; in current_alignment:
+        previous_qscore = previous_alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+        current_qscore = current_alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+
+    num_microhomology = 0
+    min_length = min(len(previous_midsv), len(current_midsv))
+    for i in range(1, len(current_midsv) + 1):
+        if i == min_length + 1:
+            break
+        prev_index = len(previous_midsv) - i
+        if previous_midsv[prev_index:] == current_midsv[:i]:
+            if &#34;QSCORE&#34; in current_alignment and previous_qscore[prev_index:] != current_qscore[:i]:
+                break
+            num_microhomology = i
+    return num_microhomology</code></pre>
+</details>
+<div class="desc"><p>Calculate the length of microhomology between two alignments.</p></div>
+</dd>
+<dt id="midsv.polisher.fill_gap"><code class="name flex">
+<span>def <span class="ident">fill_gap</span></span>(<span>sam_template: dict[str, int | str], gap: int) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fill_gap(sam_template: dict[str, int | str], gap: int) -&gt; None:
+    &#34;&#34;&#34;Fill the gap between alignments with unknown nucleotides.&#34;&#34;&#34;
+    sam_template[&#34;MIDSV&#34;] += &#34;,=N&#34; * gap
+    if &#34;QSCORE&#34; in sam_template:
+        sam_template[&#34;QSCORE&#34;] += &#34;,-1&#34; * gap</code></pre>
+</details>
+<div class="desc"><p>Fill the gap between alignments with unknown nucleotides.</p></div>
+</dd>
+<dt id="midsv.polisher.is_forward_strand"><code class="name flex">
+<span>def <span class="ident">is_forward_strand</span></span>(<span>flag: int) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_forward_strand(flag: int) -&gt; bool:
+    &#34;&#34;&#34;
+    Determines if the read is mapped to the forward strand.
+
+    Args:
+    flag (int): The SAM flag value.
+
+    Returns:
+    bool: True if the read is mapped to the forward strand, False otherwise.
+    &#34;&#34;&#34;
+    # Check if the bit 4 (0-based) is NOT set
+    return not (flag &amp; 16)</code></pre>
+</details>
+<div class="desc"><p>Determines if the read is mapped to the forward strand.</p>
+<p>Args:
+flag (int): The SAM flag value.</p>
+<p>Returns:
+bool: True if the read is mapped to the forward strand, False otherwise.</p></div>
+</dd>
+<dt id="midsv.polisher.merge"><code class="name flex">
+<span>def <span class="ident">merge</span></span>(<span>alignments: list[dict[str, int | str]]) ‑> list[dict[str, str | int]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge(alignments: list[dict[str, int | str]]) -&gt; list[dict[str, int | str]]:
+    &#34;&#34;&#34;Merge splitted reads including large deletion or inversion.
+
+    Args:
+        alignments (list[dict[str, int | str]]): dictionarized SAM
+
+    Returns:
+        list[dict[str, int | str]]: SAM with joined splitted reads to single read
+    &#34;&#34;&#34;
+    sam_sorted = sorted(alignments, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
+    sam_groupby = groupby(sam_sorted, key=lambda x: x[&#34;QNAME&#34;])
+    sam_merged = []
+
+    for *_, records in sam_groupby:
+        records = list(records)
+        if len(records) == 1:
+            sam_merged.append(records[0])
+            continue
+
+        sam_template = deepcopy(records[0])
+        first_strand = is_forward_strand(sam_template[&#34;FLAG&#34;])
+
+        for i, current_alignment in enumerate(records[1:], start=1):
+            process_inversion(current_alignment, first_strand)
+
+            previous_alignment = records[i - 1]
+            num_microhomology = calculate_microhomology(previous_alignment, current_alignment)
+            remove_microhomology(current_alignment, num_microhomology)
+
+            previous_end = previous_alignment[&#34;POS&#34;] + len(previous_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)) - 1
+            current_start = current_alignment[&#34;POS&#34;] - 1
+
+            fill_gap(sam_template, current_start - previous_end)
+
+            sam_template[&#34;MIDSV&#34;] += &#34;,&#34; + current_alignment[&#34;MIDSV&#34;]
+            if &#34;QSCORE&#34; in sam_template:
+                sam_template[&#34;QSCORE&#34;] += &#34;,&#34; + current_alignment[&#34;QSCORE&#34;]
+
+        sam_merged.append(sam_template)
+
+    return sam_merged</code></pre>
+</details>
+<div class="desc"><p>Merge splitted reads including large deletion or inversion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>alignments</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, int | str]]</code></dt>
+<dd>SAM with joined splitted reads to single read</dd>
+</dl></div>
+</dd>
+<dt id="midsv.polisher.pad"><code class="name flex">
+<span>def <span class="ident">pad</span></span>(<span>alignments: list[dict[str, int | str]], sqheaders: dict[str, int]) ‑> list[dict[str, str | int]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pad(alignments: list[dict[str, int | str]], sqheaders: dict[str, int]) -&gt; list[dict[str, int | str]]:
+    &#34;&#34;&#34;Padding left and right flanks as &#34;=&#34; in MIDSV, &#34;-1&#34; in QUAL
+
+    Args:
+        sam (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
+
+    Returns:
+        list[dict[str, int | str]]: dictionarized SAM with padding as &#34;=N&#34; in MIDSV and CSSPLIT, and &#34;-1&#34; in QUAL
+    &#34;&#34;&#34;
+    alignments_padding = []
+    for alignment in alignments:
+        ref_length = sqheaders[alignment[&#34;RNAME&#34;]]
+        left_pad = max(0, alignment[&#34;POS&#34;] - 1)
+        right_pad = max(0, ref_length - (len(alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)) + left_pad))
+        left_pad_midsv, right_pad_midsv = &#34;=N,&#34; * left_pad, &#34;,=N&#34; * right_pad
+        left_pad_qscore, right_pad_qscore = &#34;-1,&#34; * left_pad, &#34;,-1&#34; * right_pad
+
+        alignment[&#34;MIDSV&#34;] = left_pad_midsv + alignment[&#34;MIDSV&#34;] + right_pad_midsv
+        if &#34;QSCORE&#34; in alignment:
+            alignment[&#34;QSCORE&#34;] = left_pad_qscore + alignment[&#34;QSCORE&#34;] + right_pad_qscore
+
+        alignments_padding.append(alignment)
+
+    return alignments_padding</code></pre>
+</details>
+<div class="desc"><p>Padding left and right flanks as "=" in MIDSV, "-1" in QUAL</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM</dd>
+<dt><strong><code>sqheaders</code></strong> :&ensp;<code>dict[str, int]</code></dt>
+<dd>dictionary as {SQ:LN}</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM with padding as "=N" in MIDSV and CSSPLIT, and "-1" in QUAL</dd>
+</dl></div>
+</dd>
+<dt id="midsv.polisher.polish"><code class="name flex">
+<span>def <span class="ident">polish</span></span>(<span>alignments: list[dict[str, int | str]],<br>sqheaders: dict[str, int],<br>keep: set[str] = None) ‑> list[dict[str, str | int]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def polish(
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
+) -&gt; list[dict[str, int | str]]:
+    &#34;&#34;&#34;Polish SAM by merging splitted reads, padding, removing different length, and selecting fields
+    Args:
+        alignments (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
+        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
+
+    Returns:
+        list[dict[str, int | str]]: polished SAM
+    &#34;&#34;&#34;
+    alignments_polished = merge(alignments)
+    alignments_polished = pad(alignments_polished, sqheaders)
+    alignments_polished = remove_different_length(alignments_polished, sqheaders)
+    return select(alignments_polished, keep)</code></pre>
+</details>
+<div class="desc"><p>Polish SAM by merging splitted reads, padding, removing different length, and selecting fields</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>alignments</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM</dd>
+<dt><strong><code>sqheaders</code></strong> :&ensp;<code>dict[str, int]</code></dt>
+<dd>dictionary as {SQ:LN}</dd>
+</dl>
+<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, int | str]]</code></dt>
+<dd>polished SAM</dd>
+</dl></div>
+</dd>
+<dt id="midsv.polisher.process_inversion"><code class="name flex">
+<span>def <span class="ident">process_inversion</span></span>(<span>current_alignment: dict[str, int | str], first_strand: bool) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_inversion(current_alignment: dict[str, int | str], first_strand: bool) -&gt; None:
+    &#34;&#34;&#34;Detect and mark inversion in the current alignment.&#34;&#34;&#34;
+    current_read_is_forward = is_forward_strand(current_alignment[&#34;FLAG&#34;])
+    if first_strand is not current_read_is_forward:
+        current_alignment[&#34;MIDSV&#34;] = current_alignment[&#34;MIDSV&#34;].lower()</code></pre>
+</details>
+<div class="desc"><p>Detect and mark inversion in the current alignment.</p></div>
+</dd>
+<dt id="midsv.polisher.remove_different_length"><code class="name flex">
+<span>def <span class="ident">remove_different_length</span></span>(<span>alignments: list[dict[str, int | str]], sqheaders: dict[str, int]) ‑> list[dict[str, str | int]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_different_length(
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int]
+) -&gt; list[dict[str, int | str]]:
+    &#34;&#34;&#34;remove different sequence length of the reference
+
+    Args:
+        sam (list[dict[str, int | str]]): dictionarized SAM
+        sqheaders (dict[str, int]): dictionary as {SQ:LN}
+
+    Returns:
+        list[dict[str, int | str]]: filtered SAM by different sequence length of the reference
+    &#34;&#34;&#34;
+    alignments_filtered = []
+    for alignment in alignments:
+        ref_length = sqheaders[alignment[&#34;RNAME&#34;]]
+        if len(alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)) != ref_length:
+            continue
+        alignments_filtered.append(alignment)
+    return alignments_filtered</code></pre>
+</details>
+<div class="desc"><p>remove different sequence length of the reference</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM</dd>
+<dt><strong><code>sqheaders</code></strong> :&ensp;<code>dict[str, int]</code></dt>
+<dd>dictionary as {SQ:LN}</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, int | str]]</code></dt>
+<dd>filtered SAM by different sequence length of the reference</dd>
+</dl></div>
+</dd>
+<dt id="midsv.polisher.remove_microhomology"><code class="name flex">
+<span>def <span class="ident">remove_microhomology</span></span>(<span>current_alignment: dict[str, str], num_microhomology: int) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_microhomology(current_alignment: dict[str, str], num_microhomology: int) -&gt; None:
+    &#34;&#34;&#34;Remove microhomology and update the current alignment.&#34;&#34;&#34;
+    current_midsv = current_alignment[&#34;MIDSV&#34;].split(&#34;,&#34;)
+    current_alignment[&#34;MIDSV&#34;] = &#34;,&#34;.join(current_midsv[num_microhomology:])
+
+    if &#34;QSCORE&#34; in current_alignment:
+        current_qscore = current_alignment[&#34;QSCORE&#34;].split(&#34;,&#34;)
+        current_alignment[&#34;QSCORE&#34;] = &#34;,&#34;.join(current_qscore[num_microhomology:])
+
+    current_alignment[&#34;POS&#34;] += num_microhomology</code></pre>
+</details>
+<div class="desc"><p>Remove microhomology and update the current alignment.</p></div>
+</dd>
+<dt id="midsv.polisher.select"><code class="name flex">
+<span>def <span class="ident">select</span></span>(<span>alignments: list[dict[str, int | str]], keep: set[str] = None) ‑> list[dict[str, str | int]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select(alignments: list[dict[str, int | str]], keep: set[str] = None) -&gt; list[dict[str, int | str]]:
+    &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
+
+    Args:
+        alignments (list[dict[str, int | str]]): dictionarized SAM
+        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
+    Returns:
+        list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
+    &#34;&#34;&#34;
+    keep = set(keep) if keep else set()
+    keys_to_delete = {&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;} - keep
+    selected = []
+    for record in alignments:
+        for key in keys_to_delete:
+            record.pop(key)
+        selected.append(record)
+    return selected</code></pre>
+</details>
+<div class="desc"><p>Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>alignments</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM</dd>
+</dl>
+<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, int | str]]</code></dt>
+<dd>dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="midsv" href="index.html">midsv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="midsv.polisher.calculate_microhomology" href="#midsv.polisher.calculate_microhomology">calculate_microhomology</a></code></li>
+<li><code><a title="midsv.polisher.fill_gap" href="#midsv.polisher.fill_gap">fill_gap</a></code></li>
+<li><code><a title="midsv.polisher.is_forward_strand" href="#midsv.polisher.is_forward_strand">is_forward_strand</a></code></li>
+<li><code><a title="midsv.polisher.merge" href="#midsv.polisher.merge">merge</a></code></li>
+<li><code><a title="midsv.polisher.pad" href="#midsv.polisher.pad">pad</a></code></li>
+<li><code><a title="midsv.polisher.polish" href="#midsv.polisher.polish">polish</a></code></li>
+<li><code><a title="midsv.polisher.process_inversion" href="#midsv.polisher.process_inversion">process_inversion</a></code></li>
+<li><code><a title="midsv.polisher.remove_different_length" href="#midsv.polisher.remove_different_length">remove_different_length</a></code></li>
+<li><code><a title="midsv.polisher.remove_microhomology" href="#midsv.polisher.remove_microhomology">remove_microhomology</a></code></li>
+<li><code><a title="midsv.polisher.select" href="#midsv.polisher.select">select</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

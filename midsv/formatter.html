@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
-<title>midsv.format API documentation</title>
+<meta name="generator" content="pdoc3 0.11.6">
+<title>midsv.formatter API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -33,7 +33,7 @@ el.replaceWith(d);
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>midsv.format</code></h1>
+<h1 class="title">Module <code>midsv.formatter</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -44,34 +44,37 @@ el.replaceWith(d);
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="midsv.format.dictionarize_sam"><code class="name flex">
-<span>def <span class="ident">dictionarize_sam</span></span>(<span>sam: list[list[str]]) ‑> list[dict[str | int]]</span>
+<dt id="midsv.formatter.alignments_to_dict"><code class="name flex">
+<span>def <span class="ident">alignments_to_dict</span></span>(<span>sam: list[list[str]] | Iterator[list[str]]) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def dictionarize_sam(sam: list[list[str]]) -&gt; list[dict[str | int]]:
+<pre><code class="python">def alignments_to_dict(sam: list[list[str]] | Iterator[list[str]]) -&gt; list[dict[str, str | int]]:
     &#34;&#34;&#34;Extract mapped alignments from SAM
 
     Args:
-        sam (list[list]): a list of lists of SAM format including CS tag
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
 
     Returns:
-        dict: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
+        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
     &#34;&#34;&#34;
     aligns = []
     for alignment in sam:
         if alignment[0].startswith(&#34;@&#34;):
             continue
-        if alignment[2] == &#34;*&#34;:
+        if alignment[2] == &#34;*&#34; or alignment[9] == &#34;*&#34;:
             continue
-        if alignment[9] == &#34;*&#34;:
-            continue
+
+        idx_cstag = None
         for i, a in enumerate(alignment):
             if a.startswith(&#34;cs:Z:&#34;) and not re.search(r&#34;:[0-9]+&#34;, alignment[i]):
                 idx_cstag = i
+        if idx_cstag is None:
+            continue
+
         alignments = dict(
             QNAME=alignment[0].replace(&#34;,&#34;, &#34;_&#34;),
             FLAG=int(alignment[1]),
@@ -83,98 +86,102 @@ el.replaceWith(d);
             CSTAG=alignment[idx_cstag],
         )
         aligns.append(alignments)
-    aligns = sorted(aligns, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])
     return aligns</code></pre>
 </details>
 <div class="desc"><p>Extract mapped alignments from SAM</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]] | Iterator[list[str]]</code></dt>
 <dd>a list of lists of SAM format including CS tag</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict</code></dt>
+<dt><code>list[dict[str, str | int]]</code></dt>
 <dd>a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN</dd>
 </dl></div>
 </dd>
-<dt id="midsv.format.extract_sqheaders"><code class="name flex">
-<span>def <span class="ident">extract_sqheaders</span></span>(<span>sam: list[list]) ‑> dict[str, int]</span>
+<dt id="midsv.formatter.extract_sqheaders"><code class="name flex">
+<span>def <span class="ident">extract_sqheaders</span></span>(<span>sam: list[list[str]] | Iterator[list[str]]) ‑> dict[str, int]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_sqheaders(sam: list[list]) -&gt; dict[str, int]:
+<pre><code class="python">def extract_sqheaders(sam: list[list[str]] | Iterator[list[str]]) -&gt; dict[str, int]:
     &#34;&#34;&#34;Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header
 
     Args:
-        sam (list[list]): a list of lists of SAM format
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format
 
     Returns:
-        dict: a dictionary containing (multiple) SN and LN
+        dict[str, int]: a dictionary containing (multiple) SN and LN
     &#34;&#34;&#34;
     sqheaders = [s for s in sam if &#34;@SQ&#34; in s]
-    SNLN = {}
+    header_snln = {}
     for sqheader in sqheaders:
-        sn_ln = [sq for sq in sqheader if re.search((&#34;SN:|LN:&#34;), sq)]
-        sn = sn_ln[0].replace(&#34;SN:&#34;, &#34;&#34;)
-        ln = sn_ln[1].replace(&#34;LN:&#34;, &#34;&#34;)
-        SNLN.update({sn: int(ln)})
-    return SNLN</code></pre>
+        snln = [sq for sq in sqheader if re.search((&#34;SN:|LN:&#34;), sq)]
+        sn = snln[0].replace(&#34;SN:&#34;, &#34;&#34;)
+        ln = snln[1].replace(&#34;LN:&#34;, &#34;&#34;)
+        header_snln.update({sn: int(ln)})
+    return header_snln</code></pre>
 </details>
 <div class="desc"><p>Extract SN (Reference sequence name) and LN (Reference sequence length) from SQ header</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>sam</code></strong> :&ensp;<code>list[list]</code></dt>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]] | Iterator[list[str]]</code></dt>
 <dd>a list of lists of SAM format</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict</code></dt>
+<dt><code>dict[str, int]</code></dt>
 <dd>a dictionary containing (multiple) SN and LN</dd>
 </dl></div>
 </dd>
-<dt id="midsv.format.realign_sequence"><code class="name flex">
-<span>def <span class="ident">realign_sequence</span></span>(<span>alignment: dict[str, str | int]) ‑> dict</span>
+<dt id="midsv.formatter.organize_alignments_to_dict"><code class="name flex">
+<span>def <span class="ident">organize_alignments_to_dict</span></span>(<span>sam: list[list[str]] | Iterator[list[str]]) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def realign_sequence(alignment: dict[str, str | int]) -&gt; dict:
-    &#34;&#34;&#34;Discard insertion, and add deletion and spliced nucleotides to unify sequence length&#34;&#34;&#34;
-    cigar = alignment[&#34;CIGAR&#34;]
-    cigar_split = split_cigar(cigar)
-    sequence = alignment[&#34;SEQ&#34;]
-    sequence_ignored = [&#34;N&#34;] * alignment[&#34;POS&#34;]
-    start = 0
-    for cig in cigar_split:
-        if &#34;M&#34; in cig:
-            end = start + int(cig[:-1])
-            sequence_ignored.append(sequence[start:end])
-            start = end
-        elif &#34;I&#34; in cig:
-            start += int(cig[:-1])
-        elif any(x in cig for x in [&#34;D&#34;, &#34;N&#34;]):
-            sequence_ignored.append(&#34;N&#34; * int(cig[:-1]))
-    realignment = deepcopy(alignment)
-    realignment[&#34;SEQ&#34;] = &#34;&#34;.join(sequence_ignored)
-    return realignment</code></pre>
+<pre><code class="python">def organize_alignments_to_dict(sam: list[list[str]] | Iterator[list[str]]) -&gt; list[dict[str, str | int]]:
+    &#34;&#34;&#34;Extract mapped alignments from SAM
+
+    Args:
+        sam (list[list[str]] | Iterator[list[str]]): a list of lists of SAM format including CS tag
+
+    Returns:
+        list[dict[str, str | int]]: a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN
+    &#34;&#34;&#34;
+    aligns = alignments_to_dict(sam)
+    aligns = remove_softclips(aligns)
+    aligns = remove_resequence(aligns)
+
+    return sorted(aligns, key=lambda x: [x[&#34;QNAME&#34;], x[&#34;POS&#34;]])</code></pre>
 </details>
-<div class="desc"><p>Discard insertion, and add deletion and spliced nucleotides to unify sequence length</p></div>
+<div class="desc"><p>Extract mapped alignments from SAM</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sam</code></strong> :&ensp;<code>list[list[str]] | Iterator[list[str]]</code></dt>
+<dd>a list of lists of SAM format including CS tag</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, str | int]]</code></dt>
+<dd>a dictionary containing QNAME, RNAME, POS, QUAL, CSTAG and RLEN</dd>
+</dl></div>
 </dd>
-<dt id="midsv.format.remove_resequence"><code class="name flex">
-<span>def <span class="ident">remove_resequence</span></span>(<span>alignments: list[dict[str, str | int]]) ‑> list[dict]</span>
+<dt id="midsv.formatter.remove_resequence"><code class="name flex">
+<span>def <span class="ident">remove_resequence</span></span>(<span>alignments: list[dict[str, str | int]]) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_resequence(alignments: list[dict[str, str | int]]) -&gt; list[dict]:
+<pre><code class="python">def remove_resequence(alignments: list[dict[str, str | int]]) -&gt; list[dict[str, str | int]]:
     &#34;&#34;&#34;Remove non-microhomologic overlapped reads within the same QNAME.
     The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
     The &#39;realignments&#39; is not sequencing errors, and it preserves the same sequence.
@@ -188,53 +195,52 @@ el.replaceWith(d);
         alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
-        list[list]: disctionalized SAM with removed overlaped reads
+        list[dict[str, str | int]]: disctionalized SAM with removed overlaped reads
     &#34;&#34;&#34;
+
+    def is_resequence(prev_read: dict[str, str | int], curr_read: dict[str, str | int]) -&gt; bool:
+        &#34;&#34;&#34;Check if the current read is a resequence of the previous read.&#34;&#34;&#34;
+        start_overlap = max(prev_read[&#34;POS&#34;], curr_read[&#34;POS&#34;])
+        end_overlap = min(_return_end_of_current_read(prev_read), _return_end_of_current_read(curr_read))
+
+        if prev_read[&#34;POS&#34;] &lt;= curr_read[&#34;POS&#34;] and _return_end_of_current_read(
+            prev_read
+        ) &gt;= _return_end_of_current_read(curr_read):
+            return True  # Completely contained
+
+        overlap_prev = prev_read[&#34;SEQ&#34;][start_overlap - prev_read[&#34;POS&#34;] : end_overlap - prev_read[&#34;POS&#34;]]
+        overlap_curr = curr_read[&#34;SEQ&#34;][start_overlap - curr_read[&#34;POS&#34;] : end_overlap - curr_read[&#34;POS&#34;]]
+
+        for prev_base, curr_base in zip(overlap_prev, overlap_curr):
+            if prev_base != &#34;=N&#34; and curr_base != &#34;=N&#34; and prev_base != curr_base:
+                return True  # Overlapped but different sequences
+
+        return False
+
     alignments.sort(key=lambda x: x[&#34;QNAME&#34;])
-    sam_groupby = groupby(alignments, lambda x: x[&#34;QNAME&#34;])
-    sam_nonoverlapped = []
-    for _, alignments in sam_groupby:
-        alignments = list(alignments)
-        if len(alignments) == 1:
-            sam_nonoverlapped += alignments
-            continue
-        alignments = [realign_sequence(alignment) for alignment in alignments]
-        alignments = sorted(alignments, key=lambda x: [x[&#34;POS&#34;]])
-        is_overraped = False
-        end_of_previous_read = -1
-        previous_read = alignments[0][&#34;SEQ&#34;]
-        for i, alignment in enumerate(alignments):
+    grouped_alignments = groupby(alignments, key=lambda x: x[&#34;QNAME&#34;])
+    filtered_alignments = []
+
+    for _, group in grouped_alignments:
+        group = sorted((_padding_n_to_sequence(alignment) for alignment in group), key=lambda x: x[&#34;POS&#34;])
+
+        retained_alignments = []
+        longest_alignment = max(group, key=lambda x: len(x[&#34;SEQ&#34;]))
+
+        for i, alignment in enumerate(group):
             if i == 0:
-                start_of_previous_read = alignment[&#34;POS&#34;] - 1
-                end_of_previous_read = return_end_of_current_read(alignment)
+                retained_alignments.append(alignment)
                 continue
-            start_of_current_read = alignment[&#34;POS&#34;] - 1
-            end_of_current_read = return_end_of_current_read(alignment)
-            # (1) The shorter reads that are completely included in the longer reads
-            if start_of_previous_read &lt;= start_of_current_read and end_of_previous_read &gt;= end_of_current_read:
-                is_overraped = True
+
+            if is_resequence(retained_alignments[-1], alignment):
+                retained_alignments = [longest_alignment]
                 break
-            else:
-                start_overlap = max(start_of_previous_read, start_of_current_read)
-                end_overlap = min(end_of_previous_read, end_of_current_read)
-                for prev, curr in zip(
-                    previous_read[start_overlap:end_overlap], alignment[&#34;SEQ&#34;][start_overlap:end_overlap]
-                ):
-                    if prev == &#34;N&#34; or curr == &#34;N&#34;:
-                        continue
-                    # (2) Overlapped but not the same DNA sequence
-                    if prev != curr:
-                        is_overraped = True
-                        break
-            start_of_previous_read = start_of_current_read
-            end_of_previous_read = return_end_of_current_read(alignment)
-        if is_overraped:
-            # The longest alignment will be retain
-            alignment = sorted(alignments, key=lambda x: -len(x[&#34;SEQ&#34;]))[0]
-            sam_nonoverlapped.append(alignment)
-        else:
-            sam_nonoverlapped += alignments
-    return sam_nonoverlapped</code></pre>
+
+            retained_alignments.append(alignment)
+
+        filtered_alignments.extend(retained_alignments)
+
+    return filtered_alignments</code></pre>
 </details>
 <div class="desc"><p>Remove non-microhomologic overlapped reads within the same QNAME.
 The overlapped sequences can be (1) realignments by microhomology or (2) resequence by sequencing error.
@@ -251,26 +257,26 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list[list]</code></dt>
+<dt><code>list[dict[str, str | int]]</code></dt>
 <dd>disctionalized SAM with removed overlaped reads</dd>
 </dl></div>
 </dd>
-<dt id="midsv.format.remove_softclips"><code class="name flex">
-<span>def <span class="ident">remove_softclips</span></span>(<span>alignments: list[dict[str | int]]) ‑> list[dict[str | int]]</span>
+<dt id="midsv.formatter.remove_softclips"><code class="name flex">
+<span>def <span class="ident">remove_softclips</span></span>(<span>alignments: list[dict[str, str | int]]) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_softclips(alignments: list[dict[str | int]]) -&gt; list[dict[str | int]]:
+<pre><code class="python">def remove_softclips(alignments: list[dict[str, str | int]]) -&gt; list[dict[str, str | int]]:
     &#34;&#34;&#34;Remove softclip information from SEQ and QUAL.
 
     Args:
         alignments (list[dict[str, str | int]]): disctionalized alignments
 
     Returns:
-        list[list]: disctionalized SAM with trimmed softclips in QUAL
+        list[dict[str, str | int]]: disctionalized SAM with trimmed softclips in QUAL
     &#34;&#34;&#34;
     alignments_softclips_removed = []
     for alignment in alignments:
@@ -299,31 +305,11 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list[list]</code></dt>
+<dt><code>list[dict[str, str | int]]</code></dt>
 <dd>disctionalized SAM with trimmed softclips in QUAL</dd>
 </dl></div>
 </dd>
-<dt id="midsv.format.return_end_of_current_read"><code class="name flex">
-<span>def <span class="ident">return_end_of_current_read</span></span>(<span>alignment: dict[str, str | int]) ‑> int</span>
-</code></dt>
-<dd>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def return_end_of_current_read(alignment: dict[str, str | int]) -&gt; int:
-    start_of_current_read = alignment[&#34;POS&#34;]
-    cigar = alignment[&#34;CIGAR&#34;]
-    cigar_split = split_cigar(cigar)
-    alignment_length = 0
-    for cig in cigar_split:
-        if &#34;M&#34; in cig or &#34;D&#34; in cig or &#34;N&#34; in cig:
-            alignment_length += int(cig[:-1])
-    return start_of_current_read + alignment_length - 1</code></pre>
-</details>
-<div class="desc"></div>
-</dd>
-<dt id="midsv.format.split_cigar"><code class="name flex">
+<dt id="midsv.formatter.split_cigar"><code class="name flex">
 <span>def <span class="ident">split_cigar</span></span>(<span>cigar: str) ‑> list[str]</span>
 </code></dt>
 <dd>
@@ -355,20 +341,19 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="midsv.format.dictionarize_sam" href="#midsv.format.dictionarize_sam">dictionarize_sam</a></code></li>
-<li><code><a title="midsv.format.extract_sqheaders" href="#midsv.format.extract_sqheaders">extract_sqheaders</a></code></li>
-<li><code><a title="midsv.format.realign_sequence" href="#midsv.format.realign_sequence">realign_sequence</a></code></li>
-<li><code><a title="midsv.format.remove_resequence" href="#midsv.format.remove_resequence">remove_resequence</a></code></li>
-<li><code><a title="midsv.format.remove_softclips" href="#midsv.format.remove_softclips">remove_softclips</a></code></li>
-<li><code><a title="midsv.format.return_end_of_current_read" href="#midsv.format.return_end_of_current_read">return_end_of_current_read</a></code></li>
-<li><code><a title="midsv.format.split_cigar" href="#midsv.format.split_cigar">split_cigar</a></code></li>
+<li><code><a title="midsv.formatter.alignments_to_dict" href="#midsv.formatter.alignments_to_dict">alignments_to_dict</a></code></li>
+<li><code><a title="midsv.formatter.extract_sqheaders" href="#midsv.formatter.extract_sqheaders">extract_sqheaders</a></code></li>
+<li><code><a title="midsv.formatter.organize_alignments_to_dict" href="#midsv.formatter.organize_alignments_to_dict">organize_alignments_to_dict</a></code></li>
+<li><code><a title="midsv.formatter.remove_resequence" href="#midsv.formatter.remove_resequence">remove_resequence</a></code></li>
+<li><code><a title="midsv.formatter.remove_softclips" href="#midsv.formatter.remove_softclips">remove_softclips</a></code></li>
+<li><code><a title="midsv.formatter.split_cigar" href="#midsv.formatter.split_cigar">split_cigar</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>
