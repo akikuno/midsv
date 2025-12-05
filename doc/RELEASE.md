@@ -12,19 +12,19 @@
 
 <!-- ############################################################# # -->
 
-# v0.12.0 (2025-01-dd)
+# v0.12.0 (2025-12-05)
+
 ## 💥 Breaking
 
-+ Change the `keep` parameter of `main.transform` to accept types `str | list[str]`. [[Commit Detail](https://github.com/akikuno/DAJIN2/commit/4bfca120e15814a2c9a281b401241bda5c83e362)]
-+ Remove `midsv` and `cssplit` from the arguments of `main.transform`. [[Commit Detail](https://github.com/akikuno/DAJIN2/commit/d4ad2a52f49c16885c25e5b16f2a25deace2fcaa)]
++ `main.transform` now requires `path_sam: Path | str`; the old API that accepted a SAM iterator is removed.
 
-## 📝 Documentation
-## 🚀 Performance
-## 🌟 New Features
-## 🐛 Bug Fixes
++ Output dictionaries from `main.transform` now expose `MIDSV` (formerly `CSSPLIT`), so callers must read `MIDSV`.
+
++ Reference Ns are always emitted as `=N`/`=n`.
+
 ## 🔧 Maintenance
-## ⛔️ Deprecated
-+ commitMessage. Issue #XX [[Commit Detail](https://github.com/akikuno/DAJIN2/commit/xxxxx)]
+
++ Documentation refreshed to outline the breaking changes and differences from v0.11.x.
 
 
 -------------------------------------------------------------
