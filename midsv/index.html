@@ -158,6 +158,14 @@ MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chr
 <pre><code class="language-python">midsv.io.read_jsonl(path_jsonl: str | Path) -&gt; Iterator[dict[str, str]]
 </code></pre>
 <p>Conversely, <code><a title="midsv.io.read_jsonl" href="io.html#midsv.io.read_jsonl">read_jsonl()</a></code> reads JSONL as a list of dictionaries.</p>
+<h2 id="export-vcf">Export VCF</h2>
+<pre><code class="language-python">from midsv import transform
+from midsv.io import write_vcf
+
+alignments = transform(&quot;examples/example_indels.sam&quot;, qscore=False)
+write_vcf(alignments, &quot;variants.vcf&quot;, large_sv_threshold=50)
+</code></pre>
+<p><code><a title="midsv.io.write_vcf" href="io.html#midsv.io.write_vcf">write_vcf()</a></code> writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than <code>large_sv_threshold</code> are emitted as symbolic <code>&lt;INS&gt;</code>, large deletions (or <code>=N</code> padding) use <code>&lt;DEL&gt;</code>, and inversions use <code>&lt;INV&gt;</code>. The INFO field includes <code>TYPE</code> or <code>SVTYPE</code>, <code>SVLEN</code>, <code>SEQ</code>, and <code>QNAME</code>.</p>
 <h1 id="examples">🖍️Examples</h1>
 <h2 id="perfect-match">Perfect match</h2>
 <pre><code class="language-python">import midsv
@@ -350,6 +358,7 @@ print(midsv.transform(sam, qscore=True))
 <li><a href="#helper-functions">🧩Helper functions</a><ul>
 <li><a href="#read-sam-file">Read SAM file</a></li>
 <li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
+<li><a href="#export-vcf">Export VCF</a></li>
 </ul>
 </li>
 <li><a href="#examples">🖍️Examples</a><ul>

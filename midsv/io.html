@@ -89,6 +89,51 @@ el.replaceWith(d);
 </details>
 <div class="desc"></div>
 </dd>
+<dt id="midsv.io.write_vcf"><code class="name flex">
+<span>def <span class="ident">write_vcf</span></span>(<span>alignments: list[dict[str, str | int]],<br>path_output: str | Path,<br>large_sv_threshold: int = 50) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write_vcf(alignments: list[dict[str, str | int]], path_output: str | Path, large_sv_threshold: int = 50) -&gt; None:
+    &#34;&#34;&#34;Export MIDSV alignments to VCF format.
+
+    Args:
+        alignments (list[dict[str, str | int]]): Output of midsv.transform including MIDSV.
+        path_output (str | Path): Destination VCF path.
+        large_sv_threshold (int, optional): Insertions longer than this use symbolic ALT. Defaults to 50.
+    &#34;&#34;&#34;
+    records: list[dict[str, object]] = []
+    for alignment in alignments:
+        records.extend(_alignment_to_vcf_records(alignment, large_sv_threshold))
+
+    for order, record in enumerate(records):
+        record[&#34;_order&#34;] = order
+
+    records.sort(key=lambda r: (r[&#34;CHROM&#34;], r[&#34;POS&#34;], r[&#34;_order&#34;]))
+
+    with open(path_output, &#34;w&#34;) as f:
+        f.write(&#34;##fileformat=VCFv4.3\n&#34;)
+        f.write(&#34;#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n&#34;)
+        for record in records:
+            info_str = _format_info(record[&#34;INFO&#34;])
+            f.write(
+                f&#34;{record[&#39;CHROM&#39;]}\t{record[&#39;POS&#39;]}\t.\t{record[&#39;REF&#39;]}\t{record[&#39;ALT&#39;]}\t.\tPASS\t{info_str}\n&#34;
+            )</code></pre>
+</details>
+<div class="desc"><p>Export MIDSV alignments to VCF format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>alignments</code></strong> :&ensp;<code>list[dict[str, str | int]]</code></dt>
+<dd>Output of midsv.transform including MIDSV.</dd>
+<dt><strong><code>path_output</code></strong> :&ensp;<code>str | Path</code></dt>
+<dd>Destination VCF path.</dd>
+<dt><strong><code>large_sv_threshold</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Insertions longer than this use symbolic ALT. Defaults to 50.</dd>
+</dl></div>
+</dd>
 </dl>
 </section>
 <section>
@@ -109,6 +154,7 @@ el.replaceWith(d);
 <li><code><a title="midsv.io.read_jsonl" href="#midsv.io.read_jsonl">read_jsonl</a></code></li>
 <li><code><a title="midsv.io.read_sam" href="#midsv.io.read_sam">read_sam</a></code></li>
 <li><code><a title="midsv.io.write_jsonl" href="#midsv.io.write_jsonl">write_jsonl</a></code></li>
+<li><code><a title="midsv.io.write_vcf" href="#midsv.io.write_vcf">write_vcf</a></code></li>
 </ul>
 </li>
 </ul>
