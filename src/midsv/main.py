@@ -32,6 +32,6 @@ def transform(
     alignments = converter.convert(alignments, qscore)
 
     # Polishing
-    alignments = polisher.polish(alignments, sqheaders)
+    alignments = polisher.polish(alignments, sqheaders, keep)
 
     return alignments
