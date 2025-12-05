@@ -228,7 +228,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 </dl></div>
 </dd>
 <dt id="midsv.polisher.polish"><code class="name flex">
-<span>def <span class="ident">polish</span></span>(<span>alignments: list[dict[str, int | str]],<br>sqheaders: dict[str, int],<br>keep: set[str] = None) ‑> list[dict[str, str | int]]</span>
+<span>def <span class="ident">polish</span></span>(<span>alignments: list[dict[str, int | str]],<br>sqheaders: dict[str, int],<br>keep: list[str] = None) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -236,13 +236,13 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def polish(
-    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: set[str] = None
+    alignments: list[dict[str, int | str]], sqheaders: dict[str, int], keep: list[str] = None
 ) -&gt; list[dict[str, int | str]]:
     &#34;&#34;&#34;Polish SAM by merging splitted reads, padding, removing different length, and selecting fields
     Args:
         alignments (list[dict[str, int | str]]): dictionarized SAM
         sqheaders (dict[str, int]): dictionary as {SQ:LN}
-        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
+        keep (list(str), optional): Subset of [&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;] to keep. Defaults to None.
 
     Returns:
         list[dict[str, int | str]]: polished SAM
@@ -260,7 +260,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 <dt><strong><code>sqheaders</code></strong> :&ensp;<code>dict[str, int]</code></dt>
 <dd>dictionary as {SQ:LN}</dd>
 </dl>
-<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
+<p>keep (list(str), optional): Subset of ['FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'] to keep. Defaults to None.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[dict[str, int | str]]</code></dt>
@@ -347,19 +347,19 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 <div class="desc"><p>Remove microhomology and update the current alignment.</p></div>
 </dd>
 <dt id="midsv.polisher.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>alignments: list[dict[str, int | str]], keep: set[str] = None) ‑> list[dict[str, str | int]]</span>
+<span>def <span class="ident">select</span></span>(<span>alignments: list[dict[str, int | str]], keep: list[str] = None) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(alignments: list[dict[str, int | str]], keep: set[str] = None) -&gt; list[dict[str, int | str]]:
+<pre><code class="python">def select(alignments: list[dict[str, int | str]], keep: list[str] = None) -&gt; list[dict[str, int | str]]:
     &#34;&#34;&#34;Select QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
 
     Args:
         alignments (list[dict[str, int | str]]): dictionarized SAM
-        keep (set(str), optional): Subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;} to keep. Defaults to set().
+        keep (list(str), optional): Subset of [&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;] to keep. Defaults to None.
     Returns:
         list[dict[str, int | str]]: dictionarized SAM of QNAME, RNAME, MIDSV, CSSPLIT and QSCORE
     &#34;&#34;&#34;
@@ -378,7 +378,7 @@ bool: True if the read is mapped to the forward strand, False otherwise.</p></di
 <dt><strong><code>alignments</code></strong> :&ensp;<code>list[dict[str, int | str]]</code></dt>
 <dd>dictionarized SAM</dd>
 </dl>
-<p>keep (set(str), optional): Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep. Defaults to set().</p>
+<p>keep (list(str), optional): Subset of ['FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'] to keep. Defaults to None.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[dict[str, int | str]]</code></dt>

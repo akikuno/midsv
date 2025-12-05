@@ -58,14 +58,14 @@ el.replaceWith(d);
 <div class="desc"></div>
 </dd>
 <dt id="midsv.converter.convert"><code class="name flex">
-<span>def <span class="ident">convert</span></span>(<span>samdict: list[dict[str, str | int]], qscore: bool = False) ‑> None</span>
+<span>def <span class="ident">convert</span></span>(<span>samdict: list[dict[str, str | int]], qscore: bool = False) ‑> list[dict[str, str | int]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def convert(samdict: list[dict[str, str | int]], qscore: bool = False) -&gt; None:
+<pre><code class="python">def convert(samdict: list[dict[str, str | int]], qscore: bool = False) -&gt; list[dict[str, str | int]]:
     for alignment in samdict:
         alignment[&#34;MIDSV&#34;] = cstag_to_midsv(alignment[&#34;CSTAG&#34;])
         if qscore:

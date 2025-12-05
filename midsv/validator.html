@@ -45,22 +45,22 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="midsv.validator.keep_argument"><code class="name flex">
-<span>def <span class="ident">keep_argument</span></span>(<span>keep: str | list[str]) ‑> set[str]</span>
+<span>def <span class="ident">keep_argument</span></span>(<span>keep: str | list[str]) ‑> list[str]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def keep_argument(keep: str | list[str]) -&gt; set[str]:
+<pre><code class="python">def keep_argument(keep: str | list[str]) -&gt; list[str]:
     if keep is None:
         keep = set()
     elif isinstance(keep, str):
         keep = [keep]
 
-    keep = set(keep)
+    keep_set = set(keep)
 
-    if not keep.issubset({&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;}):
+    if not keep_set.issubset({&#34;FLAG&#34;, &#34;POS&#34;, &#34;SEQ&#34;, &#34;QUAL&#34;, &#34;CIGAR&#34;, &#34;CSTAG&#34;}):
         raise ValueError(&#34;&#39;keep&#39; must be a subset of {&#39;FLAG&#39;, &#39;POS&#39;, &#39;SEQ&#39;, &#39;QUAL&#39;, &#39;CIGAR&#39;, &#39;CSTAG&#39;}&#34;)
 
     return keep</code></pre>
@@ -68,14 +68,14 @@ el.replaceWith(d);
 <div class="desc"></div>
 </dd>
 <dt id="midsv.validator.sam_alignments"><code class="name flex">
-<span>def <span class="ident">sam_alignments</span></span>(<span>sam: list[list[str]], qscore: bool = False) ‑> None</span>
+<span>def <span class="ident">sam_alignments</span></span>(<span>sam: list[list[str]] | Iterator[list[str]], qscore: bool = False) ‑> None</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def sam_alignments(sam: list[list[str]], qscore: bool = False) -&gt; None:
+<pre><code class="python">def sam_alignments(sam: list[list[str]] | Iterator[list[str]], qscore: bool = False) -&gt; None:
     &#34;&#34;&#34;Check alignments are mapped and have long-formatted cs tag
 
     Args:
