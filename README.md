@@ -15,6 +15,12 @@ MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separ
 > MIDSV is intended for targeted amplicon sequences (10-100 kbp).  
 > Using whole chromosomes as references may exhaust memory and crash.  
 
+
+>[!IMPORTANT]
+> MIDSV requires long-format cstag tags in the SAM file.  
+> Please use minimap2 with `--cs=long` option.
+> or use [`cstag`](https://github.com/akikuno/cstag) tool to append long-format cstag.
+
 The output includes `MIDSV` and, optionally, `QSCORE`.
 
 - `MIDSV` preserves original nucleotides while annotating mutations.
