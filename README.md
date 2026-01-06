@@ -7,20 +7,21 @@
 
 # midsv
 
-`midsv` is a Python module to convert SAM to MIDSV format.
+`midsv` is a Python module that converts SAM files to MIDSV format.
 
-MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the differences between a reference and a query with the same length as the reference.
+MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format that represents differences between a reference and a query, with the same length as the reference.
 
 > [!CAUTION]
-> MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chromosomes are used as references due to running out of memory.
+> MIDSV is intended for targeted amplicon sequences (10-100 kbp).  
+> Using whole chromosomes as references may exhaust memory and crash.  
 
-MIDSV can provide `MIDSV` and `QSCORE`.
+The output includes `MIDSV` and, optionally, `QSCORE`.
 
-- `MIDSV` keeps original nucleotides while annotating mutations.
+- `MIDSV` preserves original nucleotides while annotating mutations.
 - `QSCORE` provides Phred quality scores for each nucleotide.
 
 
-MIDSV (formerly named MIDS) details are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).  
+Details of MIDSV (formerly MIDS) are described in [our paper](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009).
 
 # 🛠️Installation
 
@@ -41,39 +42,39 @@ pip install midsv
 ```python
 midsv.transform(
     path_sam: str | Path,
-    qscore: bool = True,
+    qscore: bool = False,
     keep: str | list[str] = None
 ) -> list[dict[str, str | int]]
 ```
 
-- path_sam: Path of SAM sfile
-- qscore (bool, optional): Output QSCORE. Defaults to True.
-- keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep fields from the SAM file. Defaults to None.
+- path_sam: Path to a SAM file on disk.
+- qscore (bool, optional): Output QSCORE. Defaults to False.
+- keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to include from the SAM file. Defaults to None.
 
-- `midsv.transform()` returns a list of dictionaries including `QNAME`, `RNAME`, `MIDSV`, and `QSCORE`.
+- `midsv.transform()` returns a list of dictionaries containing `QNAME`, `RNAME`, `MIDSV`, and optionally `QSCORE`, plus any fields specified by `keep`.
 - `MIDSV` and `QSCORE` are comma-separated strings and have the same reference sequence length.
 
 # 📜Specification
 
 ## MIDSV
 
-| Op  | Regex          | Description                  |
-| --- | -------------- | ---------------------------- |
-| =   | [ACGTN]        | Identical sequence           |
-| +   | [ACGTN]        | Insertion to the reference   |
-| -   | [ACGTN]        | Deletion from the reference  |
-| *   | [ACGTN][ACGTN] | Substitution                 |
-|     | [acgtn]        | Inversion                    |
-| \|  |                | Separator of insertion sites |
+| Op  | Regex          | Description                   |
+| --- | -------------- | ----------------------------- |
+| =   | [ACGTN]        | Identical sequence            |
+| +   | [ACGTN]        | Insertion to the reference    |
+| -   | [ACGTN]        | Deletion from the reference   |
+| *   | [ACGTN][ACGTN] | Substitution                  |
+|     | [acgtn]        | Inversion                     |
+| \|  |                | Separator for insertion sites |
 
 `MIDSV` uses `|` to separate nucleotides in insertion sites so `+A|+C|+G|+T|=A` can be easily split into `[+A, +C, +G, +T, =A]` by `"+A|+C|+G|+T|=A".split("|")`.
 
 ## QSCORE
 
-| Op  | Description                  |
-| --- | ---------------------------- |
-| -1  | Unknown                      |
-| \|  | Separator at insertion sites |
+| Op  | Description                   |
+| --- | ----------------------------- |
+| -1  | Unknown                       |
+| \|  | Separator for insertion sites |
 
 `QSCORE` uses `-1` for deletions or unknown nucleotides.
 
@@ -88,22 +89,22 @@ As with `MIDSV`, `QSCORE` uses `|` to separate quality scores in insertion sites
 midsv.io.read_sam(path_sam: str | Path) -> Iterator[list[str]]
 ```
 
-`midsv.io.read_sam` reads a SAM file into an iterator of lists.
+`midsv.io.read_sam` reads a local SAM file into an iterator of string lists.
 
 
 ## Read/Write JSON Line (JSONL)
 
 ```python
-midsv.io.write_jsonl(dicts: list[dict[str, str]], path_jsonl: str | Path)
+midsv.io.write_jsonl(dicts: list[dict[str, str]], path_output: str | Path)
 ```
 
-Since `midsv.io.transform` returns a list of dictionaries, `midsv.io.write_jsonl` outputs it to a file in JSONL format.
+Since `midsv.transform` returns a list of dictionaries, `midsv.io.write_jsonl` outputs it to a file in JSONL format.
 
 ```python
-midsv.io.read_jsonl(path_jsonl: str | Path) -> Iterator[dict[str, str]]
+midsv.io.read_jsonl(path_input: str | Path) -> Iterator[dict[str, str]]
 ```
 
-Conversely, `midsv.io.read_jsonl` reads JSONL as a list of dictionaries.
+Conversely, `midsv.io.read_jsonl` reads JSONL as an iterator of dictionaries.
 
 ## Export VCF
 
@@ -128,14 +129,14 @@ from midsv.io import read_sam
 
 # Perfect match
 
-path_sam = "https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_match.sam"
+path_sam = "examples/example_match.sam"
 print(list(read_sam(path_sam)))
 # sam = [
 #     ['@SQ', 'SN:example', 'LN:10'],
 #     ['match', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTACGTAC', '0123456789', 'cs:Z:=ACGTACGTAC']
 # ]
 
-print(midsv.transform(read_sam(path_sam), qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [{
 #   'QNAME': 'control',
 #   'RNAME': 'example',
@@ -150,14 +151,14 @@ print(midsv.transform(read_sam(path_sam), qscore=True))
 import midsv
 from midsv.io import read_sam
 
-path_sam = "https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_indels.sam"
+path_sam = "examples/example_indels.sam"
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
 #     ['indel_sub', '0', 'example', '1', '60', '5M3I1M2D2M', '*', '0', '0', 'ACGTGTTTCGT', '01234!!!56789', 'cs:Z:=ACGT*ag+ttt=C-aa=GT']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [{
 #   'QNAME': 'indel_sub',
 #   'RNAME': 'example',
@@ -172,7 +173,7 @@ print(midsv.transform(sam, qscore=True))
 import midsv
 from midsv.io import read_sam
 
-path_sam = "https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_large_deletion.sam"
+path_sam = "examples/example_large_deletion.sam"
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
@@ -180,7 +181,7 @@ print(list(read_sam(path_sam)))
 #     ['large-deletion', '0', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [
 #   {'QNAME': 'large-deletion',
 #   'RNAME': 'example',
@@ -195,7 +196,7 @@ print(midsv.transform(sam, qscore=True))
 import midsv
 from midsv.io import read_sam
 
-path_sam = "https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_inversion.sam"
+path_sam = "examples/example_inversion.sam"
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
@@ -204,7 +205,7 @@ print(list(read_sam(path_sam)))
 #     ['inversion', '2048', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [
 #   {'QNAME': 'inversion',
 #   'RNAME': 'example',
