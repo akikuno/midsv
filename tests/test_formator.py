@@ -182,3 +182,15 @@ def test_remove_resequence():
 )
 def test_alignments_to_dict(sam, expected):
     assert formatter.alignments_to_dict(sam) == expected
+
+
+def test_revcomp_basic():
+    midsv_tag = "=A,=C,=G,=T,=N"
+    expected = "=N,=A,=C,=G,=T"
+    assert formatter.revcomp(midsv_tag) == expected
+
+
+def test_revcomp_insertion_shift():
+    midsv_tag = "=A,=A,-G,+T|+C|=A,=A,*AG,=C"
+    expected = "=G,*TC,=T,=T,+G|+A|-C,=T,=T"
+    assert formatter.revcomp(midsv_tag) == expected

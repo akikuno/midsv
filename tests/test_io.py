@@ -68,11 +68,11 @@ def test_write_vcf(tmp_path):
     expected = [
         "##fileformat=VCFv4.3",
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO",
-        "example\t3\t.\tN\t<DEL>\t.\tPASS\tTYPE=DEL;SVLEN=-6;SEQ=NNNNNN;QNAME=large-deletion",
+        "example\t3\t.\tN\t<DEL>\t.\tPASS\tTYPE=DEL;SVLEN=-6;SEQ=NNNNNN;QNAME=large-deletion;END=8",
         "example\t5\t.\tA\tG\t.\tPASS\tTYPE=SUB;QNAME=indel_sub",
         "example\t6\t.\tC\tCTTT\t.\tPASS\tTYPE=INS;SVLEN=3;SEQ=TTT;QNAME=indel_sub",
         "example\t6\t.\tC\t<INV>\t.\tPASS\tSVTYPE=INV;SVLEN=3;SEQ=CGT;QNAME=inversion",
-        "example\t7\t.\tA\t<DEL>\t.\tPASS\tTYPE=DEL;SVLEN=-2;SEQ=AA;QNAME=indel_sub",
+        "example\t7\t.\tA\t<DEL>\t.\tPASS\tTYPE=DEL;SVLEN=-2;SEQ=AA;QNAME=indel_sub;END=8",
         "longins\t1\t.\tG\t<INS>\t.\tPASS\tTYPE=INS;SVLEN=6;SEQ=AAAAAA;QNAME=long-ins",
     ]
     assert content == expected
