@@ -223,6 +223,18 @@ def write_vcf(alignments: list[dict[str, str | int]], path_output: str | Path, l
         f.write("##fileformat=VCFv4.3\n")
         f.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
         for record in records:
+            info = record.get("INFO", {})
+            if isinstance(info, dict) and "END" not in info:
+                svtype = info.get("SVTYPE") or info.get("TYPE")
+                if svtype == "DEL":
+                    svlen = info.get("SVLEN")
+                    if svlen is not None:
+                        try:
+                            svlen_int = int(svlen)
+                        except (TypeError, ValueError):
+                            svlen_int = None
+                        if svlen_int is not None:
+                            info["END"] = int(record["POS"]) + abs(svlen_int) - 1
             info_str = _format_info(record["INFO"])
             f.write(
                 f"{record['CHROM']}\t{record['POS']}\t.\t{record['REF']}\t{record['ALT']}\t.\tPASS\t{info_str}\n"
