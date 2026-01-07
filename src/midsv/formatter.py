@@ -235,3 +235,93 @@ def organize_alignments_to_dict(sam: list[list[str]] | Iterator[list[str]]) -> l
     aligns = remove_resequence(aligns)
 
     return sorted(aligns, key=lambda x: [x["QNAME"], x["POS"]])
+
+
+###########################################################
+# MIDSV reverse complement
+###########################################################
+
+
+_COMPLEMENT = {
+    "A": "T",
+    "T": "A",
+    "C": "G",
+    "G": "C",
+    "N": "N",
+    "a": "t",
+    "t": "a",
+    "c": "g",
+    "g": "c",
+    "n": "n",
+}
+
+
+def _complement_sequence(seq: str) -> str:
+    return "".join(_COMPLEMENT.get(base, base) for base in seq)
+
+
+def _complement_token(token: str) -> str:
+    if not token:
+        return token
+    op = token[0]
+    if op in {"=", "-", "+"}:
+        return op + _complement_sequence(token[1:])
+    if op == "*":
+        return op + _complement_sequence(token[1:])
+    return _complement_sequence(token)
+
+
+def _split_insertion_token(token: str) -> tuple[list[str], str]:
+    parts = token.split("|")
+    insertions = [part for part in parts if part.startswith("+")]
+    anchor = next((part for part in reversed(parts) if not part.startswith("+")), "")
+    return insertions, anchor
+
+
+def revcomp(midsv: str) -> str:
+    if not midsv:
+        return ""
+    tokens = midsv.split(",")
+    num_tokens = len(tokens)
+    anchors: list[str] = []
+    boundaries: list[list[str]] = [[] for _ in range(num_tokens + 1)]
+
+    for i, token in enumerate(tokens):
+        if token.startswith("+") or "|" in token:
+            insertions, anchor = _split_insertion_token(token)
+            if insertions:
+                boundaries[i].extend(insertions)
+            anchors.append(anchor)
+        else:
+            anchors.append(token)
+
+    rev_anchors = [_complement_token(anchor) for anchor in reversed(anchors)]
+    rev_boundaries: list[list[str]] = [[] for _ in range(num_tokens + 1)]
+    for i, insertions in enumerate(boundaries):
+        if not insertions:
+            continue
+        rev_index = num_tokens - i
+        rev_insertions = ["+" + _complement_sequence(part[1:]) for part in reversed(insertions)]
+        rev_boundaries[rev_index].extend(rev_insertions)
+
+    output_tokens: list[str] = []
+    for i in range(num_tokens):
+        parts: list[str] = []
+        if rev_boundaries[i]:
+            parts.extend(rev_boundaries[i])
+        anchor = rev_anchors[i]
+        if anchor:
+            if parts:
+                parts.append(anchor)
+                output_tokens.append("|".join(parts))
+            else:
+                output_tokens.append(anchor)
+        elif parts:
+            output_tokens.append("|".join(parts))
+        else:
+            output_tokens.append(anchor)
+
+    if rev_boundaries[num_tokens]:
+        output_tokens.append("|".join(rev_boundaries[num_tokens]))
+
+    return ",".join(output_tokens)

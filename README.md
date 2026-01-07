@@ -213,6 +213,19 @@ midsv.io.read_jsonl(path_input: str | Path) -> Iterator[dict[str, str]]
 
 Conversely, `midsv.io.read_jsonl` reads JSONL as an iterator of dictionaries.
 
+## Reverse complement MIDSV
+
+```python
+from midsv import formatter
+
+midsv_tag = "=A,=A,-G,+T|+C|=A,=A,*AG,=C"
+revcomp_tag = formatter.revcomp(midsv_tag)
+print(revcomp_tag)
+# =G,*TC,=T,=T,+G|+A|-C,=T,=T
+```
+
+`midsv.formatter.revcomp` returns the reverse complement of a MIDSV string. Insertions are reversed and complemented with their anchor moved to the new position, following the MIDSV specification.
+
 ## Export VCF
 
 ```python
@@ -224,4 +237,3 @@ write_vcf(alignments, "variants.vcf", large_sv_threshold=50)
 ```
 
 `midsv.io.write_vcf` writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than `large_sv_threshold` are emitted as symbolic `<INS>`, large deletions (or `=N` padding) use `<DEL>`, and inversions use `<INV>`. The INFO field includes `TYPE` or `SVTYPE`, `SVLEN`, `SEQ`, and `QNAME`.
-
