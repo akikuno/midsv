@@ -12,15 +12,13 @@
 
 <!-- ############################################################# # -->
 
-# v0.13.0 (2025-12-06)
+# v0.13.1 (2026-01-07)
 
 ## 🌟 New Features
 
-- Add `midsv.io.write_vcf` to export MIDSV outputs as VCF supporting insertion, deletion, substitution, large insertion, large deletion, and inversion.
+- Add `midsv.formatter.revcomp` to generate the reverse complement of a MIDSV string, including insertions with anchors moved to the new position and proper handling of substitution tokens.
+- Add `END` to the INFO field for deletion records in `midsv.io.write_vcf` when `TYPE=DEL` or `SVTYPE=DEL`, computed from `POS` and `SVLEN` for clearer interval representation.
 
-## 📝 Documentation
-
-- Document VCF export usage and supported variant types in README.
 
 
 
@@ -33,6 +31,18 @@
 
 </details> -->
 
+<details>
+<summary> v0.13.0 (2025-12-06) </summary>
+
+## 🌟 New Features
+
+- Add `midsv.io.write_vcf` to export MIDSV outputs as VCF supporting insertion, deletion, substitution, large insertion, large deletion, and inversion.
+
+## 📝 Documentation
+
+- Document VCF export usage and supported variant types in README.
+
+</details>
 
 
 <details>
