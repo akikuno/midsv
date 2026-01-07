@@ -43,19 +43,24 @@ el.replaceWith(d);
 <a href="https://pypi.org/project/midsv/"><img alt="PyPI" src="https://img.shields.io/pypi/v/midsv.svg?label=PyPI&amp;color=orange&amp;style=flat-square"></a>
 <a href="https://anaconda.org/bioconda/midsv"><img alt="Bioconda" src="https://img.shields.io/conda/v/bioconda/midsv?label=Bioconda&amp;color=orange&amp;style=flat-square"></a></p>
 <h1 id="midsv">midsv</h1>
-<p><code><a title="midsv" href="#midsv">midsv</a></code> is a Python module to convert SAM to MIDSV format.</p>
-<p>MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format representing the differences between a reference and a query with the same length as the reference.</p>
+<p><code><a title="midsv" href="#midsv">midsv</a></code> is a Python module that converts SAM files to MIDSV format.</p>
+<p>MIDSV (Match, Insertion, Deletion, Substitution, and inVersion) is a comma-separated format that represents differences between a reference and a query, with the same length as the reference.</p>
 <blockquote>
 <p>[!CAUTION]
-MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chromosomes are used as references due to running out of memory.</p>
+MIDSV is intended for targeted amplicon sequences (10-100 kbp).<br>
+Using whole chromosomes as references may exhaust memory and crash.
+</p>
+<p>[!IMPORTANT]
+MIDSV requires long-format cstag tags in the SAM file.<br>
+Please use minimap2 with <code>--cs=long</code> option.
+or use <a href="https://github.com/akikuno/cstag"><code>cstag</code></a> tool to append long-format cstag.</p>
 </blockquote>
-<p>MIDSV can provide <code>MIDSV</code> and <code>QSCORE</code>.</p>
+<p>The output includes <code>MIDSV</code> and, optionally, <code>QSCORE</code>.</p>
 <ul>
-<li><code>MIDSV</code> keeps original nucleotides while annotating mutations.</li>
+<li><code>MIDSV</code> preserves original nucleotides while annotating mutations.</li>
 <li><code>QSCORE</code> provides Phred quality scores for each nucleotide.</li>
 </ul>
-<p>MIDSV (formerly named MIDS) details are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009">our paper</a>.
-</p>
+<p>Details of MIDSV (formerly MIDS) are described in <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001507#sec009">our paper</a>.</p>
 <h1 id="installation">🛠️Installation</h1>
 <p>From <a href="https://anaconda.org/bioconda/midsv">Bioconda</a> (recommended):</p>
 <pre><code class="language-bash">conda install -c bioconda midsv
@@ -63,25 +68,7 @@ MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chr
 <p>From <a href="https://pypi.org/project/midsv/">PyPI</a>:</p>
 <pre><code class="language-bash">pip install midsv
 </code></pre>
-<h1 id="usage">📘Usage</h1>
-<pre><code class="language-python">midsv.transform(
-    path_sam: str | Path,
-    qscore: bool = True,
-    keep: str | list[str] = None
-) -&gt; list[dict[str, str | int]]
-</code></pre>
-<ul>
-<li>path_sam: Path of SAM sfile</li>
-<li>qscore (bool, optional): Output QSCORE. Defaults to True.</li>
-<li>
-<p>keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to keep fields from the SAM file. Defaults to None.</p>
-</li>
-<li>
-<p><code><a title="midsv.transform" href="#midsv.transform">transform()</a></code> returns a list of dictionaries including <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, and <code>QSCORE</code>.</p>
-</li>
-<li><code>MIDSV</code> and <code>QSCORE</code> are comma-separated strings and have the same reference sequence length.</li>
-</ul>
-<h1 id="specification">📜Specification</h1>
+<h1 id="specifications">📜Specifications</h1>
 <h2 id="midsv_1">MIDSV</h2>
 <table>
 <thead>
@@ -120,7 +107,7 @@ MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chr
 <tr>
 <td>|</td>
 <td></td>
-<td>Separator of insertion sites</td>
+<td>Separator for insertion sites</td>
 </tr>
 </tbody>
 </table>
@@ -140,32 +127,30 @@ MIDSV is for target amplicon sequences (10-100 kbp). It may crash when whole chr
 </tr>
 <tr>
 <td>|</td>
-<td>Separator at insertion sites</td>
+<td>Separator for insertion sites</td>
 </tr>
 </tbody>
 </table>
 <p><code>QSCORE</code> uses <code>-1</code> for deletions or unknown nucleotides.</p>
 <p>As with <code>MIDSV</code>, <code>QSCORE</code> uses <code>|</code> to separate quality scores in insertion sites.</p>
-<h1 id="helper-functions">🧩Helper functions</h1>
-<h2 id="read-sam-file">Read SAM file</h2>
-<pre><code class="language-python">midsv.io.read_sam(path_sam: str | Path) -&gt; Iterator[list[str]]
+<h1 id="usage">📘Usage</h1>
+<pre><code class="language-python">midsv.transform(
+    path_sam: str | Path,
+    qscore: bool = False,
+    keep: str | list[str] = None
+) -&gt; list[dict[str, str | int]]
 </code></pre>
-<p><code><a title="midsv.io.read_sam" href="io.html#midsv.io.read_sam">read_sam()</a></code> reads a SAM file into an iterator of lists.</p>
-<h2 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h2>
-<pre><code class="language-python">midsv.io.write_jsonl(dicts: list[dict[str, str]], path_jsonl: str | Path)
-</code></pre>
-<p>Since <code>midsv.io.transform</code> returns a list of dictionaries, <code><a title="midsv.io.write_jsonl" href="io.html#midsv.io.write_jsonl">write_jsonl()</a></code> outputs it to a file in JSONL format.</p>
-<pre><code class="language-python">midsv.io.read_jsonl(path_jsonl: str | Path) -&gt; Iterator[dict[str, str]]
-</code></pre>
-<p>Conversely, <code><a title="midsv.io.read_jsonl" href="io.html#midsv.io.read_jsonl">read_jsonl()</a></code> reads JSONL as a list of dictionaries.</p>
-<h2 id="export-vcf">Export VCF</h2>
-<pre><code class="language-python">from midsv import transform
-from midsv.io import write_vcf
-
-alignments = transform(&quot;examples/example_indels.sam&quot;, qscore=False)
-write_vcf(alignments, &quot;variants.vcf&quot;, large_sv_threshold=50)
-</code></pre>
-<p><code><a title="midsv.io.write_vcf" href="io.html#midsv.io.write_vcf">write_vcf()</a></code> writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than <code>large_sv_threshold</code> are emitted as symbolic <code>&lt;INS&gt;</code>, large deletions (or <code>=N</code> padding) use <code>&lt;DEL&gt;</code>, and inversions use <code>&lt;INV&gt;</code>. The INFO field includes <code>TYPE</code> or <code>SVTYPE</code>, <code>SVLEN</code>, <code>SEQ</code>, and <code>QNAME</code>.</p>
+<ul>
+<li>path_sam: Path to a SAM file on disk.</li>
+<li>qscore (bool, optional): Output QSCORE. Defaults to False.</li>
+<li>
+<p>keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to include from the SAM file. Defaults to None.</p>
+</li>
+<li>
+<p><code><a title="midsv.transform" href="#midsv.transform">transform()</a></code> returns a list of dictionaries containing <code>QNAME</code>, <code>RNAME</code>, <code>MIDSV</code>, and optionally <code>QSCORE</code>, plus any fields specified by <code>keep</code>.</p>
+</li>
+<li><code>MIDSV</code> and <code>QSCORE</code> are comma-separated strings and have the same reference sequence length.</li>
+</ul>
 <h1 id="examples">🖍️Examples</h1>
 <h2 id="perfect-match">Perfect match</h2>
 <pre><code class="language-python">import midsv
@@ -173,14 +158,14 @@ from midsv.io import read_sam
 
 # Perfect match
 
-path_sam = &quot;https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_match.sam&quot;
+path_sam = &quot;examples/example_match.sam&quot;
 print(list(read_sam(path_sam)))
 # sam = [
 #     ['@SQ', 'SN:example', 'LN:10'],
 #     ['match', '0', 'example', '1', '60', '10M', '*', '0', '0', 'ACGTACGTAC', '0123456789', 'cs:Z:=ACGTACGTAC']
 # ]
 
-print(midsv.transform(read_sam(path_sam), qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [{
 #   'QNAME': 'control',
 #   'RNAME': 'example',
@@ -192,14 +177,14 @@ print(midsv.transform(read_sam(path_sam), qscore=True))
 <pre><code class="language-python">import midsv
 from midsv.io import read_sam
 
-path_sam = &quot;https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_indels.sam&quot;
+path_sam = &quot;examples/example_indels.sam&quot;
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
 #     ['indel_sub', '0', 'example', '1', '60', '5M3I1M2D2M', '*', '0', '0', 'ACGTGTTTCGT', '01234!!!56789', 'cs:Z:=ACGT*ag+ttt=C-aa=GT']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [{
 #   'QNAME': 'indel_sub',
 #   'RNAME': 'example',
@@ -211,7 +196,7 @@ print(midsv.transform(sam, qscore=True))
 <pre><code class="language-python">import midsv
 from midsv.io import read_sam
 
-path_sam = &quot;https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_large_deletion.sam&quot;
+path_sam = &quot;examples/example_large_deletion.sam&quot;
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
@@ -219,7 +204,7 @@ print(list(read_sam(path_sam)))
 #     ['large-deletion', '0', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [
 #   {'QNAME': 'large-deletion',
 #   'RNAME': 'example',
@@ -231,7 +216,7 @@ print(midsv.transform(sam, qscore=True))
 <pre><code class="language-python">import midsv
 from midsv.io import read_sam
 
-path_sam = &quot;https://raw.githubusercontent.com/akikuno/midsv/refs/heads/main/examples/example_inversion.sam&quot;
+path_sam = &quot;examples/example_inversion.sam&quot;
 print(list(read_sam(path_sam)))
 # [
 #     ['@SQ', 'SN:example', 'LN:10'],
@@ -240,7 +225,7 @@ print(list(read_sam(path_sam)))
 #     ['inversion', '2048', 'example', '9', '60', '2M', '*', '0', '0', 'AC', '89', 'cs:Z:=AC']
 # ]
 
-print(midsv.transform(sam, qscore=True))
+print(midsv.transform(path_sam, qscore=True))
 # [
 #   {'QNAME': 'inversion',
 #   'RNAME': 'example',
@@ -249,6 +234,35 @@ print(midsv.transform(sam, qscore=True))
 # ]
 
 </code></pre>
+<h1 id="helper-functions">🧩Helper functions</h1>
+<h2 id="read-sam-file">Read SAM file</h2>
+<pre><code class="language-python">midsv.io.read_sam(path_sam: str | Path) -&gt; Iterator[list[str]]
+</code></pre>
+<p><code><a title="midsv.io.read_sam" href="io.html#midsv.io.read_sam">read_sam()</a></code> reads a local SAM file into an iterator of string lists.</p>
+<h2 id="readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</h2>
+<pre><code class="language-python">midsv.io.write_jsonl(dicts: list[dict[str, str]], path_output: str | Path)
+</code></pre>
+<p>Since <code><a title="midsv.transform" href="#midsv.transform">transform()</a></code> returns a list of dictionaries, <code><a title="midsv.io.write_jsonl" href="io.html#midsv.io.write_jsonl">write_jsonl()</a></code> outputs it to a file in JSONL format.</p>
+<pre><code class="language-python">midsv.io.read_jsonl(path_input: str | Path) -&gt; Iterator[dict[str, str]]
+</code></pre>
+<p>Conversely, <code><a title="midsv.io.read_jsonl" href="io.html#midsv.io.read_jsonl">read_jsonl()</a></code> reads JSONL as an iterator of dictionaries.</p>
+<h2 id="reverse-complement-midsv">Reverse complement MIDSV</h2>
+<pre><code class="language-python">from midsv import formatter
+
+midsv_tag = &quot;=A,=A,-G,+T|+C|=A,=A,*AG,=C&quot;
+revcomp_tag = formatter.revcomp(midsv_tag)
+print(revcomp_tag)
+# =G,*TC,=T,=T,+G|+A|-C,=T,=T
+</code></pre>
+<p><code><a title="midsv.formatter.revcomp" href="formatter.html#midsv.formatter.revcomp">revcomp()</a></code> returns the reverse complement of a MIDSV string. Insertions are reversed and complemented with their anchor moved to the new position, following the MIDSV specification.</p>
+<h2 id="export-vcf">Export VCF</h2>
+<pre><code class="language-python">from midsv import transform
+from midsv.io import write_vcf
+
+alignments = transform(&quot;examples/example_indels.sam&quot;, qscore=False)
+write_vcf(alignments, &quot;variants.vcf&quot;, large_sv_threshold=50)
+</code></pre>
+<p><code><a title="midsv.io.write_vcf" href="io.html#midsv.io.write_vcf">write_vcf()</a></code> writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than <code>large_sv_threshold</code> are emitted as symbolic <code>&lt;INS&gt;</code>, large deletions (or <code>=N</code> padding) use <code>&lt;DEL&gt;</code>, and inversions use <code>&lt;INV&gt;</code>. The INFO field includes <code>TYPE</code> or <code>SVTYPE</code>, <code>SVLEN</code>, <code>SEQ</code>, and <code>QNAME</code>.</p>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
@@ -349,23 +363,24 @@ print(midsv.transform(sam, qscore=True))
 <ul>
 <li><a href="#midsv">midsv</a></li>
 <li><a href="#installation">🛠️Installation</a></li>
-<li><a href="#usage">📘Usage</a></li>
-<li><a href="#specification">📜Specification</a><ul>
+<li><a href="#specifications">📜Specifications</a><ul>
 <li><a href="#midsv_1">MIDSV</a></li>
 <li><a href="#qscore">QSCORE</a></li>
 </ul>
 </li>
-<li><a href="#helper-functions">🧩Helper functions</a><ul>
-<li><a href="#read-sam-file">Read SAM file</a></li>
-<li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
-<li><a href="#export-vcf">Export VCF</a></li>
-</ul>
-</li>
+<li><a href="#usage">📘Usage</a></li>
 <li><a href="#examples">🖍️Examples</a><ul>
 <li><a href="#perfect-match">Perfect match</a></li>
 <li><a href="#insertion-deletion-and-substitution">Insertion, deletion, and substitution</a></li>
 <li><a href="#large-deletion">Large deletion</a></li>
 <li><a href="#inversion">Inversion</a></li>
+</ul>
+</li>
+<li><a href="#helper-functions">🧩Helper functions</a><ul>
+<li><a href="#read-sam-file">Read SAM file</a></li>
+<li><a href="#readwrite-json-line-jsonl">Read/Write JSON Line (JSONL)</a></li>
+<li><a href="#reverse-complement-midsv">Reverse complement MIDSV</a></li>
+<li><a href="#export-vcf">Export VCF</a></li>
 </ul>
 </li>
 </ul>

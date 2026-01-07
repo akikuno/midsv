@@ -118,6 +118,18 @@ el.replaceWith(d);
         f.write(&#34;##fileformat=VCFv4.3\n&#34;)
         f.write(&#34;#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n&#34;)
         for record in records:
+            info = record.get(&#34;INFO&#34;, {})
+            if isinstance(info, dict) and &#34;END&#34; not in info:
+                svtype = info.get(&#34;SVTYPE&#34;) or info.get(&#34;TYPE&#34;)
+                if svtype == &#34;DEL&#34;:
+                    svlen = info.get(&#34;SVLEN&#34;)
+                    if svlen is not None:
+                        try:
+                            svlen_int = int(svlen)
+                        except (TypeError, ValueError):
+                            svlen_int = None
+                        if svlen_int is not None:
+                            info[&#34;END&#34;] = int(record[&#34;POS&#34;]) + abs(svlen_int) - 1
             info_str = _format_info(record[&#34;INFO&#34;])
             f.write(
                 f&#34;{record[&#39;CHROM&#39;]}\t{record[&#39;POS&#39;]}\t.\t{record[&#39;REF&#39;]}\t{record[&#39;ALT&#39;]}\t.\tPASS\t{info_str}\n&#34;

@@ -309,6 +309,64 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
 <dd>disctionalized SAM with trimmed softclips in QUAL</dd>
 </dl></div>
 </dd>
+<dt id="midsv.formatter.revcomp"><code class="name flex">
+<span>def <span class="ident">revcomp</span></span>(<span>midsv: str) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def revcomp(midsv: str) -&gt; str:
+    if not midsv:
+        return &#34;&#34;
+    tokens = midsv.split(&#34;,&#34;)
+    num_tokens = len(tokens)
+    anchors: list[str] = []
+    boundaries: list[list[str]] = [[] for _ in range(num_tokens + 1)]
+
+    for i, token in enumerate(tokens):
+        if token.startswith(&#34;+&#34;) or &#34;|&#34; in token:
+            insertions, anchor = _split_insertion_token(token)
+            if insertions:
+                boundaries[i].extend(insertions)
+            anchors.append(anchor)
+        else:
+            anchors.append(token)
+
+    rev_anchors = [_complement_token(anchor) for anchor in reversed(anchors)]
+    rev_boundaries: list[list[str]] = [[] for _ in range(num_tokens + 1)]
+    for i, insertions in enumerate(boundaries):
+        if not insertions:
+            continue
+        rev_index = num_tokens - i
+        rev_insertions = [&#34;+&#34; + _complement_sequence(part[1:]) for part in reversed(insertions)]
+        rev_boundaries[rev_index].extend(rev_insertions)
+
+    output_tokens: list[str] = []
+    for i in range(num_tokens):
+        parts: list[str] = []
+        if rev_boundaries[i]:
+            parts.extend(rev_boundaries[i])
+        anchor = rev_anchors[i]
+        if anchor:
+            if parts:
+                parts.append(anchor)
+                output_tokens.append(&#34;|&#34;.join(parts))
+            else:
+                output_tokens.append(anchor)
+        elif parts:
+            output_tokens.append(&#34;|&#34;.join(parts))
+        else:
+            output_tokens.append(anchor)
+
+    if rev_boundaries[num_tokens]:
+        output_tokens.append(&#34;|&#34;.join(rev_boundaries[num_tokens]))
+
+    return &#34;,&#34;.join(output_tokens)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
 <dt id="midsv.formatter.split_cigar"><code class="name flex">
 <span>def <span class="ident">split_cigar</span></span>(<span>cigar: str) ‑> list[str]</span>
 </code></dt>
@@ -346,6 +404,7 @@ Example reads are in <code>tests/data/overlap/real_overlap.sam</code> and <code>
 <li><code><a title="midsv.formatter.organize_alignments_to_dict" href="#midsv.formatter.organize_alignments_to_dict">organize_alignments_to_dict</a></code></li>
 <li><code><a title="midsv.formatter.remove_resequence" href="#midsv.formatter.remove_resequence">remove_resequence</a></code></li>
 <li><code><a title="midsv.formatter.remove_softclips" href="#midsv.formatter.remove_softclips">remove_softclips</a></code></li>
+<li><code><a title="midsv.formatter.revcomp" href="#midsv.formatter.revcomp">revcomp</a></code></li>
 <li><code><a title="midsv.formatter.split_cigar" href="#midsv.formatter.split_cigar">split_cigar</a></code></li>
 </ul>
 </li>
