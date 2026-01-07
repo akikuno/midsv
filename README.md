@@ -43,24 +43,8 @@ From [PyPI](https://pypi.org/project/midsv/):
 pip install midsv
 ```
 
-# 📘Usage
 
-```python
-midsv.transform(
-    path_sam: str | Path,
-    qscore: bool = False,
-    keep: str | list[str] = None
-) -> list[dict[str, str | int]]
-```
-
-- path_sam: Path to a SAM file on disk.
-- qscore (bool, optional): Output QSCORE. Defaults to False.
-- keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to include from the SAM file. Defaults to None.
-
-- `midsv.transform()` returns a list of dictionaries containing `QNAME`, `RNAME`, `MIDSV`, and optionally `QSCORE`, plus any fields specified by `keep`.
-- `MIDSV` and `QSCORE` are comma-separated strings and have the same reference sequence length.
-
-# 📜Specification
+# 📜Specifications
 
 ## MIDSV
 
@@ -87,42 +71,23 @@ midsv.transform(
 As with `MIDSV`, `QSCORE` uses `|` to separate quality scores in insertion sites.
 
 
-# 🧩Helper functions
 
-## Read SAM file
-
-```python
-midsv.io.read_sam(path_sam: str | Path) -> Iterator[list[str]]
-```
-
-`midsv.io.read_sam` reads a local SAM file into an iterator of string lists.
-
-
-## Read/Write JSON Line (JSONL)
+# 📘Usage
 
 ```python
-midsv.io.write_jsonl(dicts: list[dict[str, str]], path_output: str | Path)
+midsv.transform(
+    path_sam: str | Path,
+    qscore: bool = False,
+    keep: str | list[str] = None
+) -> list[dict[str, str | int]]
 ```
 
-Since `midsv.transform` returns a list of dictionaries, `midsv.io.write_jsonl` outputs it to a file in JSONL format.
+- path_sam: Path to a SAM file on disk.
+- qscore (bool, optional): Output QSCORE. Defaults to False.
+- keep: Subset of {'FLAG', 'POS', 'SEQ', 'QUAL', 'CIGAR', 'CSTAG'} to include from the SAM file. Defaults to None.
 
-```python
-midsv.io.read_jsonl(path_input: str | Path) -> Iterator[dict[str, str]]
-```
-
-Conversely, `midsv.io.read_jsonl` reads JSONL as an iterator of dictionaries.
-
-## Export VCF
-
-```python
-from midsv import transform
-from midsv.io import write_vcf
-
-alignments = transform("examples/example_indels.sam", qscore=False)
-write_vcf(alignments, "variants.vcf", large_sv_threshold=50)
-```
-
-`midsv.io.write_vcf` writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than `large_sv_threshold` are emitted as symbolic `<INS>`, large deletions (or `=N` padding) use `<DEL>`, and inversions use `<INV>`. The INFO field includes `TYPE` or `SVTYPE`, `SVLEN`, `SEQ`, and `QNAME`.
+- `midsv.transform()` returns a list of dictionaries containing `QNAME`, `RNAME`, `MIDSV`, and optionally `QSCORE`, plus any fields specified by `keep`.
+- `MIDSV` and `QSCORE` are comma-separated strings and have the same reference sequence length.
 
 
 # 🖍️Examples
@@ -220,3 +185,43 @@ print(midsv.transform(path_sam, qscore=True))
 # ]
 
 ```
+
+
+
+# 🧩Helper functions
+
+## Read SAM file
+
+```python
+midsv.io.read_sam(path_sam: str | Path) -> Iterator[list[str]]
+```
+
+`midsv.io.read_sam` reads a local SAM file into an iterator of string lists.
+
+
+## Read/Write JSON Line (JSONL)
+
+```python
+midsv.io.write_jsonl(dicts: list[dict[str, str]], path_output: str | Path)
+```
+
+Since `midsv.transform` returns a list of dictionaries, `midsv.io.write_jsonl` outputs it to a file in JSONL format.
+
+```python
+midsv.io.read_jsonl(path_input: str | Path) -> Iterator[dict[str, str]]
+```
+
+Conversely, `midsv.io.read_jsonl` reads JSONL as an iterator of dictionaries.
+
+## Export VCF
+
+```python
+from midsv import transform
+from midsv.io import write_vcf
+
+alignments = transform("examples/example_indels.sam", qscore=False)
+write_vcf(alignments, "variants.vcf", large_sv_threshold=50)
+```
+
+`midsv.io.write_vcf` writes MIDSV output to VCF and supports insertion, deletion, substitution, large insertion, large deletion, and inversion. Insertions longer than `large_sv_threshold` are emitted as symbolic `<INS>`, large deletions (or `=N` padding) use `<DEL>`, and inversions use `<INV>`. The INFO field includes `TYPE` or `SVTYPE`, `SVLEN`, `SEQ`, and `QNAME`.
+
