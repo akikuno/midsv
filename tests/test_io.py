@@ -41,7 +41,7 @@ def test_check_read_sam_FileNotFoundError():
 
 
 def test_read_jsonl():
-    path_jsonl = Path("tests", "data", "read_jsonl", "test.jsonl")
+    path_jsonl = Path("tests", "data", "read_jsonl", "test_midsv.jsonl")
     test = io.read_jsonl(path_jsonl)
     test = list(test)
     answer = [{"hoge": 1, "fuga": 2}, {"foo": "3", "bar": "4"}]
